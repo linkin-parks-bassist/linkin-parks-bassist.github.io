@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PetaLinux 101 · David Farrell</title>
+  <meta name="description" content="A play-by-play field note on learning PetaLinux by building a complete embedded Linux image.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="petalinux101">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 21 September 2026 · complete</div>
+    <h1 class="page-title">PetaLinux 101.</h1>
+    <p class="section-note">I built my first embedded Linux image: a KV260-targeted PetaLinux build from my own Vivado hardware export.</p>
+  </section>
+
+  <section id="goal" class="prose">
+    <h2>Goal</h2>
+    <p>Take a KV260 Vivado design through PetaLinux and successfully generate a Linux image. This first experiment ends at the build output, not a hardware boot. Along the way I want to understand what goes into the build, what comes out, and where the choices behind an embedded Linux system differ from a ready-made distribution.</p>
+  </section>
+
+  <section id="method" class="prose">
+    <h2>Method</h2>
+    <p>I’m using an agent for documentation lookup, machine checks and setup, while I do the hands-on PetaLinux work and question its conclusions. Agent findings are not automatically things I have learned. This page keeps that distinction visible.</p>
+  </section>
+
+  <section id="notes" class="prose">
+    <h2>Installation</h2>
+    <p>The agent found Vivado/Vitis 2025.2 already installed. It first tried their unified installer, then found that PetaLinux has a separate installer. I downloaded the 2025.2 <code>.run</code>. The agent's first attempt stopped on missing Ubuntu build packages; it installed the listed prerequisites, and the second attempt reached the licence screen. Ubuntu 24.04 and absent TFTP drew warnings, not failures.</p>
+    <p>I reviewed the licences and completed the install in my own terminal. Its text said to “click Accept” in a text-only viewer; <code>q</code> closed the viewer and led to the terminal prompt.</p>
+<pre><code>bash ~/Downloads/petalinux-v2025.2-11160223-installer.run \
+  --dir ~/AMDDesignTools/2025.2/PetaLinux</code></pre>
+    <p>The agent verified that sourcing <code>settings.sh</code> sets <code>$PETALINUX</code> and exposes <code>petalinux-create</code>, <code>petalinux-config</code>, <code>petalinux-build</code> and <code>petalinux-package</code>. What I actually learned so far: Ubuntu normally uses <code>dash</code> for <code>/bin/sh</code>. The agent initially overplayed that as a problem; we left the shell alone.</p>
+    <h2>Choosing the target</h2>
+    <p>The target was the KV260 because that is the board on my desk. The agent then checked AMD’s BSP list, found no KV260 PetaLinux 2025.2 BSP listed, and used Vivado MCP to confirm KV260 SOM board definitions exist in Vivado 2025.2. We made a matching hardware export rather than assume an older BSP would work. I sourced <code>settings.sh</code> and created <code>~/Projects/kv260-linux</code> with <code>petalinux-create project --template zynqMP --name kv260-linux</code>. The same shell and OS warnings appeared, but project creation succeeded. This was only a scaffold: no KV260 hardware description or Linux image yet. I found a <code>Rev A1</code> marking on the board; AMD’s revision labels differ, but I spotted <code>J21</code>, which its table marks as Rev 2.0-only.</p>
+    <p>In Vivado I created <code>petalinux_bringup</code> under that project and paired the KV260 SOM with the Vision AI Starter Kit carrier card. The agent checked that both selections were saved in the Vivado project file. I added the Zynq UltraScale+ MPSoC to a block design and ran board-preset automation. Validation failed: the preset enabled two PS-to-PL AXI interfaces with unconnected clocks. The agent found AMD’s PS-only remedy; I disabled the unused interfaces and validation passed. I then exported <code>vivado/design_1_wrapper.xsa</code>; Vivado reported success and the agent confirmed the file exists. I imported it with <code>petalinux-config --get-hw-description</code>, kept the detected UART/SD settings and default DTG machine, and got “Successfully configured project.” No image has been built yet.</p>
+    <p>The first <code>petalinux-build</code> stopped before compiling: XSCT requires <code>libtinfo.so.5</code>, absent from Ubuntu 24.04’s repositories. My attempt to install <code>libtinfo-dev</code> only found the already-installed ncurses development package. The agent verified Ubuntu’s legacy <code>libtinfo5</code> package; I installed it, and the retry passed that check. It then stopped because Ubuntu’s AppArmor policy blocks BitBake’s user namespaces. AMD documents a temporary host-wide relaxation; after applying it, the build is running. I still need to restore the policy afterward.</p>
+    <h2>What is the build actually making?</h2>
+    <p>This is the part I came for. I know what it is to use Linux; I want to see where a board-specific Linux system comes from. In particular, I wanted the breakpoints between <em>this</em> fresh, template-based PetaLinux build and the ready-made Ubuntu Server 24.04 image offered for the KV260. The agent initially answered in containers—“kernel,” “root filesystem,” “packages”—without showing me what was inside them. I kept asking until we opened the recipes and named programs.</p>
+
+    <h3>Inputs and process</h3>
+    <p>Our input is not an Ubuntu image. It is a Vivado hardware export (<code>design_1_wrapper.xsa</code>), a PetaLinux project configuration, and an image recipe. The XSA describes the hardware design; it does not contain Linux. PetaLinux uses it to derive hardware-facing configuration such as the device tree, then invokes Yocto/BitBake. BitBake resolves recipes and dependencies, fetches source, cross-compiles for the target, makes packages, and assembles a root filesystem. Here the requested target is <code>petalinux-image-minimal</code>. “Minimal” is the recipe’s name, not a promise of a kernel plus one lonely process. <a href="https://docs.yoctoproject.org/overview-manual/concepts.html">Yocto’s image-generation model</a> helped make the distinction between a recipe, a package and a finished image clearer.</p>
+    <p>The current selection includes <code>systemd</code> for init/service management, BusyBox for basic commands, and OpenSSH for remote access. The image also names <code>mtd-utils</code>, <code>nfs-utils</code>, <code>pciutils</code>, <code>u-boot-tools</code>, filesystem-making tools, kernel modules and a boot package group. That is a real userspace, not merely a kernel. The menu does not show GNU coreutils or Bash directly selected, but dependencies can still pull software in; the final manifest matters more than those individual ticks. Nor does producing RPM packages during the build prove that the target has a usable package manager or feed.</p>
+
+    <h3>Where the boundary sits</h3>
+    <p>I wondered what the XSA contributes when our block design has no PL logic or enabled PS-to-PL AXI master ports. The agent inspected the export: it contains PS initialization and hardware-description files, but no bitstream. Its useful contribution is still substantial: the PS configuration identifies DDR and peripherals such as UART, Ethernet, QSPI and SD. PetaLinux uses that hardware information to generate platform configuration and a device tree; the kernel’s existing drivers can then bind to the described PS devices. The XSA is not a driver, and this design does not call for a “trivial FPGA driver” to match nonexistent PL hardware. Disabling those PS-to-PL ports did not disable every AXI-based connection inside the SoC.</p>
+    <p>Several names sounded like drivers, which prompted a useful distinction. A kernel driver makes hardware usable through the kernel’s interfaces; <code>pciutils</code> gives userspace tools such as <code>lspci</code> a way to inspect what the kernel found. Likewise, MTD is the kernel’s raw-flash subsystem while <code>mtd-utils</code> contains tools for working with it; NFS has kernel and user-space pieces. A package can contain a command, daemon, library, configuration or kernel module: “package” is a delivery unit, not a software layer. <code>e2fsprogs-mke2fs</code> makes an ext filesystem; it is not the ext driver. <code>u-boot-tools</code> is software for working with U-Boot-related data, not U-Boot itself.</p>
+    <p>I also asked for the extreme case: could the userspace be nothing but a program I supply as <code>/init</code>? Yes. A tiny initramfs could contain a statically linked init and no shell, SSH, systemd, package manager or <code>cat</code>. The kernel would execute it as PID 1; it would need to remain alive. On this board the earlier boot firmware, bootloader and device tree would still exist. That experiment is a useful way to expose what Linux itself requires versus what a distribution chooses to provide. <a href="https://docs.kernel.org/6.5/filesystems/ramfs-rootfs-initramfs.html">The kernel’s initramfs documentation</a> describes that hand-off.</p>
+
+    <h3>Why not a pre-built distribution?</h3>
+    <p>The <a href="https://ubuntu.com/download/amd">KV260-capable Ubuntu Server 24.04 image</a> is a completed integration: board support, kernel, device tree, root filesystem, service policy and Ubuntu’s package/update machinery have already been selected and assembled. This PetaLinux project starts further down the stack. Our XSA describes a hardware configuration; PetaLinux derives platform settings from it; Yocto recipes specify which kernel and userspace components to build and put into the image. Those are different inputs at different abstraction layers, not two ways of downloading the same operating system.</p>
+    <p>The overlap is in upstream software, not distribution identity. Both images can contain Linux, systemd and OpenSSH, but the versions, kernel configuration, device tree, included packages, defaults and maintenance model need not match. In Ubuntu, the board integration and distribution choices arrive as a prebuilt whole. Here we own more of those choices—and therefore more of the work of making them coherent. On the KV260, the boot firmware lives in SOM QSPI and U-Boot hands off to the carrier’s SD card; <a href="https://docs.amd.com/r/en-US/ug1089-kv260-starter-kit/Boot-Devices-and-Firmware-Overview">AMD’s boot overview</a> shows another boundary that a compiled root filesystem alone cannot settle. Whether our template-derived image would boot is a separate experiment, not a condition of this one.</p>
+    <p>That is why embedded Linux builds exist despite ready-made distributions being available: they let a product choose its hardware description, services, commands and update strategy deliberately, rather than inherit a general-purpose machine’s assumptions. They can be very small or fairly rich. The interesting question is not whether this counts as “real Linux”; it is which part of the familiar Linux experience was chosen, built and wired together, and which part was never included.</p>
+    <p>The manifest is a useful correction to our predictions: it lists 250 installed packages, including systemd, BusyBox, OpenSSH, <code>bash</code> and <code>iproute2</code>. The rootfs archive contains <code>ls</code> and <code>cat</code>. GNU coreutils, <code>apt</code>, <code>dnf</code>, <code>rpm</code> and <code>opkg</code> do not appear as installed packages. This is the first answer based on the produced filesystem rather than the menu. The agent used the workstation’s authorized sudo prompt to restore the temporary AppArmor setting to its original value.</p>
+    <p>Unrelated field note: I nicked my thumb while cooking dinner. It bled rather a lot. This has no bearing on PetaLinux.</p>
+    <h3>Result: my first embedded Linux image</h3>
+    <p>The build ran for ages and ended with exactly the message I had half expected: 225 errors, nonzero exit code, failure. Of course it did. Then we looked. Every one of those errors concerned a missing shared-state cache entry; BitBake had fallen back to running the real task. Its log said all 6,388 build tasks succeeded. In <code>images/linux</code> sat the kernel (<code>Image</code>), device tree (<code>system.dtb</code>), FIT image (<code>image.ub</code>), root filesystems and package manifest. The apparent failure was a detour through the cache, not the outcome of the build. I had built my first embedded Linux image. That was the experiment. The end.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+
+  <section id="sources">
+    <h2>References</h2>
+    <div class="prose">
+      <p><a href="https://docs.amd.com/r/2025.2-English/ug1144-petalinux-tools-reference-guide/Installation-Requirements">AMD UG1144: Installation requirements (2025.2)</a></p>
+      <p><a href="https://docs.amd.com/r/2025.2-English/ug1144-petalinux-tools-reference-guide/Installing-the-PetaLinux-Tool">AMD UG1144: Installing the PetaLinux tool (2025.2)</a></p>
+      <p><a href="https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/1641152513/Kria%2BSOMs%2BStarter%2BKits">AMD Kria starter-kit BSP list</a></p>
+      <p><a href="https://ubuntu.com/download/amd">Ubuntu Server 24.04 for AMD Kria</a></p>
+      <p><a href="https://docs.yoctoproject.org/overview-manual/concepts.html">Yocto Project: concepts and image generation</a></p>
+    </div>
+  </section>
+
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+</body>
+</html>
