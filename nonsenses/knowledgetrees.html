@@ -143,13 +143,13 @@ test -f .knowledge/where/am/i.md
 ```</code></pre>
       </div>
       <div>
-        <p><span class="tag green">green</span> the default. Usable, whether or not it carries a proof.</p>
+        <p><span class="tag green">green</span> not <em>necessarily</em> false: no failed proof, no expired freshness. It is the default, whether or not a leaf carries a proof. It does not mean true: check the evidence and scope before relying on it.</p>
         <p><span class="tag yellow">yellow</span> freshness expired. Unusable until re-verified: check the claims, then <code>kt renew</code>, which is the agent's attestation that it read the whole leaf.</p>
         <p><span class="tag brown">brown</span> falsified, malformed or proof-failing. Stop relying on it and repair it.</p>
         <p>A proof run only ever <em>lowers</em> a status. Raising one takes a manual whole-leaf review, except that a <code>verifiable: true</code> leaf, asserting every claim is covered by its proofs, goes green when they all pass. Facts likely to change get <code>expires_every</code>.</p>
       </div>
     </div>
-    <div class="note-box"><b>What green means:</b> the selected checks detected no failure at that time. It does not certify current prose, agreement between leaves, or the adequacy of a predicate. If checked evidence contradicts a leaf, repair it before relying on it.</div>
+    <div class="note-box"><b>Green means not necessarily false, not true.</b> A passing run says only that the selected checks detected no failure at that time. It does not certify current prose, agreement between leaves, or the adequacy of a predicate. If checked evidence contradicts a leaf, repair it before relying on it.</div>
 
     <div class="flow">
       <div>lookup</div><div>discover</div><div>verify</div><div>record</div><div>use</div>
