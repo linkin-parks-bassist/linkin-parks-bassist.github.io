@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>A counterexample turned Jev's Maybe into No</title>
-  <meta name="description" content="Field note: asking Jev the same question of 500 exactly-certified polynomial maps, one call each, and watching its answer follow the map.">
+  <title>Jev and the Jacobian conjecture · David Farrell</title>
+  <meta name="description" content="Field note: what Jev answered when the same question about the Jacobian conjecture was asked with 500 different polynomial maps written beside it.">
   <link rel="stylesheet" href="../style.css">
   <style>
     .answer { display: inline-block; margin-top: 4px; padding: 5px 10px; font-size: 23px; font-weight: 900; border: 1px solid #776c71; }
@@ -57,9 +57,9 @@
   <header>
     <div class="hero" style="grid-template-columns:1fr">
       <div>
-        <div class="eyebrow">Field note · 21 September 2026 · Jev, on the bench</div>
-        <h1>A counterexample turned Jev's <em>Maybe</em> into <em>No.</em></h1>
-        <p class="dek">I put the same question to Jev alongside 500 different polynomial maps, one call each. Shown a counterexample to the Jacobian conjecture, it said No. Shown a reversible decoy, it said Maybe. Asked with no map at all, it said Maybe.</p>
+        <div class="eyebrow">Field note · 21 September 2026</div>
+        <h1>Jev and the <em>Jacobian conjecture.</em></h1>
+        <p class="dek">I asked Jev the same question 500 times, each time with a different polynomial map written beside it, and recorded what it said. With a counterexample beside the question it said No. With a reversible map it said Maybe. With no map at all it said Maybe.</p>
       </div>
     </div>
     <dl class="specimen">
@@ -67,13 +67,13 @@
       <dt>Question</dt><dd>“Is the Jacobian conjecture true”, held fixed for every call</dd>
       <dt>Specimens</dt><dd>500 polynomial maps in three variables: 250 counterexamples, 250 bijections</dd>
       <dt>Protocol</dt><dd>One call per map, shuffled with seed <span id="seed"></span></dd>
-      <dt>Result</dt><dd><b id="hero-rate">—</b> of answers followed the intended No / Maybe pattern</dd>
+      <dt>Result</dt><dd><b id="hero-rate">—</b> of answers matched the No / Maybe pattern I expected</dd>
     </dl>
   </header>
 
   <section class="prose">
-    <div class="kicker">§ 1 · What I asked</div>
-    <h2>One question, with a formula beside it.</h2>
+    <div class="kicker">§ 1</div>
+    <h2>Setup</h2>
     <p><code>jev</code> is a small command-line wrapper around one TypeSafe <a href="https://docs.typesafe.ai/primitives/noul.md">Jev Noul</a> API call. It sends the quoted question and the optional <code>where</code> text as separate fields of the request state. Here the <code>where</code> text is only a polynomial. It is never a label saying what kind of map it is.</p>
     <p>Jev returns a probability <code>p</code> for <b>Yes</b>. The wrapper prints <b>No</b> when <code>p &lt; 1/3</code>, <b>Maybe</b> when <code>1/3 ≤ p &lt; 2/3</code>, and <b>Yes</b> otherwise. So “Maybe” is my middle probability band, not a separate word Jev generates. <code>jev --show-probability</code> shows the underlying value.</p>
   </section>
@@ -81,8 +81,8 @@
 
   <section>
     <div class="prose">
-      <div class="kicker">§ 2 · First, no map</div>
-      <h2>Ask the bare question. Then add one formula.</h2>
+      <div class="kicker">§ 2</div>
+      <h2>First observations</h2>
       <p>In an earlier exploratory run, the bare question got <b>Maybe</b> three times out of three. Then I held that question fixed and supplied one formula at a time.</p>
     </div>
     <div class="cards">
@@ -91,15 +91,15 @@
       <div class="card"><span class="number">Obs. 3 / Decoy bijection</span><h3>Show a reversible map</h3><p>The same shape, but this polynomial has an explicit inverse.</p><code>jev 'Is the Jacobian conjecture true' where 'F(x,y,z)=(x+(y+x^2)*(z+(y+x^2)^2)^2, y+x^2, z+(y+x^2)^2)'</code><div><span class="answer a-maybe">Maybe</span></div><small>2 of 3 exploratory calls (the other was No); also Maybe in the 500-map run</small></div>
     </div>
     <div class="prose" style="margin-top:22px">
-      <p>That was the surprising part. I never asked “Is this map bijective?” or “Is this a counterexample?” I only put the formula beside the global question. The original three-call observations are saved in <a href="results.json">results.json</a>. Three calls per case proves little, so the next step was to find out whether the pattern extended beyond those two examples.</p>
+      <p>I never asked whether the map was bijective, or whether it was a counterexample. The formula was the only thing that changed. The three-call results are saved in <a href="results.json">results.json</a>. Three calls per case says very little, so I ran a larger set to see whether the difference held up beyond those two maps.</p>
     </div>
   </section>
 
   <section>
     <div class="prose">
-      <div class="kicker">§ 3 · Then, 500 maps</div>
-      <h2>Two families, shuffled, one call each.</h2>
-      <p>I generated and algebraically certified 250 related counterexamples and 250 bijections, shuffled them, and asked Jev once per map. The response matched the intended No-for-counterexample / Maybe-for-bijection pattern on <b>420 of 500 maps (84.0%)</b>.</p>
+      <div class="kicker">§ 3</div>
+      <h2>The 500-map run</h2>
+      <p>I generated 250 related counterexamples and 250 bijections, checked each one algebraically, shuffled them together, and asked Jev once per map. The answer matched the pattern I expected (No for a counterexample, Maybe for a bijection) on <b>420 of 500 maps, or 84.0%</b>.</p>
     </div>
     <figure class="fig">
       <div class="metrics" style="margin:0">
@@ -108,15 +108,15 @@
         <div class="metric"><b id="bijection-rate">—</b><span class="label">Bijections → Maybe</span><span class="sub" id="bijection-count"></span></div>
         <div class="metric"><b id="global-rate">—</b><span class="label">Literal global answer: No</span><span class="sub" id="global-count"></span></div>
       </div>
-      <figcaption><b>Fig. 1</b>Headline rates, computed in the page from the saved benchmark JSON.</figcaption>
+      <figcaption><b>Fig. 1</b>Overall rates, computed in the page from the saved benchmark JSON.</figcaption>
     </figure>
   </section>
 
   <section>
     <div class="prose">
-      <div class="kicker">§ 4 · How the answers split</div>
-      <h2>Salmon is No. Yellow is Maybe.</h2>
-      <p>The prompt did not label a map as a counterexample or a bijection, and it did not ask Jev to classify the map. The two map families were certified with exact symbolic algebra before I sent them.</p>
+      <div class="kicker">§ 4</div>
+      <h2>How the answers split</h2>
+      <p>The prompt did not label a map as a counterexample or a bijection, and it did not ask Jev to classify anything. Both families were checked with exact symbolic algebra before I sent them. In the bars, salmon is No and yellow is Maybe.</p>
     </div>
     <figure class="fig">
       <div class="bars">
@@ -130,8 +130,8 @@
 
   <section>
     <div class="prose">
-      <div class="kicker">§ 5 · Every response</div>
-      <h2>Each square is one map and one call.</h2>
+      <div class="kicker">§ 5</div>
+      <h2>Every response</h2>
       <p>Click a square to inspect the full polynomial and its certificate.</p>
     </div>
     <figure class="fig">
@@ -146,8 +146,8 @@
 
   <section>
     <div class="prose">
-      <div class="kicker">§ 6 · The raw calls</div>
-      <h2>Filter the full dataset.</h2>
+      <div class="kicker">§ 6</div>
+      <h2>The raw calls</h2>
       <p>Click a row to read the polynomial in Fig. 3. The saved JSON also includes each response and its elapsed time.</p>
     </div>
     <figure class="fig">
@@ -158,8 +158,8 @@
   </section>
 
   <section class="prose">
-    <div class="kicker">§ 7 · Method</div>
-    <h2>How the specimens were made.</h2>
+    <div class="kicker">§ 7</div>
+    <h2>Method</h2>
     <h3>The counterexample side</h3>
     <p>The base map has determinant −2 and maps three distinct rational points to the same output. Every generated variant composes it with reversible coordinate changes, and the script checks its Jacobian and collision again with SymPy. These are 250 related maps, <b>not</b> 250 independent discoveries.</p>
     <p>The original construction has also been <a href="https://devel.isa-afp.org/entries/Jacobian_Counterexample.html">formalized in Isabelle</a>, and an <a href="https://github.com/shadybrook/jacobian-counterexample-audit/blob/main/paper/main.md">exact audit</a> prints the formula and witnesses.</p>
@@ -169,9 +169,9 @@
   </section>
 
   <section class="prose">
-    <div class="kicker">§ 8 · Caveats</div>
-    <h2>What this does and doesn't show.</h2>
-    <div class="note-box" style="margin-top:0"><b>What this tests:</b> whether Jev's answer to the <em>unchanged</em> global question tracks the mathematical character of an unlabeled map supplied only as context. The observed No / Maybe split is striking evidence of context sensitivity. It does not reveal Jev's internal reasoning, and it does not prove Jev verified each formula. The conjecture is false in dimension three, so the literally correct answer to the global question is <b>No for every row</b>. The No-for-counterexample / Maybe-for-bijection score is a response-pattern measure, shown separately from literal accuracy.</div>
+    <div class="kicker">§ 8</div>
+    <h2>Caveats</h2>
+    <div class="note-box" style="margin-top:0"><b>What this tests:</b> whether Jev's answer to the <em>unchanged</em> global question tracks the mathematical character of an unlabeled map supplied only as context. The No / Maybe split suggests Jev's answer is sensitive to the map beside the question. It does not show how Jev reached its answers, and it does not show that Jev checked any formula. The conjecture is false in dimension three, so the literally correct answer to the global question is <b>No for every row</b>. The No-for-counterexample / Maybe-for-bijection score is a response-pattern measure, shown separately from literal accuracy.</div>
   </section>
 
   <footer>
