@@ -14,6 +14,7 @@
     <nav>
       <a href="#about">About</a>
       <a href="#projects">Projects</a>
+      <a href="#boarbarktree">Boarbarktree</a>
       <a href="#nonsenses">Nonsenses</a>
       <a href="#notes">Notes</a>
       <a href="#contact">Contact</a>
@@ -22,27 +23,37 @@
 
   <div class="hero" id="top">
     <div>
-      <div class="eyebrow">Placeholder tagline · what I do · where I am</div>
-      <h1>Hi, I'm David. I build <em>things.</em></h1>
-      <p>One or two sentences introducing yourself go here. Swap this for whatever you'd like people to know first.</p>
-    </div>
-    <div>
-      <div class="big-mark">DF</div>
-      <div class="big-caption">Placeholder caption</div>
+      <div class="eyebrow">FPGA systems · embedded compute · developer tools · Sydney</div>
+      <h1><em>David</em> Farrell</h1>
+      <p>I'm an engineer working across FPGA systems, embedded compute, audio DSP and developer tooling. I like turning ideas into working hardware quickly, then building better abstractions around what I learned.</p>
     </div>
   </div>
 
   <div class="question"><span class="prompt">$</span> whoami --short</div>
-  <div class="note"><p><b>A short aside.</b> Use this callout for a status line, a current focus, or a one-paragraph pitch. It's the same left-ruled note style as the benchmark report.</p></div>
+  <div class="note"><p><b>Current focus.</b> Better ways to build and operate complex technical systems: expressive HDL, real-time FPGA audio, and agent tooling that can retain and verify knowledge instead of repeatedly rediscovering it.</p></div>
 
   <section id="projects">
     <h2>Projects.</h2>
-    <p class="section-note">A short line introducing the work below. Each card is one project; duplicate or delete as needed.</p>
+    <p class="section-note">A few things I keep coming back to: programmable hardware, tools that make it easier to reason about systems, and projects where software has to meet the physical world.</p>
     <div class="cards">
-      <div class="card"><span class="number">01 / Category</span><h3>Project one</h3><p>What it is and why it exists, in a sentence or two.</p><code>a command, snippet or tagline</code><small>Status · year · stack</small></div>
-      <div class="card"><span class="number">02 / Category</span><h3>Project two</h3><p>What it is and why it exists, in a sentence or two.</p><code>a command, snippet or tagline</code><small>Status · year · stack</small></div>
-      <div class="card"><span class="number">03 / Category</span><h3>Project three</h3><p>What it is and why it exists, in a sentence or two.</p><a class="more" href="#">Read more →</a><small>Status · year · stack</small></div>
+      <div class="card"><span class="number">01 / FPGA audio</span><h3>Kestrel</h3><p>A real-time FPGA audio DSP platform built around per-sample effects processing, flexible control, and low-cost hardware.</p><code>audio in → FPGA DSP → audio out</code><div class="links"><a href="https://github.com/linkin-parks-bassist/kestrel">GitHub →</a></div><small>Active · SystemVerilog · DSP · embedded UI</small></div>
+      <div class="card"><span class="number">02 / HDL</span><h3>Pigen</h3><p><b>Pi</b>peline <b>Gen</b>erator: An experimental hardware description language centered on pipelines, implicit flow control and making streaming hardware easier to express.</p><code>wire · reg · fifo[n] · skid</code><div class="links"><a href="https://github.com/linkin-parks-bassist/pigen">GitHub →</a></div><small>Active · compiler design · RTL · dataflow</small></div>
+      <div class="card"><span class="number">03 / Agent infrastructure</span><h3>Knowledgetrees</h3><p>A semantic filesystem for agent knowledge: small, addressable pieces of technical state that can be updated, checked and reused across long-running work.</p><div class="links"><a href="https://github.com/linkin-parks-bassist/knowledgetrees">GitHub →</a><a href="nonsenses/knowledgetrees.html">Read the pitch →</a></div><small>Active · agents · MCP · verification</small></div>
+      <div class="card"><span class="number">04 / Agent infrastructure</span><h3>CointOS</h3><p>Local-first orchestration for my personal AI agents. It turns requests from the terminal or Telegram into durable agent work, coordinates local model inference, and keeps resource use in check on my own machine.</p><code>request → durable work → local inference</code><div class="links"><a href="https://github.com/linkin-parks-bassist/CointOS">GitHub →</a></div><small>Active · Python · agents · local inference</small></div>
+      <div class="card"><span class="number">05 / FPGA audio</span><h3>Lyrebird</h3><p>A sixteen-voice polyphonic synthesizer on an AMD Kria KV260. A USB MIDI controller is read on the Linux side and written into registers in the programmable logic, where an HLS DSP core generates 24-bit, 48 kHz audio: phase-modulation voices with wavefolding, filters, envelopes and LFOs, and a shared reverb, played out over I2S.</p><code>MIDI → Linux → PL registers → HLS → I2S</code><small>Active · Vitis HLS · SystemVerilog · KV260</small></div>
+      <div class="card"><span class="number">06 / Animation</span><h3>Whiteboard</h3><p>A text-driven animation tool for hand-drawn-style maths explainer videos. You write a spec, it renders the video, and it uses my own captured handwriting for the notation. I built it to make Boarbarktree videos practical again.</p><code>write spec → render → adjust → publish</code><div class="links"><a href="https://github.com/linkin-parks-bassist/whiteboard">GitHub →</a></div><small>In progress · C · animation · maths</small></div>
+      <div class="card"><span class="number">07 / CPU design</span><h3>DUNK</h3><p>David's Universal Number Kounter: a 16-bit microcoded CPU I designed in Logisim Evolution, with its own instruction set and an assembler written in C. A learning project, to find out how a processor really works. It runs, and it's finished.</p><div class="links"><a href="https://github.com/linkin-parks-bassist/davids-universal-number-kounter">GitHub →</a></div><small>Finished · Logisim Evolution · C · microcode</small></div>
     </div>
+  </section>
+
+  <section id="boarbarktree">
+    <h2>Boarbarktree.</h2>
+    <p class="section-note">My maths YouTube channel. Currently inactive, but it may well come back.</p>
+    <div class="about">
+      <div><h3>The channel</h3><p>Hand-drawn explainer videos on algebraic topology, including a three-part series, <em>You Could Have Invented Homology</em>. Each video was an enormous amount of hand animation in Adobe Animate.</p></div>
+      <div><h3>Where it's at</h3><p>It went quiet when I started my PhD, because I couldn't keep up that pace alongside it. I still want to make the videos, which is why I'm building <a href="https://github.com/linkin-parks-bassist/whiteboard">Whiteboard</a>: a way to make them without animating everything by hand.</p></div>
+    </div>
+    <div class="note-box"><b>Watch:</b> <a href="https://www.youtube.com/@boarbarktree">the channel</a> · <a href="https://www.youtube.com/watch?v=pSjahcOnJvU">Part 1: Topology</a> · <a href="https://www.youtube.com/watch?v=JTTDmE_bBtM">Part 2: Some Simple Spaces</a> · <a href="https://www.youtube.com/watch?v=j9JJJoTjIpY">Part 3: Boundaries &amp; The Big Idea</a></div>
   </section>
 
   <section id="nonsenses">
@@ -57,30 +68,29 @@
   <section id="about">
     <h2>About.</h2>
     <div class="about">
-      <div><h3>Background</h3><p>Placeholder paragraph about your background, training or the path that got you here.</p></div>
-      <div><h3>Right now</h3><p>Placeholder paragraph about what you're working on, reading or curious about at the moment.</p></div>
+      <div><h3>Background</h3><p>I came to engineering from pure mathematics, including postgraduate work in category theory. I eventually moved from diagrams and abstractions into digital hardware, embedded systems and FPGA design. That path still shapes how I work: I care about structure, but I want the abstraction to cash out in a system that actually runs.</p></div>
+      <div><h3>Right now</h3><p>I work professionally with embedded compute and programmable logic, and outside work I build FPGA audio systems, hardware tooling and local-agent infrastructure. I also run a Sydney FPGA/ASIC meetup and help create low-friction ways for people to get hands-on with hardware.</p></div>
     </div>
   </section>
 
   <section id="notes">
     <h2>Notes.</h2>
-    <p class="section-note">Writing, write-ups and experiments. Replace these rows with real links.</p>
+    <p class="section-note">Write-ups, experiments and technical field notes.</p>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Date</th><th>Title</th><th>Topic</th></tr></thead>
         <tbody>
-          <tr><td>2026-09-21</td><td><a href="#">Placeholder post title</a></td><td>Topic</td></tr>
-          <tr><td>2026-09-14</td><td><a href="#">Another placeholder post</a></td><td>Topic</td></tr>
-          <tr><td>2026-09-01</td><td><a href="#">A third placeholder post</a></td><td>Topic</td></tr>
+          <tr><td>2026-09-21</td><td><a href="nonsenses/jev-jacobian.html">Jev and the Jacobian conjecture</a></td><td>LLMs · evaluation</td></tr>
+          <tr><td>2026-09</td><td><a href="nonsenses/knowledgetrees.html">Knowledgetrees</a></td><td>Agents · tooling</td></tr>
+          <tr><td>2026</td><td><a href="https://github.com/linkin-parks-bassist">Open-source work on GitHub</a></td><td>FPGA · software</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="note-box"><b>Heads up:</b> use this box for a disclaimer, an update, or anything that deserves emphasis.</div>
   </section>
 
   <section id="contact">
     <h2>Contact.</h2>
-    <p class="section-note">The best way to reach me: <a href="mailto:you@example.com">you@example.com</a> · <a href="https://github.com/">GitHub</a> · <a href="#">Elsewhere</a></p>
+    <p class="section-note"><a href="https://github.com/linkin-parks-bassist">GitHub</a> · davidjfarrell96@gmail.com</p>
   </section>
 
   <footer>© 2026 David Farrell · realdavidfarrell.com</footer>

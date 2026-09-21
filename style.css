@@ -129,3 +129,10 @@ details p { margin: 0 0 16px; color: #655e63; line-height: 1.5; max-width: 850px
   .step { padding-left: 54px; }
   .step::before { left: 16px; }
 }
+
+.card .links { margin-top: auto; padding-top: 6px; display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; font-weight: 800; }
+.card .links + small { margin-top: 0; }
+@media (max-width: 700px) {
+  .topline { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .topline nav { flex-wrap: wrap; gap: 8px 16px; }
+}
