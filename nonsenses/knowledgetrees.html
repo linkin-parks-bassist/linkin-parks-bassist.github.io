@@ -187,17 +187,10 @@ test -f .knowledge/where/am/i.md
   </section>
 
   <section id="adopt">
-    <h2>Adopt it in six steps.</h2>
-    <div class="steps">
-      <div class="step"><h3>Create <code>.knowledge/where/am/i.md</code></h3><p>Or run <code>kt init</code>: it creates the six branches, an orientation, and empty spec, plan, state and next leaves.</p></div>
-      <div class="step"><h3>Create the spine</h3><p>Current-truth leaves for spec, plan, state and next action, so a fresh agent always knows where the work stands.</p></div>
-      <div class="step"><h3>Project your most-used answers into question paths</h3><p>Build, test, release, architecture, rationale, common failure modes.</p></div>
-      <div class="step"><h3>Teach agents one operating rule</h3><p>Use <code>kt</code> when knowledge is needed; preserve reusable discoveries as part of ordinary work. The installed hooks reinforce this.</p></div>
-      <div class="step"><h3>Add proofs where truth is cheap to test</h3><p>Concrete environmental and repository facts, not every explanatory sentence.</p></div>
-      <div class="step"><h3>Garden when real friction appears</h3><p><code>kt status</code> shows what is yellow or brown. Fix ambiguous branches, duplication and stale answers as use exposes them.</p></div>
-    </div>
-    <div class="question" style="margin-top:24px"><span class="prompt">$</span> ./install --dry-run &amp;&amp; ./install</div>
-    <div class="note"><p>The installer is knowledge-first and idempotent. It merges reusable leaves into <code>~/.knowledge</code>, installs the <code>kt</code> CLI (proof engine built in), hooks and the MCP server for all four harnesses, and refuses to overwrite differing knowledge without <code>--force</code>. It is covered by an isolated-home integration test. Restart each harness afterwards.</p></div>
+    <h2>Adopt it.</h2>
+    <p class="section-note">Run the install script, lol. It installs the hooks and the MCP server, and agents start using knowledgetrees on their own.</p>
+    <div class="question"><span class="prompt">$</span> ./install</div>
+    <div class="note"><p>Idempotent, and it refuses to overwrite differing knowledge without <code>--force</code>. Try <code>./install --dry-run</code> first if you're nervous. Restart your agent harnesses afterwards.</p></div>
   </section>
 
   <section id="faq">
