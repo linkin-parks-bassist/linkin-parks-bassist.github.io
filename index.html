@@ -24,25 +24,23 @@
   <div class="hero" id="top">
     <div>
       <div class="eyebrow">FPGA systems · embedded compute · developer tools · Sydney</div>
-      <h1><em>David</em> Farrell</h1>
-      <p>I'm an engineer working across FPGA systems, embedded compute, audio DSP and developer tooling. I like turning ideas into working hardware quickly, then building better abstractions around what I learned.</p>
-    </div>
+      <h1><em>David</em> Farrell</h1></div>
   </div>
-
-  <div class="question"><span class="prompt">$</span> whoami --short</div>
-  <div class="note"><p><b>Current focus.</b> Better ways to build and operate complex technical systems: expressive HDL, real-time FPGA audio, and agent tooling that can retain and verify knowledge instead of repeatedly rediscovering it.</p></div>
-
+  
+  <div class="question"><span class="prompt">$</span> whoami --short
+  <p>I'm an engineer working across FPGA systems, embedded compute, audio DSP and developer tooling. I like turning ideas into working hardware quickly, then building better abstractions around what I learned.
+  </div>
+  
   <section id="projects">
     <h2>Projects.</h2>
     <p class="section-note">A few things I keep coming back to: programmable hardware, tools that make it easier to reason about systems, and projects where software has to meet the physical world.</p>
     <div class="cards">
       <div class="card"><span class="number">01 / FPGA audio</span><h3>Kestrel</h3><p>A real-time FPGA audio DSP platform built around per-sample effects processing, flexible control, and low-cost hardware.</p><code>audio in → FPGA DSP → audio out</code><div class="links"><a href="https://github.com/linkin-parks-bassist/kestrel">GitHub →</a></div><small>Active · SystemVerilog · DSP · embedded UI</small></div>
-      <div class="card"><span class="number">02 / HDL</span><h3>Pigen</h3><p><b>Pi</b>peline <b>Gen</b>erator: An experimental hardware description language centered on pipelines, implicit flow control and making streaming hardware easier to express.</p><code>wire · reg · fifo[n] · skid</code><div class="links"><a href="https://github.com/linkin-parks-bassist/pigen">GitHub →</a></div><small>Active · compiler design · RTL · dataflow</small></div>
-      <div class="card"><span class="number">03 / Agent infrastructure</span><h3>Knowledgetrees</h3><p>A semantic filesystem for agent knowledge: small, addressable pieces of technical state that can be updated, checked and reused across long-running work.</p><div class="links"><a href="https://github.com/linkin-parks-bassist/knowledgetrees">GitHub →</a><a href="nonsenses/knowledgetrees.html">Read the pitch →</a></div><small>Active · agents · MCP · verification</small></div>
-      <div class="card"><span class="number">04 / Agent infrastructure</span><h3>CointOS</h3><p>Local-first orchestration for my personal AI agents. It turns requests from the terminal or Telegram into durable agent work, coordinates local model inference, and keeps resource use in check on my own machine.</p><code>request → durable work → local inference</code><div class="links"><a href="https://github.com/linkin-parks-bassist/CointOS">GitHub →</a></div><small>Active · Python · agents · local inference</small></div>
-      <div class="card"><span class="number">05 / FPGA audio</span><h3>Lyrebird</h3><p>A sixteen-voice polyphonic synthesizer on an AMD Kria KV260. A USB MIDI controller is read on the Linux side and written into registers in the programmable logic, where an HLS DSP core generates 24-bit, 48 kHz audio: phase-modulation voices with wavefolding, filters, envelopes and LFOs, and a shared reverb, played out over I2S.</p><code>MIDI → Linux → PL registers → HLS → I2S</code><small>Active · Vitis HLS · SystemVerilog · KV260</small></div>
+      <div class="card"><span class="number">02 / FPGA audio</span><h3>Lyrebird</h3><p>A sixteen-voice polyphonic synthesizer on an AMD Kria KV260. A USB MIDI controller is read on the Linux side and written into registers in the programmable logic, where an HLS DSP core generates 24-bit, 48 kHz audio: phase-modulation voices with wavefolding, filters, envelopes and LFOs, and a shared reverb, played out over I2S.</p><code>MIDI → Linux → PL registers → HLS → I2S</code><small>Active · Vitis HLS · SystemVerilog · KV260</small></div>
+      <div class="card"><span class="number">03 / HDL</span><h3>Pigen</h3><p><b>Pi</b>peline <b>Gen</b>erator: An experimental hardware description language centered on pipelines, implicit flow control and making streaming hardware easier to express.</p><code>buf · port · fifo[n] · skid</code><div class="links"><a href="https://github.com/linkin-parks-bassist/pigen">GitHub →</a></div><small>Active · compiler design · RTL · dataflow</small></div>
+      <div class="card"><span class="number">04 / Agent infrastructure</span><h3>Knowledgetrees</h3><p>A semantic filesystem for agent knowledge: small, addressable pieces of technical state that can be updated, checked and reused across long-running work.</p><code>kt where am i</code><div class="links"><a href="https://github.com/linkin-parks-bassist/knowledgetrees">GitHub →</a><a href="nonsenses/knowledgetrees.html">Read the pitch →</a></div><small>Active · agents · MCP · verification</small></div>
+      <div class="card"><span class="number">05 / Agent infrastructure</span><h3>CointOS</h3><p>Local-first orchestration for my personal AI agents. It turns requests from the terminal or Telegram into durable agent work, coordinates local model inference, and keeps resource use in check on my own machine.</p><code>request → durable work → local inference</code><div class="links"><a href="https://github.com/linkin-parks-bassist/CointOS">GitHub →</a></div><small>Active · Python · agents · local inference</small></div>
       <div class="card"><span class="number">06 / Animation</span><h3>Whiteboard</h3><p>A text-driven animation tool for hand-drawn-style maths explainer videos. You write a spec, it renders the video, and it uses my own captured handwriting for the notation. I built it to make Boarbarktree videos practical again.</p><code>write spec → render → adjust → publish</code><div class="links"><a href="https://github.com/linkin-parks-bassist/whiteboard">GitHub →</a></div><small>In progress · C · animation · maths</small></div>
-      <div class="card"><span class="number">07 / CPU design</span><h3>DUNK</h3><p>David's Universal Number Kounter: a 16-bit microcoded CPU I designed in Logisim Evolution, with its own instruction set and an assembler written in C. A learning project, to find out how a processor really works. It runs, and it's finished.</p><div class="links"><a href="https://github.com/linkin-parks-bassist/davids-universal-number-kounter">GitHub →</a></div><small>Finished · Logisim Evolution · C · microcode</small></div>
     </div>
   </section>
 
