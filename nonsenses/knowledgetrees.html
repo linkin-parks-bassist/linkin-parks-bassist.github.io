@@ -16,13 +16,13 @@
 
   <div class="hero">
     <div>
-      <div class="eyebrow">A knowledge system for agents · working, installed, tested</div>
+      <div class="eyebrow">A knowledge system for agents</div>
       <h1><em>Knowledgetrees:</em> Information Indexed By Natural Language</h1>
       <p><b>Knowledgetrees</b> are a stateful, self-growing, self-healing filesystem for agent knowledge. One canonical, agent-navigable substrate that replaces the split between skills, docs, code comments, project memory, plans, specs, policy and notes.</p>
     </div>
     <div>
       <div class="big-mark">kt</div>
-      <div class="big-caption">Installed in 4 agent harnesses</div>
+      <div class="big-caption">Works with 4 agent harnesses</div>
     </div>
   </div>
 
@@ -96,9 +96,9 @@
     <div class="quote"><p>Store knowledge. Generate presentations. Do not make every future agent reread the presentation to recover the knowledge.</p></div>
   </section>
 
-  <section id="now">
-    <h2>It is a working system now.</h2>
-    <p class="section-note">What began as a pitch is installed and in daily use. The pieces below are all in the repository, and each has tests behind it.</p>
+  <section id="how">
+    <h2>How it works.</h2>
+    <p class="section-note">Agents reach a tree through a local MCP server, and hooks keep the discover-and-capture loop running. Access, federation and search sit around that core.</p>
 
     <div class="split">
       <div>
@@ -178,10 +178,10 @@ test -f .knowledge/where/am/i.md
   </section>
 
   <section id="limits">
-    <h2>What it isn't (yet).</h2>
+    <h2>Limits.</h2>
     <div class="cards">
-      <div class="card"><span class="number">Scale</span><h3>Larger trees are untested</h3><p>The README says as much: further testing is needed at bigger scales. Retrieval works as long as branches stay meaningfully discriminating.</p></div>
-      <div class="card"><span class="number">Search</span><h3>Lexical, not semantic</h3><p>Ranking is keyword coverage within a branch. No embeddings, no vector database, and that is deliberate for now.</p></div>
+      <div class="card"><span class="number">Scale</span><h3>Larger trees are untested</h3><p>Untested at larger sizes. Retrieval works as long as branches stay meaningfully discriminating.</p></div>
+      <div class="card"><span class="number">Search</span><h3>Lexical, not semantic</h3><p>Ranking is keyword coverage within a branch. No embeddings, no vector database, and that is deliberate.</p></div>
       <div class="card"><span class="number">Scope</span><h3>Not task management</h3><p>It gives knowledge continuity. Work still needs bounded objectives, authority, ownership and acceptance criteria.</p></div>
     </div>
   </section>
