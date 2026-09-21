@@ -10,18 +10,18 @@
 <body>
 <main>
   <div class="topline">
-    <a href="#top">David Farrell</a>
+    <a href="index.html">David Farrell</a>
     <nav>
-      <a href="#about">About</a>
-      <a href="#projects">Projects</a>
-      <a href="#boarbarktree">Boarbarktree</a>
-      <a href="#nonsenses">Nonsenses</a>
-      <a href="#field-notes">Field Notes</a>
-      <a href="#contact">Contact</a>
+      <a href="about/index.html">About</a>
+      <a href="projects/index.html">Projects</a>
+      <a href="boarbarktree/index.html">Boarbarktree</a>
+      <a href="nonsenses/index.html">Nonsenses</a>
+      <a href="field-notes/index.html">Field Notes</a>
+      <a href="contact/index.html">Contact</a>
     </nav>
   </div>
 
-  <div class="hero" id="top">
+  <div class="hero">
     <div>
       <div class="eyebrow">FPGA systems · embedded compute · developer tools · Sydney</div>
       <h1><em>David</em> Farrell</h1></div>
@@ -30,63 +30,16 @@
   <div class="question"><span class="prompt">$</span> whoami --short
   <p>I'm an engineer working across FPGA systems, embedded compute, audio DSP and developer tooling. I like turning ideas into working hardware quickly, then building better abstractions around what I learned.
   </div>
-  
-  <section id="projects">
-    <h2>Projects.</h2>
-    <p class="section-note">A few things I keep coming back to: programmable hardware, tools that make it easier to reason about systems, and projects where software has to meet the physical world.</p>
+
+  <section>
     <div class="cards">
-      <div class="card"><span class="number">01 / FPGA audio</span><h3>Kestrel</h3><p>A real-time FPGA audio DSP platform built around per-sample effects processing, flexible control, and low-cost hardware.</p><code>audio in → FPGA DSP → audio out</code><div class="links"><a href="https://github.com/linkin-parks-bassist/kestrel">GitHub →</a></div><small>Active · SystemVerilog · DSP · embedded UI</small></div>
-      <div class="card"><span class="number">02 / FPGA audio</span><h3>Lyrebird</h3><p>A sixteen-voice polyphonic synthesizer on an AMD Kria KV260. A USB MIDI controller is read on the Linux side and written into registers in the programmable logic, where an HLS DSP core generates 24-bit, 48 kHz audio: phase-modulation voices with wavefolding, filters, envelopes and LFOs, and a shared reverb, played out over I2S.</p><code>MIDI → Linux → PL registers → HLS → I2S</code><small>Active · Vitis HLS · SystemVerilog · KV260</small></div>
-      <div class="card"><span class="number">03 / HDL</span><h3>Pigen</h3><p><b>Pi</b>peline <b>Gen</b>erator: An experimental hardware description language centered on pipelines, implicit flow control and making streaming hardware easier to express.</p><code>buf · port · fifo[n] · skid</code><div class="links"><a href="https://github.com/linkin-parks-bassist/pigen">GitHub →</a></div><small>Active · compiler design · RTL · dataflow</small></div>
-      <div class="card"><span class="number">04 / Agent infrastructure</span><h3>Knowledgetrees</h3><p>A semantic filesystem for agent knowledge: small, addressable pieces of technical state that can be updated, checked and reused across long-running work.</p><code>kt where am i</code><div class="links"><a href="https://github.com/linkin-parks-bassist/knowledgetrees">GitHub →</a><a href="nonsenses/knowledgetrees.html">Read the pitch →</a></div><small>Active · agents · MCP · verification</small></div>
-      <div class="card"><span class="number">05 / Agent infrastructure</span><h3>CointOS</h3><p>Local-first orchestration for my personal AI agents. It turns requests from the terminal or Telegram into durable agent work, coordinates local model inference, and keeps resource use in check on my own machine.</p><code>request → durable work → local inference</code><div class="links"><a href="https://github.com/linkin-parks-bassist/CointOS">GitHub →</a></div><small>Active · Python · agents · local inference</small></div>
-      <div class="card"><span class="number">06 / Animation</span><h3>Whiteboard</h3><p>A text-driven animation tool for hand-drawn-style maths explainer videos. You write a spec, it renders the video, and it uses my own captured handwriting for the notation. I built it to make Boarbarktree videos practical again.</p><code>write spec → render → adjust → publish</code><div class="links"><a href="https://github.com/linkin-parks-bassist/whiteboard">GitHub →</a></div><small>In progress · C · animation · maths</small></div>
+      <div class="card"><span class="number">01</span><h3>About</h3><p>Background: from pure mathematics to FPGAs, and what I am working on now.</p><div class="links"><a href="about/index.html">Open →</a></div></div>
+      <div class="card"><span class="number">02</span><h3>Projects</h3><p>FPGA audio, a pipeline-oriented HDL, agent infrastructure and more.</p><div class="links"><a href="projects/index.html">Open →</a></div></div>
+      <div class="card"><span class="number">03</span><h3>Boarbarktree</h3><p>My maths YouTube channel. Currently inactive, but it may well come back.</p><div class="links"><a href="boarbarktree/index.html">Open →</a></div></div>
+      <div class="card"><span class="number">04</span><h3>Nonsenses</h3><p>My nonsense. Experiments and pitches that don't fit anywhere else.</p><div class="links"><a href="nonsenses/index.html">Open →</a></div></div>
+      <div class="card"><span class="number">05</span><h3>Field Notes</h3><p>Notes from the field: experiments, write-ups and things I found out by poking at them.</p><div class="links"><a href="field-notes/index.html">Open →</a></div></div>
+      <div class="card"><span class="number">06</span><h3>Contact</h3><p>GitHub and email.</p><div class="links"><a href="contact/index.html">Open →</a></div></div>
     </div>
-  </section>
-
-  <section id="boarbarktree">
-    <h2>Boarbarktree.</h2>
-    <p class="section-note">My maths YouTube channel. Currently inactive, but it may well come back.</p>
-    <div class="about">
-      <div><h3>The channel</h3><p>Hand-drawn explainer videos on algebraic topology, including a three-part series, <em>You Could Have Invented Homology</em>. Each video was an enormous amount of hand animation in Adobe Animate.</p></div>
-      <div><h3>Where it's at</h3><p>It went quiet when I started my PhD, because I couldn't keep up that pace alongside it. I still want to make the videos, which is why I'm building <a href="https://github.com/linkin-parks-bassist/whiteboard">Whiteboard</a>: a way to make them without animating everything by hand.</p></div>
-    </div>
-    <div class="note-box"><b>Watch:</b> <a href="https://www.youtube.com/@boarbarktree">The Channel</a> · <a href="https://www.youtube.com/watch?v=pSjahcOnJvU">Part 1: Topology</a> · <a href="https://www.youtube.com/watch?v=JTTDmE_bBtM">Part 2: Some Simple Spaces</a> · <a href="https://www.youtube.com/watch?v=j9JJJoTjIpY">Part 3: Boundaries &amp; The Big Idea</a></div>
-  </section>
-
-  <section id="nonsenses">
-    <h2>Nonsenses.</h2>
-    <p class="section-note">My nonsense. Experiments and pitches that don't fit anywhere else.</p>
-    <div class="cards two">
-      <div class="card"><span class="number">01 / Pitch</span><h3>Knowledgetrees</h3><p>A stateful, self-growing, self-healing filesystem for agent knowledge. The case for it, and what is built and installed today.</p><a class="more" href="nonsenses/knowledgetrees.html">Read the pitch →</a><small>Agents · MCP · proofs · hooks</small></div>
-    </div>
-  </section>
-
-  <section id="about">
-    <h2>About.</h2>
-    <div class="about">
-      <div><h3>Background</h3><p>I came to engineering from pure mathematics, including postgraduate work in category theory. I eventually moved from diagrams and abstractions into digital hardware, embedded systems and FPGA design. That path still shapes how I work: I care about structure, but I want the abstraction to cash out in a system that actually runs.</p></div>
-      <div><h3>Right now</h3><p>I work professionally with embedded compute and programmable logic, and outside work I build FPGA audio systems, hardware tooling and local-agent infrastructure. I also run a Sydney FPGA/ASIC meetup and help create low-friction ways for people to get hands-on with hardware.</p></div>
-    </div>
-  </section>
-
-  <section id="field-notes">
-    <h2>Field Notes.</h2>
-    <p class="section-note">Notes from the field: experiments, write-ups and things I found out by poking at them.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Date</th><th>Title</th><th>Topic</th></tr></thead>
-        <tbody>
-          <tr><td>2026-09</td><td><a href="field-notes/jev-jacobian.html">Jev and the Jacobian conjecture</a></td><td>LLMs · evaluation</td></tr>
-          <tr><td>2026-09</td><td><a href="nonsenses/knowledgetrees.html">Knowledgetrees</a></td><td>Agents · tooling</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section id="contact">
-    <h2>Contact.</h2>
-    <p class="section-note"><a href="https://github.com/linkin-parks-bassist">GitHub</a> · davidjfarrell96@gmail.com</p>
   </section>
 
   <footer>© 2026 David Farrell · realdavidfarrell.com</footer>

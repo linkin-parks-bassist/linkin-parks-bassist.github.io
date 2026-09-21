@@ -156,3 +156,11 @@ figure.fig figcaption b { color: var(--accent); font-size: 11px; font-weight: 90
   .specimen { grid-template-columns: 1fr; }
   .specimen dt { border-bottom: 0; padding-bottom: 0; }
 }
+
+/* ---- multi-page site: section pages, breadcrumb, current-page marker ---- */
+.topline nav a[aria-current] { color: var(--accent); }
+section.page { margin-top: 0; }
+.page-title { font-size: clamp(44px, 6vw, 72px); line-height: .95; letter-spacing: -.07em; margin: 38px 0 14px; }
+.crumb { margin: 22px 0 0; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.crumb a { text-decoration: none; }
+body { min-height: 100vh; }
