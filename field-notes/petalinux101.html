@@ -84,7 +84,7 @@ petalinux-build</code></pre>
 
   <section id="result" class="prose">
     <h2>Result: my first embedded Linux image</h2>
-    <p>The build ran for ages and ended with exactly the message I had half expected: 225 errors, nonzero exit code, failure. Of course it did. Then we looked. The agent checked the logs and found that every one of those errors concerned a missing shared-state cache entry; BitBake had fallen back to running the real task. The task summary reported 6,388 tasks attempted, 5,139 not needing a rerun, and all succeeded. In <code>images/linux</code> sat the kernel (<code>Image</code>), device tree (<code>system.dtb</code>), FIT image (<code>image.ub</code>), root filesystems and package manifest. The apparent failure was a detour through the cache, not the outcome of the build. I had built my first embedded Linux image. That was the experiment. The end.</p>
+    <p>The build ran for ~35 minutes and ended with exactly the message I had expected: 225 errors, nonzero exit code, failure. Of course it did. Then we looked. The agent checked the logs and found that every one of those errors concerned a missing shared-state cache entry; BitBake had fallen back to running the real task. The task summary reported 6,388 tasks attempted, 5,139 not needing a rerun, and all succeeded. In <code>images/linux</code> sat the kernel (<code>Image</code>), device tree (<code>system.dtb</code>), FIT image (<code>image.ub</code>), root filesystems and package manifest. The apparent failure was a detour through the cache, not the outcome of the build. I had built my first embedded Linux image. That was the experiment. The end.</p>
     <p class="tombstone" aria-label="End of note">□</p>
   </section>
 
