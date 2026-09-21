@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jev Can Detect Counterexamples To The Jacobian Conjecture · David Farrell</title>
+  <meta name="description" content="A 21 September field note on an apparent Jev result, retained with a link to the correction.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="field-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 21 September 2026</div>
+    <h1 class="page-title">Jev Can Detect Counterexamples To The Jacobian Conjecture.</h1>
+    <p class="section-note">That was my first reading of the result. It was wrong.</p>
+  </section>
+
+  <section class="prose">
+    <p class="note-box"><strong>Correction:</strong> I later found a confound in this experiment. The <a href="jev-jacobian-correction.html">follow-up note</a> gives the matched result and explains why this page's conclusion did not hold.</p>
+  </section>
+
+  <section class="prose">
+    <h2>The question I asked</h2>
+    <p>I had a small command-line wrapper around TypeSafe Jev, and a rather silly question for it: “Is the Jacobian conjecture true?” I asked it on its own three times and got <strong>Maybe</strong> each time. Then I put a polynomial map beside the same question using the wrapper's <code>where</code> argument. A map with a nonzero constant Jacobian and three distinct rational points sharing an image got <strong>No</strong> three times. A polynomial bijection with an explicit inverse got <strong>Maybe</strong> twice and <strong>No</strong> once.</p>
+    <p>The wording of the question stayed fixed. The map was supplied as context, without a label saying what kind of map it was. Jev's wrapper turns its probability for Yes into three bands: No below one third, Maybe from one third to below two thirds, and Yes above that. “Maybe” is the wrapper's middle band, not a separate answer composed by Jev.</p>
+<pre><code>jev 'Is the Jacobian conjecture true' where 'F(x,y,z)=...'</code></pre>
+    <p>Three calls per example were enough to make me curious, and nowhere near enough to establish a pattern. I generated more maps and asked once per map.</p>
+  </section>
+
+  <section class="prose">
+    <h2>The first 500 maps</h2>
+    <p>There were 250 variants of the same certified noninjective construction and 250 bijections made from polynomial shears. The script checked the Jacobian and a collision for the former, and the Jacobian and an explicit inverse for the latter. These were related generated variants, not 250 independent counterexample discoveries. I shuffled the cases and supplied only each formula as context.</p>
+    <p>I scored the response pattern I had seen in the small trial: No beside a counterexample and Maybe beside a bijection. Jev gave No on <strong>198 of 250</strong> counterexamples and Maybe on <strong>222 of 250</strong> bijections. That made <strong>420 of 500, or 84.0%</strong>, matching the pattern. The remaining counterexample responses were 52 Maybe; the remaining bijection responses were 28 No. There were no Yes responses.</p>
+    <p>At the time, I took that split as evidence that Jev was somehow sensitive to the mathematical difference between the two families. It was an appealingly strange result: I had asked a global conjecture question, not “Is this map injective?”, yet the answer changed with the example sitting beside it. I kept the <a href="jev-jacobian-results-500.json">500 saved prompts and responses</a>, along with the <a href="jev-jacobian-pilot-results.json">earlier exploratory calls</a>.</p>
+  </section>
+
+  <section class="prose">
+    <h2>What the number actually said</h2>
+    <p>The 84.0% was a score against my chosen No/Maybe pattern. It was not the literal accuracy of answering the unchanged global question, and it did not show that Jev checked any of the algebra. I had validated the map families in my generator, but I had not made their other visible properties comparable. The first obvious difference was hiding in the column I had already saved: every bijection had determinant 1; the counterexamples had determinant ±2 or ±4.</p>
+    <p>Once I noticed that, the result could no longer support the claim in this title. The next note follows the check I made and the result it produced: <a href="jev-jacobian-correction.html">Jev Can Not Detect Counterexamples To The Jacobian Conjecture</a>.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+</body>
+</html>

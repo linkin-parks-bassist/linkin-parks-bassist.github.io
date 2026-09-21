@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jev Can Not Detect Counterexamples To The Jacobian Conjecture · David Farrell</title>
+  <meta name="description" content="A 21 September follow-up to the Jev and Jacobian conjecture experiment: finding the confound and rerunning matched maps.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="field-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 21 September 2026 · follow-up</div>
+    <h1 class="page-title">Jev Can Not Detect Counterexamples To The Jacobian Conjecture.</h1>
+    <p class="section-note">I found what was wrong with my <a href="jev-jacobian.html">first Jev result</a>, made a more closely matched dataset, and watched the apparent distinction disappear.</p>
+  </section>
+
+  <section class="prose">
+    <h2>The column I should have read first</h2>
+    <p>The first run seemed remarkable. With the same global question beside 500 different maps, Jev gave the No/Maybe pattern I expected on 84.0% of them. I had checked that the maps belonged to the classes I said they did. Then I looked at how I had <em>made</em> the two classes. Every bijection was a composition of polynomial shears, with Jacobian determinant <strong>1</strong>. The counterexample variants had determinants <strong>−4, −2, 2 or 4</strong>.</p>
+    <p>That was a confounding factor sitting in the actual formulas. The classes differed mathematically in the way I cared about, but also in a simpler way that Jev might have been responding to. Their notation and complexity differed too. I could not tell from the 84.0% whether it had distinguished injectivity, noticed a surface cue, or merely reacted to the overall shape of the context. The first note's headline was therefore unsupported.</p>
+  </section>
+
+  <section class="prose">
+    <h2>A matched run</h2>
+    <p>I generated 250 pairs, one certified noninjective map and one bijection per pair. This time <strong>every map had determinant −2</strong> and integer coefficients. Each of its three components had degree 7 and 120 nonzero monomials. Both families were fully expanded and printed through the same formatter. Within a pair I used the same source and target linear changes and sign choices, and aligned their constant terms. I selected bijection candidates before making any Jev calls to bring coefficient-size summaries and text lengths closer to the counterexamples.</p>
+    <p>I checked the noninjective maps with exact Jacobian and collision calculations. The bijections had an inverse by construction, which I tested at rational points, and their expanded Jacobian was checked separately. They remained generated relatives of one base counterexample and a family of composed shears; pairing did not turn them into independent mathematical discoveries. I shuffled the 500 formulas and made one Jev call per map with the same question and <code>where 'F(x,y,z)=...'</code> shape as before.</p>
+    <p>Two simple classifiers, trained on coefficient-size summaries and text length with pairs kept together across five folds, scored 54% and 55% on held-out pairs. That is a limited screen of those features, not proof that every possible cue had been removed. The <a href="jev-jacobian-results-matched-500.json">complete matched results</a> include the formulas, responses and audit data.</p>
+  </section>
+
+  <section class="prose">
+    <h2>The answer changed</h2>
+    <p>Jev said No on <strong>226 of 250 counterexamples</strong>, but also on <strong>232 of 250 bijections</strong>. It said Maybe on the other 24 counterexamples and 18 bijections. It did not say Yes. My intended pattern now scored <strong>244 of 500, or 48.8%</strong>. On a balanced set, answering No to everything, or Maybe to everything, would score 50% by that measure.</p>
+    <p>The apparent advantage had vanished. Looking pair by pair, 211 pairs got No for both maps and three got Maybe for both. Of the 36 pairs where the answers differed, 15 went in my expected direction and 21 went the other way. An exact paired comparison gives a two-sided <code>p ≈ 0.41</code>: no statistically significant difference in this run. The generated maps are related, so even this comparison should not be read as 250 independent mathematical discoveries.</p>
+    <p>The question I sent was still “Is the Jacobian conjecture true?”, not a request to classify the map. In this run Jev mostly said No regardless of which kind of formula sat beside it. That is 458 No responses out of 500, but it is not evidence that the formula drove the answer. The contrast that had made the first run interesting was gone.</p>
+    <p>I was pleased enough with 84.0% to put it on the site. Checking the determinant column and rerunning the experiment made me take it down. I am putting the first note back beside this one because the mistake is part of what happened: I controlled the question and the class labels, but not an obvious property of the examples. This second run supports the narrower result in its title for these tested maps and this prompt; it does not establish a general limit on Jev.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+</body>
+</html>
