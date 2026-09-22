@@ -24,14 +24,26 @@
 
   <section class="page">
     <div class="eyebrow">Field note · 21 September 2026 · follow-up</div>
-    <h1 class="page-title">Jev Can Not Detect Counterexamples To The Jacobian Conjecture.</h1>
-    <p class="section-note">I found what was wrong with my <a href="jev-jacobian.html">first Jev result</a>, made a more closely matched dataset, and watched the apparent distinction disappear.</p>
+    <h1 class="page-title">Jev Can <em>Not</em> Detect Counterexamples To The <em>Jacobian</em> Conjecture.</h1>
+    <p class="section-note">A cautionary tale.</p>
   </section>
 
   <section class="prose">
-    <h2>The column I should have read first</h2>
-    <p>The first run seemed remarkable. With the same global question beside 500 different maps, Jev gave the No/Maybe pattern I expected on 84.0% of them. I had checked that the maps belonged to the classes I said they did. Then I looked at how I had <em>made</em> the two classes. Every bijection was a composition of polynomial shears, with Jacobian determinant <strong>1</strong>. The counterexample variants had determinants <strong>−4, −2, 2 or 4</strong>.</p>
-    <p>That was a confounding factor sitting in the actual formulas. The classes differed mathematically in the way I cared about, but also in a simpler way that Jev might have been responding to. Their notation and complexity differed too. I could not tell from the 84.0% whether it had distinguished injectivity, noticed a surface cue, or merely reacted to the overall shape of the context. The first note's headline was therefore unsupported.</p>
+    <h2>Non-Injectivity and Hip Fractures</h2>
+    <p>I ran <a href="jev-jacobian.html">an experiment</a> on Jev to investigate a seemingly miraculous property: Jev asserted uncertainty when asked about the Jacobian conjecture, but changed its mind when a counter-example was added to context - just the formula was enough, 84% of the time.</p>
+    <p>The first run seemed remarkable. With the same global question beside 500 different maps, Jev gave the No/Maybe pattern I expected on 84.0% of them. I had checked that the maps belonged to the classes I said they did. Naturally, I had used codex to whip up a python script for generating the example polynomials. It seemingly had missed the point of the experiment. Maybe it was still dazed from finding out in real time that JC had fallen:</p>
+    <div class="question transcript" aria-label="Excerpt from the Codex conversation">
+      <p><span class="prompt">codex ›</span> I’ll build the benchmark, but there’s one math constraint to keep the score honest: no characteristic-zero counterexample to the Jacobian conjecture is known.</p>
+      <p><span class="prompt">•</span> <b>Ran</b> kt 'what is the jacobian conjecture and known counterexamples'</p>
+      <p><span class="prompt">•</span> <b>Searched the web</b> for Jacobian conjecture open characteristic zero positive characteristic counterexample x - x^p polynomial map paper ...</p>
+      <p><span class="prompt">•</span> <b>Searched the web</b> for 2026 Jacobian conjecture counterexample dimension 3 polynomial map verified paper ...</p>
+      <p><span class="prompt">codex ›</span> Correction: I was wrong about the math being open in three variables.</p>
+      <p><span class="prompt">david ›</span> lmao. sorry you had to find out this way</p>
+      <p><span class="prompt">codex ›</span> Honestly, that was a spectacular way to find out.</p>
+    </div>
+
+    <p>Every bijective polynomial mapping in the test set was a composition of polynomial shears - and therefore had Jacobian determinant identically <strong>1</strong>. The counterexample variants had determinants <strong>−4, −2, 2 or 4</strong>. Therefore, we cannot conclude that Jev can detect counterexamples to the Jacobian conjecture; it could have been deciding entirely based on the actual Jacobian determinants, or some other property, or nothing at all relevant.</p>
+    <p>It harkens to <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6550136/">a famous failure in classification history</a>; a model trained to detect hip fractures in pelvic radiographs instead made inferences based on the specific model of radiograph used to produce the scan (among other confounding factors), which, in the training set, happened to correlate with the prevalence of hip fractures in the scan. Except this time, AI was responsible for the counfound's presence in the first place! What a world.</p>
   </section>
 
   <section class="prose">

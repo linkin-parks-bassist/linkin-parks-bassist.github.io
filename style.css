@@ -34,6 +34,9 @@ h1 em { font-style: normal; color: var(--accent-bright); }
 
 .question { background: var(--dark); color: var(--dark-text); padding: 18px 22px; border: 2px solid var(--dark); box-shadow: 7px 7px 0 #e8b7b8; font: 16px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
 .question .prompt { color: #ffb1b5; }
+.transcript { margin: 20px 0 28px; }
+.prose .transcript p { color: inherit; font: inherit; line-height: 1.5; margin: 0 0 12px; }
+.prose .transcript p:last-child { margin-bottom: 0; }
 .note { border-left: 4px solid #a03f56; margin-top: 18px; padding: 13px 18px; background: var(--paper); color: #554f53; line-height: 1.5; }
 .note p { margin: 0 0 9px; }
 .note p:last-child { margin-bottom: 0; }
@@ -147,6 +150,9 @@ details p { margin: 0 0 16px; color: #655e63; line-height: 1.5; max-width: 850px
 .field-note .prose { max-width: 1080px; }
 .field-note .section-note { max-width: 1080px; }
 .field-note .prose p.tombstone { margin: 18px 0 0; text-align: right; color: var(--ink); font-size: 18px; font-weight: 900; line-height: 1; -webkit-text-stroke: 1px currentColor; }
+.terminal-capture { width: min(100%, 748px); margin: 24px auto 28px; }
+.terminal-capture img { display: block; max-width: 100%; height: auto; }
+.terminal-capture figcaption { margin-top: 10px; color: var(--ink-faint); font-size: 13px; text-align: center; }
 .prose p { font-size: 18px; line-height: 1.65; color: #3f3a3d; margin: 0 0 1.05em; }
 .prose h3 { font-size: 22px; letter-spacing: -.04em; margin: 1.6em 0 .4em; }
 .prose a { text-underline-offset: 2px; }

@@ -1,0 +1,10 @@
+---
+status: green
+revised_at: "2026-09-22T08:23:02+10:00"
+---
+
+Use `field-notes/petalinux101.html` as the first Field Notes style reference. A Field Note records one day of an experiment in a personal, grounded voice. Keep the date at page level, state the bounded goal, then follow the actual work, questions, snags, corrections, and result. Preserve small incidental details when their placement gives the note character; the unrelated thumb-cut aside immediately before the build result is an example. Let the event carry the joke. Avoid sales-like framing, punchy moralizing, and explaining the significance of every turn.
+
+The method belongs in the account when it matters to the result. In the PetaLinux note, the two-terminal Codex/PetaLinux setup, documentation-backed command and flag guidance through MCP tools, David running the build, and the live agent-generated HTML drafts explain how the learning happened. Credit agent research and inspection plainly, including where an answer missed the question and had to be refined. David set the intent, challenged the explanations, edited the structure and tone, and decided what he had learned. Write from his actual prior knowledge; questions about what userspace utilities contribute alongside kernel drivers must not read as questions about what drivers are.
+
+Spend words in proportion to the intellectual work. Installation mechanics can be brief; the inputs, build process, concrete software, output inspection, and comparison with a prebuilt distribution deserve room in this note. Use named programs, artifacts, commands, and observed results so the reasoning is inspectable. A few direct excerpts from the exchange can show where a question sharpened. The note remains a public reading surface, not a tool transcript or an agent progress report. The 21 September 2026 date belongs to the experiment; this style guidance records the later editorial decision to use the finished note as a reference. Provenance: David accepted the revision after reading it on the morning of 22 September 2026, before emailing his boss.
