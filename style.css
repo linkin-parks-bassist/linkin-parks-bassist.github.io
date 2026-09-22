@@ -150,6 +150,8 @@ details p { margin: 0 0 16px; color: #655e63; line-height: 1.5; max-width: 850px
 .field-note .prose { max-width: 1080px; }
 .field-note .section-note { max-width: 1080px; }
 .field-note .prose p.tombstone { margin: 18px 0 0; text-align: right; color: var(--ink); font-size: 18px; font-weight: 900; line-height: 1; -webkit-text-stroke: 1px currentColor; }
+.field-note .orphan-six { position: relative; }
+.field-note .orphan-six::after { content: "6"; position: absolute; left: calc(100% + 260px); top: 50%; transform: translateY(-50%); background: #f3eae6; color: #8c2e45; padding: .1em .35em; font: .92em/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
 .terminal-capture { width: min(100%, 748px); margin: 24px auto 28px; }
 .terminal-capture img { display: block; max-width: 100%; height: auto; }
 .terminal-capture figcaption { margin-top: 10px; color: var(--ink-faint); font-size: 13px; text-align: center; }
@@ -164,6 +166,9 @@ figure.fig { margin: 30px 0 0; }
 figure.fig figcaption { margin-top: 12px; max-width: 720px; color: var(--ink-faint); font-size: 13px; line-height: 1.5; }
 figure.fig figcaption b { color: var(--accent); font-size: 11px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; margin-right: 8px; }
 .fn-end { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+@media (max-width: 1180px) {
+  .field-note .orphan-six::after { display: none; }
+}
 @media (max-width: 520px) {
   .specimen { grid-template-columns: 1fr; }
   .specimen dt { border-bottom: 0; padding-bottom: 0; }
