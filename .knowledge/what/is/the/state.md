@@ -1,10 +1,10 @@
 ---
 status: "green"
-revised_at: "2026-09-23T11:00:14+10:00"
+revised_at: "2026-09-23T17:22:21+10:00"
 ---
 
-`field-notes/edf101.html` is the completed and published 22 September 2026 Field Note. It records the first EDF day through successful package builds, including the container/Repo learning path, the linked Apollo `touch purple` moment, and the orphaned layer-priority `6`. The page is marked complete and indexed above the 21 September notes.
+`field-notes/edf102.html` is the completed 23 September 2026 continuation of EDF 101. It documents the full-image build, machine-name typecheck and learning process, first boot failure, systemd one-shot diagnosis and live drop-in fix, audible pre-login startup, and successful cold power-cycle acceptance. It includes two preview/fade disclosure panels: the full agent-generated typecheck and a deliberately stubborn 16-click transcript reveal. David reviewed the finished page and explicitly approved publication.
 
-EDF 102 is an in-progress local draft for 23 September 2026 and is not ready for publication. It must not appear in the homepage or Field Notes index until David explicitly approves publication. Commit `1ad16b8` accidentally published its scaffold; the immediate corrective commit removes the page and both links from the deployed site.
+`field-notes/edf101.html` is the completed and published 22 September 2026 first EDF note, including the linked Apollo `touch purple` moment and orphaned layer-priority `6`. PetaLinux 101 remains a writing reference. The finished Jev notes and evidence remain published and unchanged.
 
-The completed PetaLinux 101 note remains a writing reference. The finished Jev notes and evidence remain published and unchanged.
+The homepage and Field Notes index list completed notes in reverse chronology, with EDF 102 above EDF 101.

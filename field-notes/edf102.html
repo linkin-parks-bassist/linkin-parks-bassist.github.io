@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EDF 102 · David Farrell</title>
+  <meta name="description" content="A live field note on assembling a complete bootable EDF Linux image for the KV260 synthesizer.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .disclosure {
+      position: relative;
+      max-height: 15rem;
+      margin: 18px 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+    .disclosure-content { padding: 0 18px 62px; }
+    .disclosure-content.agent-output { padding: 18px 20px 72px; }
+    .disclosure::after {
+      content: "";
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 8rem;
+      pointer-events: none;
+      background: linear-gradient(to bottom, transparent, var(--paper) 72%);
+    }
+    .disclosure-toggle {
+      position: absolute;
+      z-index: 1;
+      right: 18px;
+      bottom: 14px;
+      padding: 7px 11px;
+      color: var(--accent);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      cursor: pointer;
+      font: 800 12px/1 ui-sans-serif, system-ui, sans-serif;
+    }
+    .disclosure.expanded { max-height: none; overflow: visible; }
+    .disclosure.expanded::after,
+    .disclosure.expanded .disclosure-toggle { display: none; }
+    .disclosure.expanded .disclosure-content { padding-bottom: 18px; }
+    .disclosure.stubborn::after { height: 11rem; background: linear-gradient(to bottom, transparent, var(--paper) 58%); }
+    .disclosure.stubborn .disclosure-content { padding: 0; }
+    .agent-output {
+      padding: 18px 20px;
+      color: var(--dark-text);
+      background: var(--dark);
+      font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .agent-output .agent-label {
+      margin: 0 0 16px;
+      color: #ffb1b5;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .agent-output h3 { color: #fff5ef; font: 800 16px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .agent-output p { color: #eee2dc; font: 14px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .agent-output pre { border: 1px solid #5b615e; background: #171b19; }
+    .agent-output code { color: #ffb1b5; background: #3b3031; }
+  </style>
+</head>
+<body class="field-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 23 September 2026 · complete</div>
+    <h1 class="page-title">EDF 102.</h1>
+    <p class="section-note">Continuing the EDF journey: moving from individual packages to building the full bootable image for the KV260 synthesizer.</p>
+  </section>
+
+  <section id="goal" class="prose">
+    <h2>Goal</h2>
+    <p>Build the complete bootable disk image (<code>synth-image</code>) under EDF 25.11, containing the synthesizer runtime, ALSA Sequencer support, automatic boot services and the packaged programmable logic payload.</p>
+  </section>
+
+  <section id="method" class="prose">
+    <h2>Methodology</h2>
+    <p>Picking up from yesterday's package-level validation. I am connected via SSH from the office into DDRiver. The long-running container from yesterday is still alive on the workstation, with our persistent workspace intact. The agent continues providing documentation lookups, build inspection, and live drafting as I drive the tools.</p>
+  </section>
+
+  <section id="starting-point" class="prose">
+    <h2>Starting point</h2>
+    <p>Yesterday established the EDF 25.11 workspace, the <code>meta-synth</code> layer, and proved that both <code>synth-live</code> and <code>synth-firmware</code> compile and package cleanly (2,600 tasks completed). Today's task was to carry those packages into a complete image and then boot it on hardware.</p>
+    <p>I was working from the office over SSH, while the disposable build container I had entered at home was still running on DDRiver. A fresh SSH shell did not inherit that interactive shell's environment, but the container and bind-mounted workspace had survived. I entered the existing container with <code>podman exec</code> and sourced <code>edf-init-build-env</code> again, restoring the same build directory, layers and caches.</p>
+    <p>Before building the image, the agent inspected the kernel configuration produced during package dependency work. Userspace ALSA and <code>aconnect</code> were present, but the kernel had <code>CONFIG_SND_SEQUENCER</code> disabled. We added a one-line Kconfig fragment through a <code>linux-xlnx_%.bbappend</code>, forced the target kernel's configure task, and verified that the generated <code>.config</code> now contained <code>CONFIG_SND_SEQUENCER=y</code>.</p>
+    <p>That led into the next question: which target context should own the complete image? During the prior day we had used one machine name to inspect the Kria image and another after BitBake warned against the first. The agent now proposed changing recipe compatibility and switching back for the full image. Before allowing another string substitution, I needed to understand how those names participated in BitBake's configuration model.</p>
+  </section>
+
+  <section id="machine-types" class="prose">
+    <h2>Typechecking the machines</h2>
+    <p>I was now in unfamiliar territory, with several obviously meaningful strings appearing in command arguments: <code>kria-zynqmp-generic</code>, <code>amd-cortexa53-mali-common</code>, <code>k26-smk-kv-sdt</code>. They were plainly names for different hardware/build targets. What I did not know was where each name entered the configuration system, which actors interpreted it, what metadata it selected, and how that selection propagated into recipes and image composition.</p>
+    <p>The agent made that worse by making and unmaking decisions around them. We started with <code>kria-zynqmp-generic</code>. After BitBake warned that it “should not be used by itself,” the agent changed the package and kernel commands to <code>amd-cortexa53-mali-common</code>. Later it proposed switching the full image back to <code>kria-zynqmp-generic</code> and changing a recipe compatibility declaration to match.</p>
+    <blockquote class="quote">“Did we not yesterday <em>start</em> with ‘kria’ and then switch to ‘...-mali’?”</blockquote>
+    <p>The answer explained that one was for package and kernel validation while the other was for a complete Kria disk image. It contained true-looking distinctions, but still left the actual mechanism hidden. My response was:</p>
+    <blockquote class="quote">“uh”</blockquote>
+    <p>This was the point at which I stopped the flow and restated the methodology. I was not there merely to accept whichever string the agent most recently recommended. I wanted to understand the system well enough to drive it. An earlier explanation of the kernel configuration fragment had made the same mistake in another form: it spent time motivating why fragments exist when the interesting questions were what form the fragment takes, which other files and systems see it, and how it enters the global build configuration.</p>
+    <p>I clarified how I needed unfamiliar software machinery explained. In ordinary computing, much of the motivation is obvious once the mechanism is visible; save motivation-heavy exposition for genuinely non-obvious choices and difficult intellectual material. I am a category theorist. Show me the objects, their types, the relations and transformations between them, who owns each representation, and where composition occurs.</p>
+    <blockquote class="quote">“Typecheck. What are the domains and codomains. Who sees these machine names, where do they live, who consumes them, where are they wrong, where are we changing them?”</blockquote>
+    <p>That produced the first explanation which made the situation transparent. The machine names were not interchangeable labels, and the proposed edit was not another switch of target. There was one selected nominal machine, a lookup from that name to a configuration file, an inherited ordered set of machine-classification overrides, and a compatibility predicate over those overrides. Our image and firmware recipes had accidentally been declared over disjoint domains.</p>
+
+    <div class="disclosure" data-expand-after="1">
+      <div class="disclosure-content agent-output">
+        <p class="agent-label">Assistant / GPT-5.6 Sol</p>
+        <p>Let's typecheck the machinery precisely. There are several different things that have all been called “machine,” and I blurred them.</p>
+        <h3>1. Selected machine name</h3>
+        <p>Type:</p>
+<pre><code>MachineName := String</code></pre>
+        <p>Examples:</p>
+<pre><code>"amd-cortexa53-mali-common"
+"kria-zynqmp-generic"
+"k26-smk-kv-sdt"</code></pre>
+        <p>The build has exactly one selected <code>MACHINE</code> value at a time:</p>
+<pre><code>MACHINE = "..."</code></pre>
+        <p>We currently supply it on the command line:</p>
+<pre><code>MACHINE=amd-cortexa53-mali-common bitbake ...</code></pre>
+        <p>or:</p>
+<pre><code>MACHINE=kria-zynqmp-generic bitbake ...</code></pre>
+        <p>The shell exports <code>MACHINE</code>; BitBake imports it into its metadata environment. We have not permanently changed <code>MACHINE</code> in <code>local.conf</code>.</p>
+<pre><code>selectedMachine : BuildInvocation → MachineName</code></pre>
+
+        <h3>2. Resolving a machine name to a file</h3>
+        <p>BitBake searches the configured layers for:</p>
+<pre><code>conf/machine/${MACHINE}.conf</code></pre>
+        <p>So there is a partial lookup:</p>
+<pre><code>resolveMachine :
+    MachineName ⇀ MachineConfigurationFile</code></pre>
+        <p>For the two relevant names:</p>
+<pre><code>"amd-cortexa53-mali-common"
+    ↦ sources/meta-amd-edf/meta-amd-edf-bsp/
+      conf/machine/amd-cortexa53-mali-common.conf
+
+"kria-zynqmp-generic"
+    ↦ sources/meta-kria/
+      conf/machine/kria-zynqmp-generic.conf</code></pre>
+        <p>These are not aliases for each other. They are different configuration files.</p>
+
+        <h3>3. Machine configuration files compose other files</h3>
+        <p>A machine configuration is metadata, not an object file or target package. It can import other configuration files with <code>require</code>.</p>
+        <h3>Common Cortex-A53/Mali machine</h3>
+<pre><code># amd-cortexa53-mali-common.conf
+
+DEFAULTTUNE = "cortexa72-cortexa53"
+
+require conf/machine/zynqmp-generic.conf
+
+MACHINE_FEATURES += "mali400 vcu fpga-overlay efi"</code></pre>
+        <p>Its composition graph is roughly:</p>
+<pre><code>amd-cortexa53-mali-common.conf
+    └── zynqmp-generic.conf
+          ├── soc-zynqmp.inc
+          ├── machine-xilinx-default.inc
+          └── machine-xilinx-qemu.inc</code></pre>
+        <p>It describes a common software/filesystem target for ZynqMP devices with Cortex-A53 application processors, a Mali-400 GPU, VCU, FPGA-overlay support and EFI support. It intentionally clears several board/QEMU-specific variables after importing the generic ZynqMP base.</p>
+
+        <h3>Generic Kria image machine</h3>
+<pre><code># kria-zynqmp-generic.conf
+
+require conf/machine/zynqmp-generic.conf
+require conf/machine/include/kria-common.inc
+
+MACHINE_FEATURES += "mali400 vcu fpga-overlay"</code></pre>
+        <p>Its graph is:</p>
+<pre><code>kria-zynqmp-generic.conf
+    ├── zynqmp-generic.conf
+    │     ├── soc-zynqmp.inc
+    │     ├── machine-xilinx-default.inc
+    │     └── machine-xilinx-qemu.inc
+    └── kria-common.inc</code></pre>
+        <p><code>kria-common.inc</code> adds Kria-specific image semantics:</p>
+<pre><code>MACHINEOVERRIDES =. "kria:"
+IMAGE_CLASSES += "kria-image"
+SERIAL_CONSOLES = "115200;ttyPS1"
+IMAGE_FSTYPES += "ext4 wic wic.xz wic.qemu-sd"
+UBOOT_MACHINE = "xilinx_zynqmp_kria_defconfig"</code></pre>
+        <p>So the Kria machine is not merely “the same CPU with another name.” It adds a Kria classification and image behavior.</p>
+
+        <h3>4. Machine overrides</h3>
+        <p>This is the key missing type.</p>
+<pre><code>MachineOverride := String
+MachineOverrides := ordered list of MachineOverride</code></pre>
+        <p>BitBake begins with:</p>
+<pre><code>MACHINEOVERRIDES ?= "${MACHINE}"</code></pre>
+        <p>Then imported machine configuration files prepend additional classification tags.</p>
+<pre><code>classifyMachine :
+    MachineConfigurationFile → MachineOverrides</code></pre>
+        <p>For <code>kria-zynqmp-generic</code>, the effective list includes tags conceptually like:</p>
+<pre><code>[
+    "kria",
+    "zynqmp-generic",
+    "zynqmp",
+    ...,
+    "kria-zynqmp-generic"
+]</code></pre>
+        <p>For <code>amd-cortexa53-mali-common</code>, it includes tags conceptually like:</p>
+<pre><code>[
+    "zynqmp-generic",
+    "zynqmp",
+    ...,
+    "amd-cortexa53-mali-common"
+]</code></pre>
+        <p>Critically, the common Cortex-A53 machine does not import <code>kria-common.inc</code>, so it does not acquire the <code>kria</code> override.</p>
+        <p>These tags are inserted into BitBake's global override namespace:</p>
+<pre><code>OVERRIDES = "...:${MACHINEOVERRIDES}:${DISTROOVERRIDES}:..."</code></pre>
+
+        <h3>5. Override syntax</h3>
+        <p>A statement such as:</p>
+<pre><code>COMPATIBLE_MACHINE:kria = "${MACHINE}"</code></pre>
+        <p>does not compare <code>MACHINE</code> to the literal string <code>"kria"</code>. Its type is more like:</p>
+<pre><code>overrideAssignment :
+    OverrideTag × VariableName × Value</code></pre>
+        <p>It means: when <code>kria</code> is present in the active override set, this is the effective value of <code>COMPATIBLE_MACHINE</code>.</p>
+<pre><code>if "kria" ∈ MACHINEOVERRIDES:
+    COMPATIBLE_MACHINE := selected MACHINE string
+else:
+    COMPATIBLE_MACHINE := "^$"</code></pre>
+
+        <h3>6. Recipe compatibility</h3>
+        <p><code>COMPATIBLE_MACHINE</code> has type:</p>
+<pre><code>CompatibleMachinePattern := RegularExpression</code></pre>
+        <p>BitBake's actual compatibility test is in <code>base.bbclass</code>:</p>
+<pre><code>compat_machines = MACHINEOVERRIDES.split(":")
+
+for m in compat_machines:
+    if re.match(COMPATIBLE_MACHINE, m):
+        recipe_is_compatible</code></pre>
+        <p>Formally:</p>
+<pre><code>isCompatible :
+    CompatibleMachinePattern × MachineOverrides → Bool
+
+isCompatible(regex, overrides)
+    := ∃ tag ∈ overrides . regex matches tag</code></pre>
+        <p>BitBake tests the regex against every machine classification tag, not only against the selected <code>MACHINE</code> string.</p>
+
+        <h3>7. Our current firmware recipe</h3>
+        <p>It currently says:</p>
+<pre><code>COMPATIBLE_MACHINE = "^$"
+COMPATIBLE_MACHINE:amd-cortexa53-mali-common = "${MACHINE}"</code></pre>
+        <h3>Under the common machine</h3>
+        <p>Input:</p>
+<pre><code>MACHINE = "amd-cortexa53-mali-common"</code></pre>
+        <p>The corresponding override is active, so the effective value becomes:</p>
+<pre><code>COMPATIBLE_MACHINE =
+    "amd-cortexa53-mali-common"</code></pre>
+        <p>That regex matches one of the active tags. The recipe is available. This is why yesterday's package build worked.</p>
+        <h3>Under the Kria machine</h3>
+        <p>Input:</p>
+<pre><code>MACHINE = "kria-zynqmp-generic"</code></pre>
+        <p>The <code>amd-cortexa53-mali-common</code> override is not active. Therefore:</p>
+<pre><code>COMPATIBLE_MACHINE = "^$"</code></pre>
+        <p><code>^$</code> matches only an empty string. None of the machine tags are empty, so BitBake skips <code>synth-firmware</code>.</p>
+
+        <h3>8. Our image recipe</h3>
+        <p>Our image recipe says:</p>
+<pre><code>require recipes-core/images/kria-image-full-cmdline.bb</code></pre>
+        <p>That imported recipe contains:</p>
+<pre><code>COMPATIBLE_MACHINE = "^$"
+COMPATIBLE_MACHINE:kria = "${MACHINE}"</code></pre>
+        <p>Therefore <code>synth-image</code> is itself only compatible when the selected machine has the <code>kria</code> override.</p>
+        <h3>Under <code>amd-cortexa53-mali-common</code></h3>
+<pre><code>"kria" ∉ MACHINEOVERRIDES</code></pre>
+        <p>Therefore the imported image recipe remains disabled.</p>
+        <h3>Under <code>kria-zynqmp-generic</code></h3>
+<pre><code>"kria" ∈ MACHINEOVERRIDES</code></pre>
+        <p>Therefore the image recipe becomes enabled.</p>
+
+        <h3>9. The actual type error</h3>
+        <p>The current declarations have disjoint domains:</p>
+<pre><code>synth-image:
+    buildable on machines classified as kria
+
+synth-firmware:
+    buildable only on amd-cortexa53-mali-common</code></pre>
+        <p>But <code>synth-image</code> includes <code>synth-firmware</code>:</p>
+<pre><code>IMAGE_INSTALL:append = " synth-firmware synth-live"</code></pre>
+        <p>So we currently have:</p>
+<pre><code>imageDomain ∩ firmwareDomain = ∅</code></pre>
+        <p>More explicitly:</p>
+<pre><code>synth-image("kria-zynqmp-generic")
+    requires
+synth-firmware("kria-zynqmp-generic")
+
+but
+
+synth-firmware("kria-zynqmp-generic")
+    is undefined/skipped</code></pre>
+        <p>That is the type error.</p>
+
+        <h3>10. What we are changing</h3>
+        <p>We are not changing any machine name. We are not editing:</p>
+<pre><code>kria-zynqmp-generic.conf
+amd-cortexa53-mali-common.conf
+local.conf
+MACHINE</code></pre>
+        <p>We are changing only the declared domain of our firmware recipe.</p>
+        <p>Current:</p>
+<pre><code>COMPATIBLE_MACHINE:amd-cortexa53-mali-common = "${MACHINE}"</code></pre>
+        <p>Proposed:</p>
+<pre><code>COMPATIBLE_MACHINE:kria = "${MACHINE}"</code></pre>
+        <p>This changes:</p>
+<pre><code>domain(synth-firmware)</code></pre>
+        <p>from:</p>
+<pre><code>{ machines carrying amd-cortexa53-mali-common override }</code></pre>
+        <p>to:</p>
+<pre><code>{ machines carrying kria override }</code></pre>
+        <p>Then:</p>
+<pre><code>domain(synth-image)
+    ⊆ domain(synth-firmware)</code></pre>
+        <p>for our intended build.</p>
+
+        <h3>11. Where the warning is wrong</h3>
+        <p>The warning is generated by this generic predicate:</p>
+<pre><code>if MACHINE.endswith("-generic"):
+    warn("intended to be included by other machines")</code></pre>
+        <p>It examines only the spelling of the selected machine name. It does not inspect whether <code>meta-kria</code> deliberately specializes that machine, whether the image recipe has explicit overrides for it, whether AMD publishes artifacts built from it, or whether the machine is valid for this particular image.</p>
+        <p>Thus it reports:</p>
+<pre><code>kria-zynqmp-generic → warning</code></pre>
+        <p>because the string ends with <code>-generic</code>. But <code>meta-kria</code> contains explicit direct-use behavior for that exact nominal machine, and AMD publishes:</p>
+<pre><code>kria-image-full-cmdline-kria-zynqmp-generic...</code></pre>
+        <p>So the warning is syntactically triggered but semantically overbroad for this curated image flow.</p>
+
+        <h3>12. Complete composition</h3>
+<pre><code>BuildInvocation
+    │
+    │ MACHINE=kria-zynqmp-generic
+    ▼
+kria-zynqmp-generic.conf
+    │
+    ├── zynqmp-generic.conf
+    └── kria-common.inc
+            │
+            ▼
+MACHINEOVERRIDES includes "kria"
+            │
+            ├── enables kria-image-full-cmdline
+            ├── should enable synth-firmware
+            └── selects Kria-specific metadata
+                    │
+                    ▼
+synth-image
+    = kria-image-full-cmdline
+    + synth-live
+    + synth-firmware
+                    │
+                    ▼
+root filesystem and WIC image</code></pre>
+        <p>That is the precise reason for the one-line compatibility edit. No machine name changes; only our recipe's domain changes so its domain agrees with the image that consumes it.</p>
+      </div>
+      <button class="disclosure-toggle" type="button">Click to expand</button>
+    </div>
+    <p>After changing only the firmware recipe's compatibility domain, I dry-ran the complete image. BitBake resolved 13,624 tasks without a missing provider or incompatible package. It spent 11 minutes 46 seconds checking AMD's shared-state mirror, then reported 98% coverage and a successful task plan. The generic-machine warning appeared twice, exactly as the typecheck predicted.</p>
+<pre><code>MACHINE=kria-zynqmp-generic bitbake -n synth-image
+
+Sstate summary: Wanted 6433 Local 101 Mirrors 6242 Missed 90 Current 196
+NOTE: Tasks Summary: Attempted 13624 tasks of which 13422 didn't need to be rerun and all succeeded.
+
+    Summary: There were 2 WARNING messages.</code></pre>
+  </section>
+
+  <section id="kernel-and-image" class="prose">
+    <h2>From packages to a system</h2>
+    <p>The userspace recipe already requested <code>alsa-lib</code> and <code>alsa-utils-aconnect</code>, but inspecting the kernel produced during the package work found <code>CONFIG_SND=y</code> and USB audio support with <code>CONFIG_SND_SEQUENCER</code> disabled. That would let the application compile while leaving it without the kernel interface behind <code>/dev/snd/seq</code>.</p>
+    <p>We added a one-line Kconfig fragment, <code>CONFIG_SND_SEQUENCER=y</code>, through a <code>linux-xlnx_%.bbappend</code> in <code>meta-synth</code>. The append makes the fragment an input to AMD's existing kernel recipe; Kconfig merges it with the machine and distribution configuration to produce the final <code>.config</code>. A forced target-machine configure completed all 769 tasks, and the generated configuration contained the requested symbol.</p>
+<pre><code>CONFIG_SND_SEQUENCER=y</code></pre>
+    <p>The full <code>synth-image</code> build ran for 50 minutes. BitBake printed 532 errors while failing to restore shared-state objects, then fell back to the real tasks. Its final summary reported all 13,624 tasks successful, but the cache-fetch errors still made the command return nonzero.</p>
+<pre><code>NOTE: Tasks Summary: Attempted 13624 tasks of which 12703 didn't need to be rerun and all succeeded.
+
+Summary: There were 833 WARNING messages.
+Summary: There were 532 ERROR messages, returning a non-zero exit code.
+
+real    50m16.156s</code></pre>
+    <p>The artifacts settled the apparent contradiction. The build produced a 1.5 GB WIC image and a 164 MB compressed image. The manifest contained <code>synth-live</code>, <code>synth-firmware</code>, <code>alsa-utils-aconnect</code>, Bash, Python and <code>dfx-mgr</code>. The root filesystem contained the AArch64 application linked to <code>libasound.so.2</code>, both enabled synth services, the complete firmware triplet and a default-firmware file selecting <code>synth</code>. The Kria-context kernel configuration contained <code>CONFIG_SND_SEQUENCER=y</code>.</p>
+<pre><code>synth-image-kria-zynqmp-generic.rootfs-20260923022458.wic.xz
+SHA256 d49f11217adb11dd1a47721cb4007595a6b5e32b845a2b2a2662382c0417b4d3</code></pre>
+    <p>This is a completed image build, not yet a completed port. The next evidence comes from writing separate removable media, booting the KV260 and checking the actual device nodes, firmware load, register identity, FC25 recovery and physical audio.</p>
+  </section>
+
+  <section id="first-boot" class="prose">
+    <h2>First boot, first real failure</h2>
+    <p>I wrote the WIC image to a fresh 16 GB card, verified the bytes against the uncompressed image hash, preserved the known-good Ubuntu card, and captured the first EDF boot over the KV260 serial console. The board reached the <code>amd-edf</code> login and forced me to establish a password. Nothing synthy appeared to remain running.</p>
+    <p>The service logs showed that most of the system had actually worked. The default firmware loader found the packaged <code>synth</code> bundle, loaded it into slot 0, and exited successfully. The synth service started and waited for the FC25. When the keyboard appeared, <code>synth_live</code> validated the register bank and reported ready. One second later the reconnect watcher restarted <code>synth.service</code>, and the system fell over:</p>
+<pre><code>May 29 18:48:32 xlnx-firmware-load: synth: Loaded with slot_handle 0
+May 29 18:48:32 systemd: Finished dfx-mgrd Default Firmware Load Service.
+May 29 18:48:33 synth-start: synth: waiting for Carry-on FC25 MIDI 1
+May 29 18:48:34 synth-midi-watch: synth-midi-watch: FC25 absent
+
+Sep 23 06:33:21 synth-start: synth: FC25 source 16:0
+Sep 23 06:33:21 synth_live: ready, source 16:0, master gain 1.0
+Sep 23 06:33:22 synth-midi-watch: FC25 returned; restarting synth
+Sep 23 06:33:22 xlnx-firmware-load: Load Error: -3: No empty slot for synth
+Sep 23 06:33:22 systemd: Dependency failed for KV260 FC25 polyphonic synthesizer.</code></pre>
+    <p>The absurd one-year timestamp jump was the board clock moving from its uncorrected image/RTC time to network-corrected time during the same boot, not a year of uptime.</p>
+    <p>The failure was in the service-state model. <code>dfx-mgr-fw-load.service</code> is a successful <code>Type=oneshot</code> service, but without <code>RemainAfterExit=yes</code> it returns to the inactive state after loading PL. <code>synth.service</code> had a hard <code>Requires=</code> dependency on that one-shot. Therefore every later restart of the MIDI process also started the apparently inactive firmware service again. The second attempt found the only flat-PL slot already occupied, failed, and systemd stopped the dependent synth. The watcher then raised <code>CalledProcessError</code> because its <code>systemctl restart synth.service</code> command failed, and systemd restarted the watcher.</p>
+<pre><code>successful firmware load
+    → oneshot becomes inactive
+    → FC25 watcher restarts synth.service
+    → Requires= starts firmware loader again
+    → no empty PL slot
+    → firmware loader fails
+    → synth dependency fails
+    → watcher command raises</code></pre>
+    <p>The smallest intended correction is to keep the successful firmware one-shot logically active with <code>RemainAfterExit=yes</code>. The initial boot still fails closed when firmware loading fails, but later FC25 recovery sees the dependency already active and restarts only the Linux control process.</p>
+    <p>I installed that property as a systemd drop-in, deliberately unloaded slot handle 0, and started the corrected one-shot exactly once. Systemd then reported the loader as <code>active (exited)</code>, FPGA Manager reported <code>operating</code>, and <code>synth</code> again occupied <code>0-&gt;0</code>. Starting <code>synth.service</code> produced a live <code>synth_live 16:0 /dev/mem 93 91 71 74</code> process while the loader remained active and the slot handle did not change. The application could now start without replaying the hardware load.</p>
+    <div class="disclosure stubborn" data-expand-after="16">
+      <div class="disclosure-content agent-output">
+<pre><code>hmm, I don't see "operating": amd-edf:~$ systemctl is-active dfx-mgr-fw-load.service
+active
+amd-edf:~$ systemctl show dfx-mgr-fw-load.service -p ActiveState -p SubState -p ExecMainStatus
+ExecMainStatus=0
+ActiveState=active
+SubState=exited
+amd-edf:~$ at /sys/class/fpga_manager/fpga0/state 
+▣  Build · GPT-5.6 Sol · interrupted
+nvm im a stupid ass bitch i need to hit enter one more time LMAO.... and also swap that " " out with a "c"
+Thought: Considering response strategies · 2.3s
+I need to respond gently and avoid insulting the user</code></pre>
+      </div>
+      <button class="disclosure-toggle" type="button">Click to expand</button>
+    </div>
+    <p>Then I played it. The synthesizer worked through the EDF image: FC25 MIDI reached <code>synth_live</code>, the packaged PL generated audio, and the speakers supplied the final proof that the port was alive.</p>
+    <p>The reboot test was stronger. Automatic pre-login operation had always been the requirement, but the agent's test procedure began with “Log in as <code>amd-edf</code>,” making it sound as though authentication might still be necessary before the instrument could work. I objected, then simply tried the keyboard before logging in. It was already playing. The EDF image had booted Linux, loaded the packaged PL payload, started the MIDI application and watcher, found the FC25 and reached audible end-to-end operation without human intervention.</p>
+    <p>I pulled power, restored it, and tried the instrument again. It returned without login or manual intervention and played perfectly. The EDF port was complete.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+<script>
+  document.querySelectorAll('.disclosure').forEach((panel) => {
+    let clicks = 0;
+    const target = Number(panel.dataset.expandAfter || 1);
+    panel.querySelector('.disclosure-toggle').addEventListener('click', () => {
+      clicks += 1;
+      if (clicks >= target) panel.classList.add('expanded');
+    });
+  });
+</script>
+</body>
+</html>
