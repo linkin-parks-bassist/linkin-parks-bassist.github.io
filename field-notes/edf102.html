@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EDF 102 · David Farrell</title>
+  <meta name="description" content="A live field note on assembling a complete bootable EDF Linux image for the KV260 synthesizer.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="field-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 23 September 2026 · in progress</div>
+    <h1 class="page-title">EDF 102.</h1>
+    <p class="section-note">Continuing the EDF journey: moving from individual packages to building the full bootable image for the KV260 synthesizer.</p>
+  </section>
+
+  <section id="goal" class="prose">
+    <h2>Goal</h2>
+    <p>Build the complete bootable disk image (<code>synth-image</code>) under EDF 25.11, containing the synthesizer runtime, ALSA Sequencer support, automatic boot services and the packaged programmable logic payload.</p>
+  </section>
+
+  <section id="method" class="prose">
+    <h2>Methodology</h2>
+    <p>Picking up from yesterday's package-level validation. I am connected via SSH from the office into DDRiver. The long-running container from yesterday is still alive on the workstation, with our persistent workspace intact. The agent continues providing documentation lookups, build inspection, and live drafting as I drive the tools.</p>
+  </section>
+
+  <section id="starting-point" class="prose">
+    <h2>Starting point</h2>
+    <p>Yesterday established the EDF 25.11 workspace, the <code>meta-synth</code> layer, and proved that both <code>synth-live</code> and <code>synth-firmware</code> compile and package cleanly (2,600 tasks completed). Today's task is assembling the full image and inspecting the bootable outputs.</p>
+  </section>
+
+  <!-- Add the day's work here as it happens. Preserve questions, commands,
+       outputs, mistakes and corrections rather than writing the result ahead. -->
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+</body>
+</html>

@@ -61,7 +61,7 @@
     <p>The agent then asked me to verify the working directory and that <code>repo</code> was available. The first line of the result was <code>&lt;repo not installed&gt;</code>. Rofl. The executable I had just run was telling me that Repo was not installed.</p>
     <p>The explanation requires three uses of almost the same word. There are the many Git repositories that make up EDF; there is Google's tool named Repo, which coordinates them; and there is a small Repo launcher at <code>/usr/bin/repo</code> which downloads the rest of the Repo tool into <code>.repo/repo</code> when a workspace is initialized. The launcher was installed and reported version 2.17. Its workspace-local implementation was not, hence <code>&lt;repo not installed&gt;</code>. This did not mean that the directory was missing some generic repository. Who comes up with this stuff, honestly.</p>
     <p>The same output reported Git 2.34.1, Python 3.10.12 and the host kernel visible through the container. Containers supply a separate userspace, but share the host kernel; this is not a virtual machine booting another kernel.</p>
-    <p>This was an incredibly bizarre experience to be documenting in real time with an AI. Somehow I was a voluntary zoo animal, the key to whose cage was <code>/quit</code>. Anyway, it was time to step face first on a rake.</p>
+    <p>Time to step face first on a rake.</p>
 <pre><code>repo init \
   -u https://github.com/Xilinx/yocto-manifests.git \
   -b refs/tags/amd-edf-rel-v25.11 \
