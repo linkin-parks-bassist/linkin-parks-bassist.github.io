@@ -417,22 +417,7 @@ Sep 23 06:33:22 systemd: Dependency failed for KV260 FC25 polyphonic synthesizer
     → watcher command raises</code></pre>
     <p>The smallest intended correction is to keep the successful firmware one-shot logically active with <code>RemainAfterExit=yes</code>. The initial boot still fails closed when firmware loading fails, but later FC25 recovery sees the dependency already active and restarts only the Linux control process.</p>
     <p>I installed that property as a systemd drop-in, deliberately unloaded slot handle 0, and started the corrected one-shot exactly once. Systemd then reported the loader as <code>active (exited)</code>, FPGA Manager reported <code>operating</code>, and <code>synth</code> again occupied <code>0-&gt;0</code>. Starting <code>synth.service</code> produced a live <code>synth_live 16:0 /dev/mem 93 91 71 74</code> process while the loader remained active and the slot handle did not change. The application could now start without replaying the hardware load.</p>
-    <div class="disclosure stubborn" data-expand-after="16">
-      <div class="disclosure-content agent-output">
-<pre><code>hmm, I don't see "operating": amd-edf:~$ systemctl is-active dfx-mgr-fw-load.service
-active
-amd-edf:~$ systemctl show dfx-mgr-fw-load.service -p ActiveState -p SubState -p ExecMainStatus
-ExecMainStatus=0
-ActiveState=active
-SubState=exited
-amd-edf:~$ at /sys/class/fpga_manager/fpga0/state 
-▣  Build · GPT-5.6 Sol · interrupted
-nvm im a stupid ass bitch i need to hit enter one more time LMAO.... and also swap that " " out with a "c"
-Thought: Considering response strategies · 2.3s
-I need to respond gently and avoid insulting the user</code></pre>
-      </div>
-      <button class="disclosure-toggle" type="button">Click to expand</button>
-    </div>
+
     <p>Then I played it. The synthesizer worked through the EDF image: FC25 MIDI reached <code>synth_live</code>, the packaged PL generated audio, and the speakers supplied the final proof that the port was alive.</p>
     <p>The reboot test was stronger. Automatic pre-login operation had always been the requirement, but the agent's test procedure began with “Log in as <code>amd-edf</code>,” making it sound as though authentication might still be necessary before the instrument could work. I objected, then simply tried the keyboard before logging in. It was already playing. The EDF image had booted Linux, loaded the packaged PL payload, started the MIDI application and watcher, found the FC25 and reached audible end-to-end operation without human intervention.</p>
     <p>I pulled power, restored it, and tried the instrument again. It returned without login or manual intervention and played perfectly. The EDF port was complete.</p>
@@ -440,15 +425,6 @@ I need to respond gently and avoid insulting the user</code></pre>
   </section>
   <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
 </main>
-<script>
-  document.querySelectorAll('.disclosure').forEach((panel) => {
-    let clicks = 0;
-    const target = Number(panel.dataset.expandAfter || 1);
-    panel.querySelector('.disclosure-toggle').addEventListener('click', () => {
-      clicks += 1;
-      if (clicks >= target) panel.classList.add('expanded');
-    });
-  });
-</script>
+
 </body>
 </html>
