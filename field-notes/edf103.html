@@ -48,7 +48,7 @@
   </section>
 
   <section id="reading-recipe" class="prose">
-    <h2>Opening the <code>.bb</code></h2>
+    <h2>Reading the recipe</h2>
     <p>I listed <code>meta-synth</code>, followed it into <code>recipes-synth</code>, and opened <code>synth-firmware_1.0.bb</code>. My first useful question was not how to edit it, but what kind of object I was looking at.</p>
     <blockquote class="quote">“They really call them recipes, huh? <code>.bb</code> I assume is BitBake? Is this a DSL, or is it literally shell code?”</blockquote>
     <p>Codex's answer was: both, at different levels. A <code>.bb</code> file is a BitBake recipe written in BitBake's metadata language. Assignments such as <code>S = "${WORKDIR}"</code>, overrides such as <code>RDEPENDS:${PN}</code>, and declarations such as <code>SRC_URI</code> belong to that DSL. A task body such as <code>do_compile() { ... }</code> or <code>do_install() { ... }</code> is shell unless the recipe explicitly declares a Python task. BitBake evaluates the metadata, constructs the task graph and then invokes those bodies inside a prepared per-recipe environment.</p>
@@ -68,7 +68,7 @@ COMPATIBLE_MACHINE:kria = "${MACHINE}"</code></pre>
   </section>
 
   <section id="starting-point" class="prose">
-    <h2>Starting point</h2>
+    <h2>Why the reconnect failed</h2>
     <p>Codex pulled the failure model directly from the repository's retained EDF 102 knowledge. The packaged PL loader, <code>dfx-mgr-fw-load.service</code>, successfully loaded the synthesizer into the only flat-PL slot and then became inactive because it is a <code>Type=oneshot</code> unit. When the FC25 reconnect watcher later restarted <code>synth.service</code>, systemd started that required but apparently inactive loader again. The second load found no empty slot and the dependent synthesizer service failed.</p>
     <p>I initially extrapolated a slightly different story: perhaps the control loop lost its MIDI friend, exited, and systemd declined to revive it. Codex pointed out that the watcher and systemd did cooperate; the restart failed because it pulled the apparently inactive firmware loader back in. Then the actual role of the correction clicked.</p>
     <blockquote class="quote">“Systemd does indeed cooperate, but the synth tries to re-program the PL, which is rejected. Similar start, different failure.”</blockquote>
