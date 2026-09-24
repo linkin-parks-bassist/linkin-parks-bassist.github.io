@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EDF 103 · David Farrell</title>
+  <meta name="description" content="A two-terminal, facts-in-the-loop session with Codex: teaching the EDF build to produce a reconnect-safe KV260 synthesizer image directly.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="field-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 24 September 2026</div>
+    <h1 class="page-title">EDF 103.</h1>
+    <p class="section-note">The first image worked only after one small live correction. Today, Codex and I teach the build that correction so its next output is already right.</p>
+  </section>
+
+  <section id="goal" class="prose">
+    <h2>Goal</h2>
+    <p>Modify the EDF build metadata before building so that an ordinary <code>bitbake synth-image</code> produces the service-state correction which currently exists only as a manual drop-in on the working card. The flashable build artifact itself should be complete: after writing it to clean media, the synthesizer should boot and survive later FC25 reconnects without post-processing the image or repairing the board.</p>
+  </section>
+
+  <section id="method" class="prose">
+    <h2>Methodology: two terminals</h2>
+    <p>As usual, I booted up my dual-terminal workflow: one with an AI agent CLI and the necessary project information at its fingertips, and one in which I would implement the workflow myself. In the first terminal, Codex could orient itself immediately through the project <a href="https://realdavidfarrell.com/knowledgetrees">Knowledgetree</a>, inspect source and build artifacts, explain what it found and propose the next bounded check. In the second, I read the files, made the edits, ran BitBake and handled the hardware.</p>
+    <p>If you are just joining us, that is the established rhythm of these notes. I ask from the mental model I actually have; Codex answers against the specific system in front of us; I challenge weak abstractions and implement the steps; and the files, tools and hardware answer back. Hardware-in-the-loop has been fundamental throughout the synthesizer bring-up. Today's physical endpoint is the KV260, the FC25 and the sound coming out of the speakers.</p>
+  </section>
+
+  <section id="build-boundary" class="prose">
+    <h2>What counts as the product?</h2>
+    <p>We hit a snag before touching the build. I told Codex that the working image needed a manual service tweak and that today's goal was to make future images come out correct. Codex described the task as “move that into the Yocto image.” I objected: that sounded like modifying an image after the build, when the whole point was to correct the inputs which produce it.</p>
+    <blockquote class="quote">“Surely the goal is that, you hit build, and the product at the end is what you wanted.”</blockquote>
+    <p>Codex corrected the boundary. The manual drop-in had been useful as a diagnostic: it tested the smallest suspected correction directly on the running system and established that the service model then behaved correctly. It was not the final product definition. The intended composition was source file plus Yocto recipe metadata, transformed by BitBake into a package, root filesystem and complete flashable image. Nothing should have to edit that image or repair the board between building and flashing.</p>
+    <p>That sharpened the terminology on both sides. The correction was build-time configuration in the broad sense, but not a private setting for this particular build directory's <code>local.conf</code>. Codex identified it as a property of the product's firmware package, so I opened <code>meta-synth/recipes-synth/synth-firmware/synth-firmware_1.0.bb</code>.</p>
+  </section>
+
+  <section id="reading-recipe" class="prose">
+    <h2>Opening the <code>.bb</code></h2>
+    <p>I listed <code>meta-synth</code>, followed it into <code>recipes-synth</code>, and opened <code>synth-firmware_1.0.bb</code>. My first useful question was not how to edit it, but what kind of object I was looking at.</p>
+    <blockquote class="quote">“They really call them recipes, huh? <code>.bb</code> I assume is BitBake? Is this a DSL, or is it literally shell code?”</blockquote>
+    <p>Codex's answer was: both, at different levels. A <code>.bb</code> file is a BitBake recipe written in BitBake's metadata language. Assignments such as <code>S = "${WORKDIR}"</code>, overrides such as <code>RDEPENDS:${PN}</code>, and declarations such as <code>SRC_URI</code> belong to that DSL. A task body such as <code>do_compile() { ... }</code> or <code>do_install() { ... }</code> is shell unless the recipe explicitly declares a Python task. BitBake evaluates the metadata, constructs the task graph and then invokes those bodies inside a prepared per-recipe environment.</p>
+    <p>I began sorting the punctuation by role. <code>${...}</code> is variable expansion. <code>${PN}</code> is the recipe's output package name. The colon in <code>RDEPENDS:${PN}</code> introduces an override-qualified value; in <code>FILESEXTRAPATHS:prepend</code> it selects an operation which prepends to the eventual search path. The recipe was not a shell script with unusually enthusiastic environment variables. It was a declarative object whose evaluated values would later parameterize shell tasks.</p>
+    <p>The dependency names also described two different worlds. <code>DEPENDS = "dtc-native"</code> makes a host-native device-tree compiler available while the recipe builds. <code>RDEPENDS:${PN} = "dfx-mgr"</code> says the resulting target package needs <code>dfx-mgr</code> when it runs on the board. One edge belongs to the build graph; the other belongs to the installed system.</p>
+    <p>That distinction made the familiar-looking fragments less deceptive. <code>0644</code> was indeed a Unix file mode. <code>install -d</code> creates a directory; <code>install -m 0644</code> copies a file while assigning its installed permissions. I noticed that <code>${S}</code> was defined in the recipe and made a first guess about the next symbol.</p>
+    <blockquote class="quote">“I assume <code>${WORKDIR}</code> = <code>pwd</code>.”</blockquote>
+    <p>Not quite. Codex separated the namespaces: <code>${WORKDIR}</code> is BitBake's isolated workspace for this recipe, version and machine context. <code>${S}</code> names the source directory within that workspace, <code>${B}</code> the build directory, and <code>${D}</code> the destination staging root which will be packaged—not the board's live root filesystem.</p>
+    <p>The compile task contained another small vocabulary lesson:</p>
+<pre><code>dtc -@ -I dts -O dtb -o synth.dtbo ${S}/synth.dtso</code></pre>
+    <p><code>dtc</code> is the device-tree compiler. It transforms the textual device-tree overlay source, <code>.dtso</code>, into the binary overlay blob, <code>.dtbo</code>. I noticed the family resemblance before Codex finished explaining it: all those <code>dt</code>s were, indeed, “device tree.” The task reads its input from <code>${S}</code>, writes the relative output into the task's build directory <code>${B}</code>, and <code>do_install</code> later copies <code>${B}/synth.dtbo</code>. The bitstream and <code>shell.json</code> pass through without compilation. Together the three files become the firmware bundle installed below <code>/lib/firmware/xilinx/synth</code>.</p>
+    <p>The final compatibility lines were another compact use of the override system:</p>
+<pre><code>COMPATIBLE_MACHINE = "^$"
+COMPATIBLE_MACHINE:kria = "${MACHINE}"</code></pre>
+    <p>The impossible-looking base regular expression disables the recipe by default. When the active machine carries the <code>kria</code> override, BitBake replaces it with the selected machine name and the recipe becomes eligible. A previous EDF session had already made machine compatibility painfully concrete; here I could recognize the same mechanism in its resting form.</p>
+    <p>Only after establishing those objects did I ask what about this recipe led to the reconnect failure. Codex initially answered as though I had asked what line was wrong. I corrected the question: a file's causal contribution includes what it omits. The recipe installed the firmware payload and selected it as <code>dfx-mgr</code>'s default, but installed no service-state override. That absence connected the build metadata to the runtime failure.</p>
+  </section>
+
+  <section id="starting-point" class="prose">
+    <h2>Starting point</h2>
+    <p>Codex pulled the failure model directly from the repository's retained EDF 102 knowledge. The packaged PL loader, <code>dfx-mgr-fw-load.service</code>, successfully loaded the synthesizer into the only flat-PL slot and then became inactive because it is a <code>Type=oneshot</code> unit. When the FC25 reconnect watcher later restarted <code>synth.service</code>, systemd started that required but apparently inactive loader again. The second load found no empty slot and the dependent synthesizer service failed.</p>
+    <p>I initially extrapolated a slightly different story: perhaps the control loop lost its MIDI friend, exited, and systemd declined to revive it. Codex pointed out that the watcher and systemd did cooperate; the restart failed because it pulled the apparently inactive firmware loader back in. Then the actual role of the correction clicked.</p>
+    <blockquote class="quote">“Systemd does indeed cooperate, but the synth tries to re-program the PL, which is rejected. Similar start, different failure.”</blockquote>
+    <blockquote class="quote">“Oh—it's the loader that needs to remain active.”</blockquote>
+    <p>The live correction was a systemd drop-in containing:</p>
+<pre><code>[Service]
+RemainAfterExit=yes</code></pre>
+    <p>With that property, a successful firmware load remains logically <code>active (exited)</code>. A reconnect can restart the Linux MIDI application without replaying the FPGA load. The corrected card has already survived reboot and cold power cycling and produced audible FC25-controlled audio before login.</p>
+    <p>That raised the next question immediately: what exactly was a “slot” here? I reasoned aloud that there probably was not a simple <code>xil_pl_load(bit_path)</code> hiding underneath; requests appeared to go through <code>dfx-mgr</code>, and there was probably one slot unless the platform had been configured with multiple independently programmable regions.</p>
+    <p>Codex separated the layers. The current <code>PL_FLAT</code> platform exposes one full-fabric configuration slot. <code>dfx-mgr</code> owns its Linux-visible lifecycle, but it cannot invent independently reconfigurable regions. Those partitions, interfaces and boundaries must exist in the hardware design which becomes the XSA; Linux can then manage what the platform actually exposes.</p>
+    <blockquote class="quote">“Oh—so this happens at <code>.xsa</code> level?”</blockquote>
+    <p>Yes. That gave the service failure a physical shape: the second request was not colliding with an arbitrary software limit. It was asking the manager to fill a full-fabric slot which the first successful load already occupied.</p>
+    <p>The working card still had not proved reproducibility. Its drop-in was installed manually after the image had been written. The next question was where the correction belonged in <code>meta-synth</code>, how BitBake would carry it into the root filesystem, and what we had to rebuild to show that the next image was born correct.</p>
+  </section>
+
+  <section id="recipe-change" class="prose">
+    <h2>Closing the recipe triangle</h2>
+    <p>Codex proposed the smallest source change and I implemented it by hand. I created a recipe-local <code>retain-state.conf</code> containing the two-line systemd override. A copied indentation briefly came along for the ride; I removed it in <code>gedit</code> and remembered, slightly after using it, that <code>&gt;&gt;</code> appends while <code>&gt;</code> truncates. Do not tell my dad.</p>
+    <p>Next I added the new <code>files</code> directory to <code>FILESEXTRAPATHS</code> and the filename to <code>SRC_URI</code>. “URI” is Uniform Resource Identifier. Here <code>file://retain-state.conf</code> does not name an absolute source-tree path; it tells BitBake's local-file fetcher to search the directories in <code>FILESPATH</code>.</p>
+    <p>At that point the spelling itself was not teaching me much. Create a two-line marker file, list its directory, list its name: those were conventions which could have been called almost anything.</p>
+    <blockquote class="quote">“The only thing I am gaining is knowledge of the conventions. Put a ‘yes’ marker, list its location, list its name.”</blockquote>
+    <p>Codex adjusted its explanation accordingly. The interesting structure was the system of actors underneath: which component declares an input, which mechanism stages it, which task transforms it, which package owns the resulting path, which service performs the one-time action, which daemon manages PL lifecycle, and which kernel subsystem programs the device.</p>
+    <p>Codex then told me to install <code>${S}/retain-state.conf</code>. I caught what looked like a missing component: if the source file lived below <code>files/</code>, why was that not <code>${S}/files/retain-state.conf</code>? The answer exposed the machinery between the declarations and the shell task. BitBake searches <code>FILESPATH</code> for each <code>file://</code> input and stages what it finds into <code>WORKDIR</code>. This recipe defines <code>S = "${WORKDIR}"</code>, so by the time <code>do_install</code> runs, the fetched file really is at <code>${S}/retain-state.conf</code>. The recipe does not reach back into its own source directory during installation.</p>
+    <blockquote class="quote">“The machinery of <code>A:B</code> and <code>file://</code> combine to resolve the missing <code>/files</code> and insert that, via BitBake's doing, appropriately so that the file is found.”</blockquote>
+    <p>That was the right composition, with one vocabulary refinement from Codex: <code>:prepend</code> modifies the search space, <code>file://</code> asks the fetcher to resolve a member of that space, and BitBake stages the resolved object so the later shell task sees a flat path below <code>${S}</code>. The missing <code>/files</code> was no longer magic. It had been consumed by an earlier morphism.</p>
+    <p>The install task created <code>${D}${systemd_system_unitdir}/dfx-mgr-fw-load.service.d/</code> and copied the drop-in there with mode <code>0644</code>. Then Codex had me add the same installed pathname to <code>FILES:${PN}</code>.</p>
+    <blockquote class="quote">“Right, so I gotta add <code>retain-state.conf</code> twice. Sure. Why not thrice?”</blockquote>
+    <p>It was, in fact, three appearances once the install command was counted. The repetition represented three different boundaries rather than three ways to say the same thing:</p>
+<pre><code>SRC_URI       source dependency
+do_install    staged-filesystem transformation
+FILES:${PN}   output-package ownership</code></pre>
+    <p><code>SRC_URI</code> makes the file an input to the recipe. <code>do_install</code> transforms that staged input into a target-filesystem path below <code>${D}</code>. <code>FILES:${PN}</code> assigns the installed path to the output package. None of the three substitutes for another. The arbitrary names had resolved into an actual composition.</p>
+    <p>I wondered aloud whether recipes were normally generated by scripts. Codex clarified that these small declarative recipes are intended to be maintained source; BitBake generates the enormous work directories, task graphs, package trees and images around them. This earned me the “manually edited a BitBake recipe file” badge, under heavy supervision.</p>
+    <p>The movement from “is this a DSL or shell?” to independently predicting the fetch, stage, install and package boundaries took about 25 minutes of poking at one recipe and challenging each unexplained transition.</p>
+    <p>I recreated the disposable EDF container around the persistent workspace and live synthesizer checkout, then sourced the existing build environment. Before spending time on a build, Codex asked me to run <code>bitbake -e synth-firmware</code>. The <code>-e</code> emits BitBake's fully evaluated environment after parsing, overrides and variable expansion. In 16 seconds we could see that the machinery had understood the edit: <code>SRC_URI</code> contained the new file, <code>S</code> was the recipe work directory, <code>D</code> was the target-image staging root, and the package path expanded to <code>/usr/lib/systemd/system/dfx-mgr-fw-load.service.d/retain-state.conf</code>.</p>
+<pre><code>SRC_URI="... file://retain-state.conf "
+S=".../synth-firmware/1.0"
+D=".../synth-firmware/1.0/image"
+FILES:synth-firmware="... /usr/lib/systemd/system/dfx-mgr-fw-load.service.d/retain-state.conf "</code></pre>
+    <p>No build task had run yet. I had produced the edit; Codex had given me a cheap way to interrogate BitBake's parsed object model; and the output answered before either of us needed to infer what the build would do.</p>
+  </section>
+
+  <section id="build-and-flash" class="prose">
+    <h2>From package to image</h2>
+    <p>I ran the focused <code>synth-firmware</code> build; it completed successfully in 2 minutes 10 seconds. Codex then inspected both the recipe's staged target root and its split package and found the exact 30-byte drop-in at <code>/usr/lib/systemd/system/dfx-mgr-fw-load.service.d/retain-state.conf</code>, root-owned with mode <code>0644</code>. The build result was not “exit zero”; it was the intended file, in the intended package, with the intended content and permissions.</p>
+    <p>I asked how much of the full build we were about to repeat and whether the previous known-good image was safe. Codex explained that BitBake would reuse almost all unchanged artifacts but regenerate the image assembly, and copied the accepted 23 September compressed image outside the disposable <code>build/tmp</code> tree before we continued. I ran <code>bitbake synth-image</code>. Six minutes later it had produced a new compressed WIC with SHA-256 <code>fc773892ceb48fb1f93c3343b08872d25d30275a721ce1a2d5d2c99749e6afbe</code>. Codex opened the deployed ext4 artifact directly, found the same drop-in, and confirmed that the manifest retained <code>dfx-mgr</code>, <code>synth-firmware</code> and <code>synth-live</code>.</p>
+    <p>I plugged in the only spare card. Codex examined it read-only and identified my Ubuntu 24.04 rollback deployment from its partition labels, service definition and firmware hash. I authorized its destruction with appropriate ceremony.</p>
+    <blockquote class="quote">“Annihilate it.”</blockquote>
+    <p>Codex's first privileged write attempt correctly stopped at sudo authentication, although the retained workstation knowledge already described the graphical authorization path. I ran the write myself. Codex then launched the same write through the proper mechanism before learning that mine had already finished, so the card received the identical 1.59 GB WIC twice. The mistake remained in the account rather than being edited into competence. The second pass was redundant but harmless; Codex compared the entire device byte-for-byte with the source WIC, confirmed the expected FAT <code>boot</code> and ext4 <code>root</code> partitions, and powered the reader off cleanly.</p>
+    <p>I moved the card to the KV260 and supplied the final kind of evidence. The board booted from the newly produced image and immediately made audible FC25-controlled sound. The artifact emitted by the build worked without recreating the manual board-side fix.</p>
+    <blockquote class="quote">“It booted—and it's making them #sounds.”</blockquote>
+    <p>Then I killed and de-killed the FC25. The instrument survived. The watcher restarted the synthesizer while the successful firmware-loader oneshot remained logically active, so systemd did not ask <code>dfx-mgr</code> to program the already occupied PL slot again. The physical test answered the exact question which had started the session.</p>
+  </section>
+
+  <section id="result" class="prose">
+    <h2>Result: the image is the product</h2>
+    <p>The correction now lives in the build inputs, travels through the firmware package, appears in the assembled root filesystem, and survives the final transition onto hardware. A normal <code>bitbake synth-image</code> produced a card which booted, played, lost its MIDI controller, found it again and kept playing. There was no post-build image edit and no repair on the board.</p>
+    <p>The source change was tiny. The other product was a working model of BitBake source discovery, staging, package ownership, systemd state and PL lifecycle, acquired conversationally and checked at every boundary against something real. Codex adapted the explanation to the system and to how I think; I challenged it, implemented it and supplied the hardware judgement it could not. The two-terminal method did exactly what it was there to do.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+</body>
+</html>
