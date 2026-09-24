@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Knowledgetrees: an AI-native knowledge system for reliable agentic engineering.">
+  <title>Knowledgetrees: Make the Filesystem Remember</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #fff9f5;
+      --paper: #fffdfb;
+      --ink: #28262b;
+      --ink-soft: #5d565b;
+      --ink-faint: #766d71;
+      --accent: #9f3b52;
+      --accent-bright: #e9687e;
+      --accent-wash: #f9eae6;
+      --line: #9a858a;
+      --shadow: #e9d9d6;
+      --dark: #29272c;
+      --dark-text: #fff5ef;
+      --green: #79cda5;
+      --yellow: #ecc16b;
+      --brown: #c99a7a;
+      --pad: clamp(24px, 5.2vw, 78px);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    html { background: var(--dark); }
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button { font: inherit; }
+    a { color: inherit; }
+    code, pre, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    .deck {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 90% 2%, #ffd8d8 0, transparent 28%),
+        radial-gradient(circle at 8% 100%, #f9eae6 0, transparent 32%),
+        var(--bg);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: clamp(18px, 3vh, 34px);
+      padding: clamp(20px, 3.8vw, 58px) var(--pad) clamp(58px, 7vh, 78px);
+      overflow: auto;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(4%);
+      transition: opacity .28s ease, transform .38s cubic-bezier(.2,.8,.2,1), visibility .28s;
+    }
+    .slide.active { opacity: 1; visibility: visible; transform: translateX(0); z-index: 2; }
+    .slide.before { transform: translateX(-4%); }
+    .slide.dark {
+      color: var(--dark-text);
+      background:
+        linear-gradient(110deg, rgba(233,104,126,.12), transparent 42%),
+        var(--dark);
+    }
+    .slide.accent {
+      color: var(--dark-text);
+      background: var(--accent);
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding-bottom: 13px;
+      border-bottom: 2px solid currentColor;
+      font-size: clamp(9px, .85vw, 12px);
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .topline .section { color: var(--accent); }
+    .dark .topline .section, .accent .topline .section { color: #ffb1b5; }
+
+    .content { align-self: center; width: min(100%, 1220px); margin: auto; }
+    .content.top { align-self: start; }
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      font-size: clamp(10px, 1vw, 13px);
+      letter-spacing: .2em;
+      font-weight: 900;
+      margin-bottom: clamp(12px, 2vh, 22px);
+    }
+    .dark .eyebrow, .accent .eyebrow { color: #ffb1b5; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2 {
+      line-height: .94;
+      letter-spacing: -.065em;
+      text-wrap: balance;
+    }
+    h1 { max-width: 12ch; margin-bottom: 28px; font-size: clamp(54px, 8.7vw, 132px); }
+    h2 { max-width: 14ch; margin-bottom: 24px; font-size: clamp(42px, 6.5vw, 96px); }
+    h3 { margin-bottom: 10px; font-size: clamp(19px, 2vw, 28px); letter-spacing: -.04em; line-height: 1.05; }
+    h1 em, h2 em { color: var(--accent-bright); font-style: normal; }
+    .accent h1 em, .accent h2 em { color: #ffe0df; }
+    .lede {
+      max-width: 880px;
+      margin: 0;
+      color: var(--ink-soft);
+      font-size: clamp(18px, 2.1vw, 30px);
+      line-height: 1.38;
+    }
+    .dark .lede, .accent .lede { color: #e6d9d3; }
+    .lede strong { color: var(--ink); }
+    .dark .lede strong, .accent .lede strong { color: #fff; }
+    .giant {
+      max-width: 100%;
+      font-size: clamp(62px, 11vw, 168px);
+      line-height: .82;
+      letter-spacing: -.085em;
+    }
+    .center { text-align: center; }
+    .center h1, .center h2, .center .lede { margin-left: auto; margin-right: auto; }
+    .credit h1 { max-width: 15ch; font-size: clamp(48px, 6.2vw, 94px); }
+    .credit .lede { font-size: clamp(22px, 2.8vw, 42px); }
+
+    .grid { display: grid; gap: clamp(12px, 1.7vw, 22px); }
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card {
+      min-width: 0;
+      padding: clamp(16px, 2vw, 26px);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 5px 5px 0 var(--shadow);
+    }
+    .card p { margin: 0; color: var(--ink-soft); font-size: clamp(13px, 1.25vw, 18px); line-height: 1.45; }
+    .card .number {
+      display: block;
+      margin-bottom: 13px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .dark .card { border-color: #71696d; background: #353238; box-shadow: 5px 5px 0 #19181b; }
+    .dark .card p { color: #d8ccca; }
+    .dark .card .number { color: #ffb1b5; }
+
+    .failure-cloud { display: flex; flex-wrap: wrap; gap: 12px; max-width: 1080px; }
+    .failure-cloud span {
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 3px 3px 0 var(--shadow);
+      font-size: clamp(13px, 1.35vw, 18px);
+      font-weight: 800;
+      transform: rotate(var(--tilt, 0deg));
+    }
+    .failure-cloud span:nth-child(3n+1) { --tilt: -1deg; }
+    .failure-cloud span:nth-child(3n+2) { --tilt: .8deg; }
+
+    .question {
+      padding: clamp(18px, 2.4vw, 32px);
+      border: 2px solid var(--dark);
+      background: var(--dark);
+      color: var(--dark-text);
+      box-shadow: 8px 8px 0 #e8b7b8;
+      font-size: clamp(15px, 1.7vw, 24px);
+      line-height: 1.55;
+    }
+    .question .prompt { color: #ffb1b5; }
+    .terminal-line + .terminal-line { margin-top: 12px; }
+    .answer { color: #fff; }
+
+    .split { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(26px, 5vw, 74px); align-items: center; }
+    .split.equal { grid-template-columns: 1fr 1fr; }
+    .stack { display: grid; gap: 10px; }
+    .stack-item {
+      display: grid;
+      grid-template-columns: minmax(100px, .38fr) 1fr;
+      gap: 18px;
+      padding: 13px 16px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      font-size: clamp(12px, 1.15vw, 16px);
+    }
+    .stack-item b { color: var(--accent); }
+    .stack-item span { color: var(--ink-soft); }
+
+    .tree {
+      margin: 0;
+      padding: clamp(18px, 2.2vw, 30px);
+      overflow: hidden;
+      border: 2px solid var(--dark);
+      background: var(--dark);
+      color: var(--dark-text);
+      box-shadow: 8px 8px 0 #e8b7b8;
+      font-size: clamp(11px, 1.22vw, 18px);
+      line-height: 1.56;
+      white-space: pre-wrap;
+    }
+    .tree .hot { color: #ffb1b5; font-weight: 800; }
+    .tree .dim { color: #a9a0a4; }
+
+    .equation {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: clamp(8px, 2vw, 28px);
+      margin-top: 34px;
+    }
+    .equation .term {
+      display: grid;
+      place-items: center;
+      min-height: clamp(105px, 17vh, 180px);
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      box-shadow: 5px 5px 0 var(--shadow);
+      text-align: center;
+      font-size: clamp(16px, 2vw, 28px);
+      font-weight: 900;
+      line-height: 1.12;
+    }
+    .equation .operator { color: var(--accent); font-size: clamp(28px, 4vw, 58px); font-weight: 300; }
+
+    blockquote { margin: 0; }
+    .testimonial {
+      position: relative;
+      max-width: 1080px;
+      padding: clamp(28px, 4vw, 54px);
+      border-left: 7px solid var(--accent-bright);
+      background: var(--paper);
+      box-shadow: 8px 8px 0 var(--shadow);
+      font-size: clamp(21px, 2.55vw, 38px);
+      font-weight: 740;
+      letter-spacing: -.035em;
+      line-height: 1.32;
+    }
+    .testimonial cite {
+      display: block;
+      margin-top: 20px;
+      color: var(--accent);
+      font-size: clamp(10px, 1vw, 13px);
+      font-style: normal;
+      font-weight: 900;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+    .contrast { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: stretch; }
+    .contrast .versus { display: grid; place-items: center; color: var(--accent); font-weight: 900; }
+    .contrast .side { padding: clamp(22px, 3vw, 38px); border: 1px solid var(--line); background: var(--paper); box-shadow: 5px 5px 0 var(--shadow); }
+    .contrast .side.bad { background: var(--dark); color: var(--dark-text); border-color: var(--dark); }
+    .contrast .measure { display: block; color: var(--accent-bright); font-size: clamp(44px, 7vw, 92px); font-weight: 900; letter-spacing: -.07em; line-height: 1; }
+    .contrast p { margin: 14px 0 0; color: var(--ink-soft); font-size: clamp(14px, 1.4vw, 20px); line-height: 1.42; }
+    .contrast .bad p { color: #ded2ce; }
+
+    .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 30px; }
+    .loop div { position: relative; padding: 18px 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); text-align: center; font-size: clamp(12px, 1.25vw, 17px); font-weight: 900; }
+    .loop div:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; right: -17px; color: var(--accent); font-size: 20px; }
+
+    .status-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .status { padding: clamp(20px, 2.4vw, 32px); border: 1px solid var(--line); background: var(--paper); box-shadow: 5px 5px 0 var(--shadow); }
+    .status b { display: inline-block; margin-bottom: 14px; padding: 4px 9px; border: 1px solid #776c71; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .status.green b { background: var(--green); }
+    .status.yellow b { background: var(--yellow); }
+    .status.brown b { background: var(--brown); }
+    .status p { margin: 0; color: var(--ink-soft); font-size: clamp(13px, 1.25vw, 18px); line-height: 1.45; }
+
+    .footerline {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: end;
+      color: var(--ink-faint);
+      font-size: clamp(9px, .8vw, 11px);
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .dark .footerline, .accent .footerline { color: #bfb2b3; }
+    .slide-number { font-variant-numeric: tabular-nums; }
+
+    .controls {
+      position: fixed;
+      right: 18px;
+      bottom: 15px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .controls button {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      background: rgba(255,253,251,.92);
+      color: var(--ink);
+      box-shadow: 3px 3px 0 var(--shadow);
+      cursor: pointer;
+      font-weight: 900;
+    }
+    .controls button:hover, .controls button:focus-visible { background: var(--accent-wash); outline: 2px solid var(--accent); outline-offset: 2px; }
+    .progress { position: fixed; z-index: 20; left: 0; bottom: 0; height: 5px; width: 0; background: var(--accent-bright); transition: width .25s ease; }
+
+    .overview { overflow: auto; background: #efe2df; }
+    .overview .deck { height: auto; min-height: 100%; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; padding: 28px; }
+    .overview .slide {
+      position: relative;
+      inset: auto;
+      display: grid;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 0;
+      padding: 22px;
+      overflow: hidden;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      border: 1px solid var(--line);
+      box-shadow: 6px 6px 0 #d8c3c0;
+      cursor: pointer;
+    }
+    .overview .slide.active { outline: 4px solid var(--accent); }
+    .overview .slide .content { transform: scale(.38); transform-origin: center; width: 250%; }
+    .overview .slide .topline, .overview .slide .footerline { font-size: 7px; }
+    .overview .controls { display: none; }
+
+    .notes { display: none; }
+    .notes-open .notes {
+      position: fixed;
+      z-index: 30;
+      left: 20px;
+      right: 20px;
+      bottom: 20px;
+      display: block;
+      max-height: 32vh;
+      overflow: auto;
+      padding: 18px 22px;
+      border: 2px solid var(--dark);
+      background: rgba(255,253,251,.97);
+      color: var(--ink);
+      box-shadow: 7px 7px 0 #e8b7b8;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .notes-open .notes::before { content: "Speaker notes"; display: block; margin-bottom: 7px; color: var(--accent); font-size: 10px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+    .notes-open .controls { bottom: calc(32vh + 34px); }
+
+    .keyhelp {
+      position: fixed;
+      z-index: 40;
+      inset: 50% auto auto 50%;
+      width: min(520px, calc(100% - 36px));
+      padding: 24px;
+      transform: translate(-50%, -50%);
+      border: 2px solid var(--dark);
+      background: var(--paper);
+      box-shadow: 9px 9px 0 #e8b7b8;
+    }
+    .keyhelp[hidden] { display: none; }
+    .keyhelp h3 { margin-bottom: 16px; }
+    .keyhelp p { display: grid; grid-template-columns: 110px 1fr; gap: 12px; margin: 8px 0; color: var(--ink-soft); }
+    kbd { width: fit-content; padding: 2px 7px; border: 1px solid var(--line); background: var(--accent-wash); color: var(--ink); font: 12px ui-monospace, monospace; }
+
+    @media (max-width: 820px), (max-height: 620px) {
+      .slide { align-content: start; }
+      .grid.three, .grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .split, .split.equal { grid-template-columns: 1fr; }
+      .split { gap: 22px; }
+      .equation { grid-template-columns: 1fr; }
+      .equation .operator { line-height: .7; }
+      .contrast { grid-template-columns: 1fr; }
+      .contrast .versus { min-height: 16px; }
+      .loop { grid-template-columns: 1fr; }
+      .loop div:not(:last-child)::after { content: "↓"; right: 50%; bottom: -17px; }
+      .slide { padding-bottom: 72px; }
+    }
+    @media (max-width: 520px) {
+      .grid.two, .grid.three, .grid.four, .status-row { grid-template-columns: 1fr; }
+      .topline span:last-child { display: none; }
+      .stack-item { grid-template-columns: 1fr; gap: 3px; }
+      .controls { right: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .slide, .progress { transition: none; }
+    }
+    @media print {
+      @page { size: 16in 9in; margin: 0; }
+      html, body { width: auto; height: auto; overflow: visible; background: #fff; }
+      .deck { display: block; height: auto; }
+      .slide, .slide.active, .slide.before {
+        position: relative;
+        display: grid;
+        width: 16in;
+        height: 9in;
+        min-height: 9in;
+        padding: .45in .65in .55in;
+        overflow: hidden;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        break-after: page;
+      }
+      .controls, .progress, .keyhelp, .notes { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-live="polite">
+    <section class="slide active" data-title="The recurring problem">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The recurring problem</span></header>
+      <div class="content">
+        <div class="eyebrow">We keep having the same conversation</div>
+        <h1>Agents are brilliant. <em>And they keep getting lost.</em></h1>
+        <p class="lede">They can write code better and faster than we can. Yet every serious agentic workflow eventually becomes a conversation about confusion, supervision and recovery.</p>
+      </div>
+      <footer class="footerline"><span>David Farrell · 2026</span><span class="slide-number"></span></footer>
+      <aside class="notes">Start from shared experience, not the product. Let the room supply examples mentally. The tension is that capability is improving rapidly, but reliability still feels stubbornly familiar.</aside>
+    </section>
+
+    <section class="slide dark" data-title="Failure patterns">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">What we observe</span></header>
+      <div class="content">
+        <div class="eyebrow">The failure pattern is remarkably consistent</div>
+        <div class="failure-cloud" aria-label="Common agent failure patterns">
+          <span>Gets confused</span><span>Solves the wrong problem</span><span>Ignores relevant docs</span>
+          <span>Loses the plan</span><span>Forgets intent after compaction</span><span>Tests too little</span>
+          <span>Tests everything</span><span>Skips verification</span><span>Fixates on the wrong detail</span>
+          <span>Burns context on orientation</span><span>Repeats old investigations</span><span>Makes locally plausible choices</span>
+        </div>
+      </div>
+      <footer class="footerline"><span>Not random mistakes</span><span class="slide-number"></span></footer>
+      <aside class="notes">Read only a few examples. The point is the breadth: planning, implementation, testing and documentation all fail in related ways.</aside>
+    </section>
+
+    <section class="slide" data-title="Band-aids">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Our current response</span></header>
+      <div class="content">
+        <h2>So we add more <em>band-aids.</em></h2>
+        <div class="grid four">
+          <article class="card"><span class="number">01 / Prompt</span><h3>Bigger instructions</h3><p>Load more rules up front and hope the relevant one remains salient.</p></article>
+          <article class="card"><span class="number">02 / Process</span><h3>Rigid plans</h3><p>Freeze every decision early because adaptation may lose the original intent.</p></article>
+          <article class="card"><span class="number">03 / Oversight</span><h3>Human babysitting</h3><p>Continuously redirect, remind, approve and re-explain.</p></article>
+          <article class="card"><span class="number">04 / Recovery</span><h3>Handover summaries</h3><p>Compress a rich working state into prose and hope nothing essential disappears.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>Useful mitigations · incomplete model</span><span class="slide-number"></span></footer>
+      <aside class="notes">These are not bad practices. They are compensations for a deeper mismatch. Even excellent specs and plans become brittle when the working knowledge around them is transient or scattered.</aside>
+    </section>
+
+    <section class="slide accent" data-title="The diagnosis">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The diagnosis</span></header>
+      <div class="content center">
+        <div class="eyebrow">Why do we keep running in circles?</div>
+        <h1 class="giant">We store information <em>for humans.</em></h1>
+      </div>
+      <footer class="footerline"><span>But our new reader is not human</span><span class="slide-number"></span></footer>
+      <aside class="notes">Pause here. This is the core diagnosis. The problem is not merely prompt quality or model intelligence. The environment represents organizational knowledge in a form optimized for human readers.</aside>
+    </section>
+
+    <section class="slide" data-title="Human-shaped information">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The old substrate</span></header>
+      <div class="content split">
+        <div>
+          <div class="eyebrow">Our knowledge stack</div>
+          <h2>Linear. Fragmented. <em>Implicit.</em></h2>
+          <p class="lede">Humans browse, skim, remember history, recognize authority and infer which paragraph is current. Agents pay tokens to approximate all of that.</p>
+        </div>
+        <div class="stack" aria-label="Traditional knowledge surfaces">
+          <div class="stack-item"><b>README</b><span>Orientation mixed with setup and history</span></div>
+          <div class="stack-item"><b>docs/</b><span>Long presentations with buried answers</span></div>
+          <div class="stack-item"><b>skills/</b><span>Procedures in a separate retrieval convention</span></div>
+          <div class="stack-item"><b>comments</b><span>Rationale hidden behind source discovery</span></div>
+          <div class="stack-item"><b>plans + specs</b><span>Intent duplicated across snapshots</span></div>
+          <div class="stack-item"><b>chat + notes</b><span>Current truth tangled with chronology</span></div>
+        </div>
+      </div>
+      <footer class="footerline"><span>Source is evidence · not always explanation</span><span class="slide-number"></span></footer>
+      <aside class="notes">The source code can be authoritative while still being a terrible explanation. Human readers bring durable memory, domain intuition and social context. Agents do not.</aside>
+    </section>
+
+    <section class="slide dark" data-title="Why RAG was insufficient">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Why retrieval alone was not enough</span></header>
+      <div class="content">
+        <div class="eyebrow">We tried to assist generation with resources</div>
+        <h2>RAG retrieved chunks from a corpus that was <em>still shaped for humans.</em></h2>
+        <div class="equation" aria-label="RAG limitation">
+          <div class="term">Human-shaped<br>documents</div><div class="operator">+</div>
+          <div class="term">Similarity<br>search</div><div class="operator">=</div>
+          <div class="term">Better access,<br>same ambiguity</div>
+        </div>
+      </div>
+      <footer class="footerline"><span>Retrieval is useful · representation is upstream</span><span class="slide-number"></span></footer>
+      <aside class="notes">Do not claim RAG is useless. The claim is narrower: retrieval cannot fully repair ambiguous ownership, stale chronology, mixed scope or answers designed as long narratives.</aside>
+    </section>
+
+    <section class="slide" data-title="The inversion">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The inversion</span></header>
+      <div class="content center">
+        <div class="eyebrow">AI-native engineering starts one layer deeper</div>
+        <h1>Do not help agents read our documentation.</h1>
+        <p class="lede"><strong>Represent knowledge in the form agents need.</strong></p>
+      </div>
+      <footer class="footerline"><span>Store knowledge · generate presentations</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is the transition to the reveal. Documents still matter as evidence, governing sources and human deliverables. They stop being the only internal representation agents must repeatedly decode.</aside>
+    </section>
+
+    <section class="slide dark" data-title="The reveal">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The proposal</span></header>
+      <div class="content center">
+        <div class="eyebrow">A stateful, self-growing, self-healing filesystem for agent knowledge</div>
+        <h1 class="giant"><em>Knowledge</em><br>trees.</h1>
+        <p class="lede">Make the filesystem remember what agents learn.</p>
+      </div>
+      <footer class="footerline"><span>github.com/linkin-parks-bassist/knowledgetrees</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is the product reveal. The one-sentence proposition from the README is “Make the filesystem remember what agents learn.”</aside>
+    </section>
+
+    <section class="slide" data-title="Semantic filesystem">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The representation</span></header>
+      <div class="content split equal">
+        <pre class="tree" aria-label="Example knowledge tree"><span class="dim">.knowledge/</span>
+├── <span class="hot">where/am/i.md</span>
+├── what/is/the/
+│   ├── spec.md
+│   ├── plan.md
+│   └── state.md
+├── <span class="hot">how/to/test/the/installer.md</span>
+├── when/to/ask/clarification.md
+├── does/kt/prove/verify/
+│   └── an/entire/leaf.md
+└── why/is/a/knowledge/tree/
+    └── not/an/index.md</pre>
+        <div>
+          <div class="eyebrow">A filesystem that doubles as an ontology</div>
+          <h2>The question points at the answer.</h2>
+          <p class="lede">Paths carry meaning. Leaves contain direct, current answers. The agent retrieves the smallest useful unit, from one implementation fact to an entire specification.</p>
+        </div>
+      </div>
+      <footer class="footerline"><span>The path is half the query</span><span class="slide-number"></span></footer>
+      <aside class="notes">The structure is not folders for folders' sake. “How do I test the installer?” naturally predicts the route. Exact wording is not required; lexical lookup and semantic branches support discovery.</aside>
+    </section>
+
+    <section class="slide" data-title="Context is working memory">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Context economics</span></header>
+      <div class="content">
+        <div class="eyebrow">A different contract with the context window</div>
+        <h2>Context is <em>working memory.</em><br>Not storage.</h2>
+        <div class="grid three">
+          <article class="card"><span class="number">On demand</span><h3>Pay only when needed</h3><p>Detailed knowledge can exist without entering every prompt.</p></article>
+          <article class="card"><span class="number">Persistent</span><h3>Survive compaction</h3><p>A fresh agent reconstructs understanding from current knowledge, not chat residue.</p></article>
+          <article class="card"><span class="number">Scoped</span><h3>Keep relevance local</h3><p>User, project and subsystem roots compose without flooding one another.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>Less archaeology · more task</span><span class="slide-number"></span></footer>
+      <aside class="notes">The context starts with orientation and a vocabulary of what is known, not the whole knowledge base. Detail is loaded only when a question makes it relevant.</aside>
+    </section>
+
+    <section class="slide" data-title="Current truth">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Knowledge lifecycle</span></header>
+      <div class="content split">
+        <div>
+          <div class="eyebrow">No more archaeology by chronology</div>
+          <h2>Current truth has <em>one owner.</em></h2>
+          <p class="lede">When reality changes, rewrite the governing answer. Git keeps history. The active tree tells the next agent what is true now.</p>
+        </div>
+        <div class="question" aria-label="Knowledge tree lifecycle">
+          <div class="terminal-line"><span class="prompt">$</span> kt lookup "what is the state"</div>
+          <div class="terminal-line answer">→ direct current answer</div>
+          <div class="terminal-line"><span class="prompt">$</span> evidence contradicts it</div>
+          <div class="terminal-line answer">→ stop · repair owner · reconcile dependents</div>
+          <div class="terminal-line"><span class="prompt">$</span> future agent asks again</div>
+          <div class="terminal-line answer">→ no repeated rediscovery</div>
+        </div>
+      </div>
+      <footer class="footerline"><span>Current state is mutable · history is separate</span><span class="slide-number"></span></footer>
+      <aside class="notes">This addresses stale specs and plan changes directly. The answer is maintained in place; chronology belongs in Git or explicit history, not mixed into operational truth.</aside>
+    </section>
+
+    <section class="slide dark" data-title="The compounding loop">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The behavior change</span></header>
+      <div class="content">
+        <div class="eyebrow">Knowledge is discovered as needed and captured as learned</div>
+        <h2>The documentation improves <em>because agents use it.</em></h2>
+        <div class="loop" aria-label="Knowledge workflow">
+          <div>lookup</div><div>discover</div><div>verify</div><div>record</div><div>use</div>
+        </div>
+        <p class="lede" style="margin-top:28px">A miss is not just an inconvenience. It is a knowledge gap. Resolve it once, at the right scope, before the next agent pays again.</p>
+      </div>
+      <footer class="footerline"><span>Growth is ordinary maintenance</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is what makes the system self-growing. Agents already perform expensive investigations. Capturing the verified result is part of completing the work, not a separate documentation sprint.</aside>
+    </section>
+
+    <section class="slide" data-title="Evidence">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Observed in practice</span></header>
+      <div class="content">
+        <div class="contrast">
+          <article class="side">
+            <span class="measure">seconds</span>
+            <h3>With a focused KT lookup</h3>
+            <p>The agent found the conceptual mechanism and exact source location, then inspected only the source needed to verify it.</p>
+          </article>
+          <div class="versus">VS</div>
+          <article class="side bad">
+            <span class="measure">1,000+</span>
+            <h3>Lines of RTL without it</h3>
+            <p>The agent reconstructed a related mechanism across buffering, commit logic and connected modules.</p>
+          </article>
+        </div>
+      </div>
+      <footer class="footerline"><span>One working session · same technical system</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is the concrete A/B from the testimonial. Do not imply a controlled benchmark. It was a direct observation within one session and demonstrates the qualitative difference in discovery cost.</aside>
+    </section>
+
+    <section class="slide" data-title="Testimonial">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Agent testimonial</span></header>
+      <div class="content">
+        <blockquote class="testimonial">
+          “It reduces discovery calls, repeated reading, irrelevant tokens, and the amount of transient context I must carry while reasoning.”
+          <cite>Agent reflection after work in a large RTL / FPGA system</cite>
+        </blockquote>
+      </div>
+      <footer class="footerline"><span>Source: knowledgetrees-testimonial.md</span><span class="slide-number"></span></footer>
+      <aside class="notes">Follow with the testimonial's diagnosis: with too little information agents guess; with too much they lose salience, mix incompatible facts or exhaust context before reaching the task.</aside>
+    </section>
+
+    <section class="slide" data-title="Trust model">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Trust without magic</span></header>
+      <div class="content">
+        <div class="eyebrow">Knowledge can still be incomplete or stale</div>
+        <h2>Reconnect claims to <em>reality.</em></h2>
+        <div class="status-row">
+          <article class="status green"><b>Green</b><h3>No detected failure</h3><p>Usable after checking scope and evidence. Green is not a blanket claim of truth.</p></article>
+          <article class="status yellow"><b>Yellow</b><h3>Needs re-verification</h3><p>Freshness expired. Review the whole answer before renewing it.</p></article>
+          <article class="status brown"><b>Brown</b><h3>Stop and repair</h3><p>A proof failed, structure broke or the claim was falsified.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>Executable proofs where facts are mechanically checkable</span><span class="slide-number"></span></footer>
+      <aside class="notes">Avoid overselling. Knowledgetrees do not eliminate source reading, testing or judgment. They make knowledge owned, auditable and able to carry explicit evidence and bounded proofs.</aside>
+    </section>
+
+    <section class="slide dark" data-title="Built today">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Not just an idea</span></header>
+      <div class="content">
+        <div class="eyebrow">The working system</div>
+        <h2>Already built into the agent loop.</h2>
+        <div class="grid four">
+          <article class="card"><span class="number">23 tools</span><h3>MCP-first</h3><p>Lookup, find, read, rewrite, capture, prove, status and access operations.</p></article>
+          <article class="card"><span class="number">4 harnesses</span><h3>Portable</h3><p>Claude Code, Codex, OpenCode and Copilot CLI integration.</p></article>
+          <article class="card"><span class="number">Filesystem</span><h3>Ordinary machinery</h3><p>Markdown, directories, links and version control. No vector database required.</p></article>
+          <article class="card"><span class="number">Guardrails</span><h3>Concurrency-safe</h3><p>Revision hashes reject stale rewrites; access approval stays with the user.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>Self-contained CLI · installer · hooks · MCP server</span><span class="slide-number"></span></footer>
+      <aside class="notes">The repository currently exposes 23 MCP tools and startup integrations for four harnesses. Be precise: broad scale behavior still needs more testing, and live qualification of every latest integration is ongoing.</aside>
+    </section>
+
+    <section class="slide" data-title="What changes">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The new workflow</span></header>
+      <div class="content">
+        <div class="eyebrow">What this changes for a team</div>
+        <h2>Stop paying for the same understanding <em>twice.</em></h2>
+        <div class="grid two">
+          <article class="card"><span class="number">Before</span><h3>Every session starts from artifacts</h3><p>Search the codebase. Read the docs. Reconstruct intent. Resolve contradictions. Compress it all into temporary context.</p></article>
+          <article class="card"><span class="number">After</span><h3>Every session inherits understanding</h3><p>Orient. Retrieve the governing answer. Verify what matters. Improve the shared substrate when reality teaches something new.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>Source remains evidence · knowledge becomes infrastructure</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is not a promise that agents never fail. It changes the default environment so the expensive conceptual work compounds instead of evaporating.</aside>
+    </section>
+
+    <section class="slide accent" data-title="The future">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The bet</span></header>
+      <div class="content center">
+        <div class="eyebrow">AI-native engineering needs AI-native knowledge</div>
+        <h1>This is how agents stop starting over.</h1>
+        <p class="lede">Once you see the behavior change, the old workflow feels impossible to defend.</p>
+      </div>
+      <footer class="footerline"><span>Try it on real work</span><span class="slide-number"></span></footer>
+      <aside class="notes">State the conviction personally: “I believe this is the missing substrate for agentic work.” Then offer the concrete next step: install it in a real repository and compare the next few agent sessions.</aside>
+    </section>
+
+    <section class="slide dark" data-title="Closing">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">One sentence</span></header>
+      <div class="content center">
+        <h1><em>Make the filesystem remember</em> what agents learn.</h1>
+        <div class="question" style="width:min(760px,100%);margin:40px auto 0;text-align:left">
+          <span class="prompt">$</span> git clone https://github.com/linkin-parks-bassist/knowledgetrees<br>
+          <span class="prompt">$</span> ./install
+        </div>
+      </div>
+      <footer class="footerline"><span>Knowledge is discovered as needed and captured as learned</span><span class="slide-number"></span></footer>
+      <aside class="notes">Finish on the repository proposition. For a team trial: choose one active codebase, create orientation plus spec/plan/state/next, and let ordinary work grow the first useful leaves.</aside>
+    </section>
+
+    <section class="slide" data-title="One more thing">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The proof is in the presentation</span></header>
+      <div class="content center credit">
+        <div class="eyebrow">One more thing</div>
+        <h1>This presentation was <em>one-shotted by 5.6-Sol</em> using knowledgetrees.</h1>
+        <p class="lede">It took <strong>4m43s</strong> from prompt to done.</p>
+      </div>
+      <footer class="footerline"><span>Yes, including the speaker notes</span><span class="slide-number"></span></footer>
+      <aside class="notes">Let this land. The presentation itself is the final demonstration: one prompt, repository knowledge, the README, the external testimonial and the established visual language became a coherent, working deck in four minutes and forty-three seconds.</aside>
+    </section>
+  </main>
+
+  <div class="progress" aria-hidden="true"></div>
+  <nav class="controls" aria-label="Presentation controls">
+    <button type="button" data-action="prev" aria-label="Previous slide" title="Previous slide (←)">←</button>
+    <button type="button" data-action="overview" aria-label="Toggle slide overview" title="Overview (O)">▦</button>
+    <button type="button" data-action="notes" aria-label="Toggle speaker notes" title="Speaker notes (N)">N</button>
+    <button type="button" data-action="fullscreen" aria-label="Toggle fullscreen" title="Fullscreen (F)">⛶</button>
+    <button type="button" data-action="next" aria-label="Next slide" title="Next slide (→)">→</button>
+  </nav>
+
+  <dialog class="keyhelp" hidden aria-label="Keyboard shortcuts">
+    <h3>Presentation controls</h3>
+    <p><kbd>← →</kbd><span>Previous / next slide</span></p>
+    <p><kbd>Space</kbd><span>Next slide</span></p>
+    <p><kbd>O</kbd><span>Slide overview</span></p>
+    <p><kbd>N</kbd><span>Speaker notes</span></p>
+    <p><kbd>F</kbd><span>Fullscreen</span></p>
+    <p><kbd>?</kbd><span>Show / hide this help</span></p>
+  </dialog>
+
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      const progress = document.querySelector('.progress');
+      const help = document.querySelector('.keyhelp');
+      let current = Math.max(0, Math.min(slides.length - 1, Number(location.hash.slice(1)) - 1 || 0));
+      let touchStartX = 0;
+
+      slides.forEach((slide, index) => {
+        const number = slide.querySelector('.slide-number');
+        number.textContent = `${String(index + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+        slide.setAttribute('aria-label', `Slide ${index + 1}: ${slide.dataset.title}`);
+      });
+
+      function show(index, updateHash = true) {
+        current = Math.max(0, Math.min(slides.length - 1, index));
+        slides.forEach((slide, slideIndex) => {
+          slide.classList.toggle('active', slideIndex === current);
+          slide.classList.toggle('before', slideIndex < current);
+          slide.setAttribute('aria-hidden', slideIndex === current ? 'false' : 'true');
+        });
+        progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+        document.title = `${slides[current].dataset.title} · Knowledgetrees`;
+        if (updateHash) history.replaceState(null, '', `#${current + 1}`);
+      }
+
+      function toggleOverview() {
+        document.body.classList.toggle('overview');
+        document.body.classList.remove('notes-open');
+      }
+
+      function toggleHelp() {
+        help.hidden = !help.hidden;
+      }
+
+      document.querySelector('.controls').addEventListener('click', event => {
+        const action = event.target.closest('button')?.dataset.action;
+        if (action === 'prev') show(current - 1);
+        if (action === 'next') show(current + 1);
+        if (action === 'overview') toggleOverview();
+        if (action === 'notes') document.body.classList.toggle('notes-open');
+        if (action === 'fullscreen') {
+          if (document.fullscreenElement) document.exitFullscreen();
+          else document.documentElement.requestFullscreen?.();
+        }
+      });
+
+      document.querySelector('.deck').addEventListener('click', event => {
+        if (!document.body.classList.contains('overview')) return;
+        const slide = event.target.closest('.slide');
+        if (!slide) return;
+        show(slides.indexOf(slide));
+        toggleOverview();
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') { event.preventDefault(); show(current + 1); }
+        if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); show(current - 1); }
+        if (event.key === 'Home') show(0);
+        if (event.key === 'End') show(slides.length - 1);
+        if (event.key.toLowerCase() === 'o') toggleOverview();
+        if (event.key.toLowerCase() === 'n') document.body.classList.toggle('notes-open');
+        if (event.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+        if (event.key === '?') toggleHelp();
+        if (event.key === 'Escape' && !help.hidden) help.hidden = true;
+      });
+
+      document.addEventListener('touchstart', event => { touchStartX = event.changedTouches[0].screenX; }, { passive: true });
+      document.addEventListener('touchend', event => {
+        const distance = event.changedTouches[0].screenX - touchStartX;
+        if (Math.abs(distance) < 50) return;
+        show(current + (distance < 0 ? 1 : -1));
+      }, { passive: true });
+      window.addEventListener('hashchange', () => show(Number(location.hash.slice(1)) - 1 || 0, false));
+
+      show(current, false);
+    })();
+  </script>
+</body>
+</html>
