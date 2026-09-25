@@ -66,18 +66,9 @@
     .slide.paper { color: var(--ink); background: var(--paper); }
     .slide.orange { color: #fff8ed; background: var(--orange); }
     .slide.image { isolation: isolate; background: #050708; }
-    .slide.image::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: -2;
-      background: var(--image) center / cover no-repeat;
-      filter: grayscale(1) contrast(1.08);
-    }
-    .slide.image::after {
-      z-index: -1;
-      background: linear-gradient(90deg, rgba(3,9,13,.94) 0%, rgba(3,9,13,.72) 44%, rgba(3,9,13,.18) 78%), linear-gradient(0deg, rgba(3,9,13,.72), transparent 48%);
-    }
+    .slide.image::after { display: none; }
+    .image-stage { min-height: 0; display: grid; place-items: center; overflow: hidden; }
+    .image-stage img { display: block; width: 100%; height: 100%; max-height: calc(100vh - 190px); object-fit: contain; }
 
     .topline {
       display: flex;
@@ -123,11 +114,6 @@
     .center { text-align: center; }
     .center h1, .center h2, .center .lede { margin-left: auto; margin-right: auto; }
 
-    .history-copy { max-width: 790px; }
-    .history-copy h1 { max-width: 11ch; text-shadow: 0 2px 24px #000; }
-    .history-copy .lede { color: #f7ede0; text-shadow: 0 2px 14px #000; }
-    .image-credit { position: absolute; right: var(--pad); bottom: 68px; max-width: 46%; color: rgba(255,255,255,.82); font-size: 16px; text-align: right; }
-
     .repeat { display: grid; grid-template-columns: 1fr auto 1fr; gap: clamp(16px, 3vw, 38px); align-items: center; margin-top: 34px; }
     .repeat .box { min-height: 165px; display: grid; place-items: center; padding: 25px; border: 1px solid var(--line); background: rgba(255,255,255,.055); text-align: center; font-size: clamp(26px, 2vw, 36px); font-weight: 850; }
     .repeat .arrow { color: var(--orange); font-size: clamp(34px, 5vw, 70px); }
@@ -151,19 +137,16 @@
     .cool { color: var(--cyan); }
     .dim { color: #68818a; }
 
-    .pipeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 7px; margin-top: 32px; }
-    .pipeline div { position: relative; display: grid; min-height: 132px; place-items: center; padding: 14px 8px; border: 1px solid var(--line); background: rgba(255,255,255,.055); text-align: center; font-size: clamp(20px, 1.35vw, 25px); font-weight: 900; line-height: 1.2; }
-    .pipeline div:nth-child(3), .pipeline div:nth-child(4) { color: var(--night); background: var(--cyan); }
-    .pipeline div:not(:last-child)::after { content: "→"; position: absolute; z-index: 2; right: -17px; color: var(--orange); font-size: 21px; }
+    .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; gap: 10px; align-items: stretch; margin-top: 30px; }
+    .flow.compact { grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr; }
+    .flow-node { display: grid; min-height: 118px; place-items: center; padding: 14px 10px; border: 1px solid var(--line); background: rgba(255,255,255,.055); text-align: center; font-size: clamp(19px, 1.25vw, 24px); font-weight: 900; line-height: 1.2; }
+    .flow-node.accent { color: var(--night); background: var(--cyan); }
+    .flow-arrow { display: grid; place-items: center; min-width: 20px; color: var(--orange); font-size: 28px; font-weight: 900; }
 
     .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #42606c; border: 1px solid #42606c; }
     .fact { min-height: 190px; padding: clamp(19px, 2.4vw, 34px); background: var(--night-2); }
     .fact b { display: block; margin-bottom: 14px; color: var(--amber); font-size: clamp(42px, 6vw, 88px); line-height: .88; letter-spacing: -.07em; }
     .fact span { color: #b8c8cd; font-size: clamp(21px, 1.35vw, 25px); }
-
-    .loop { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 30px; }
-    .loop div { position: relative; padding: 22px 8px; border: 1px solid var(--line); background: rgba(255,255,255,.055); text-align: center; font-size: clamp(20px, 1.35vw, 25px); font-weight: 900; }
-    .loop div:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; right: -17px; color: var(--orange); font-size: 20px; }
 
     .roles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
     .role { padding: clamp(22px, 3vw, 38px); border-top: 7px solid var(--cyan); background: rgba(255,255,255,.055); }
@@ -179,6 +162,10 @@
     .document-stage { display: grid; grid-template-columns: minmax(250px, .7fr) 1.3fr; gap: clamp(30px, 5vw, 76px); align-items: center; }
     .document-stage img { display: block; width: 100%; max-height: 68vh; object-fit: contain; object-position: center; border: 1px solid #80766a; background: white; box-shadow: 12px 12px 0 rgba(255,107,53,.34); }
     .document-stage .lede { font-size: clamp(27px, 1.9vw, 34px); }
+    .document-pair { display: grid; grid-template-columns: .72fr 1.28fr; gap: clamp(20px, 3vw, 44px); align-items: center; }
+    .document-pair figure { min-width: 0; margin: 0; }
+    .document-pair img { display: block; width: 100%; max-height: 62vh; object-fit: contain; border: 1px solid #80766a; background: white; box-shadow: 9px 9px 0 rgba(255,107,53,.3); }
+    .document-pair figcaption { margin-top: 12px; color: #526067; font-size: clamp(15px, 1vw, 19px); font-weight: 850; }
 
     .timing-shift { display: grid; grid-template-columns: 1fr auto 1fr; gap: clamp(14px, 2.5vw, 34px); align-items: stretch; margin-top: 28px; }
     .timing-state { padding: clamp(22px, 3vw, 38px); border: 1px solid var(--line); background: rgba(255,255,255,.055); }
@@ -197,12 +184,41 @@
     .sum-chain { padding: 20px; border: 1px solid var(--line); background: rgba(255,255,255,.055); color: #d8e6e8; font: clamp(21px, 1.4vw, 26px) ui-monospace, monospace; line-height: 1.45; }
     .sum-chain.good { border-color: var(--cyan); color: #e9fffb; }
 
-    .hil-loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 30px; }
-    .hil-loop div { position: relative; display: grid; min-height: 142px; place-items: center; padding: 18px 10px; border: 1px solid var(--line); background: rgba(255,255,255,.055); text-align: center; font-size: clamp(21px, 1.4vw, 26px); font-weight: 900; line-height: 1.22; }
-    .hil-loop div:nth-child(2) { color: var(--night); background: var(--cyan); }
-    .hil-loop div:nth-child(4) { color: var(--night); background: var(--amber); }
-    .hil-loop div:not(:last-child)::after { content: "→"; position: absolute; z-index: 2; right: -17px; color: var(--orange); font-size: 20px; }
-    .hil-loop div:last-child::after { content: "↺"; position: absolute; right: 50%; bottom: -48px; color: var(--orange); font-size: 34px; }
+    .tech-table { width: 100%; border-collapse: collapse; border: 1px solid var(--line); background: rgba(255,255,255,.035); font-size: clamp(17px, 1.15vw, 22px); line-height: 1.28; }
+    .tech-table th, .tech-table td { padding: clamp(10px, 1.2vw, 17px); border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .tech-table th { color: var(--cyan); background: rgba(89,215,211,.09); font-size: .78em; letter-spacing: .1em; text-transform: uppercase; }
+    .tech-table td strong { color: var(--amber); }
+    .paper .tech-table { border-color: #988e80; background: #fffaf0; }
+    .paper .tech-table th, .paper .tech-table td { border-color: #b9ad9c; }
+    .paper .tech-table th { color: #9f3213; background: #eadfcb; }
+    .paper .tech-table td strong { color: #9f3213; }
+    .architecture { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 26px; }
+    .architecture article { min-height: 250px; padding: 22px; border: 1px solid var(--line); background: rgba(255,255,255,.05); }
+    .architecture article:nth-child(2) { border-top: 7px solid var(--orange); }
+    .architecture article:nth-child(3) { border-top: 7px solid var(--amber); }
+    .architecture article:first-child { border-top: 7px solid var(--cyan); }
+    .architecture ul { margin: 16px 0 0; padding-left: 20px; color: #b8c8cd; font-size: clamp(17px, 1.15vw, 22px); line-height: 1.5; }
+    .metric-note { margin-top: 16px; color: var(--amber); font-size: clamp(18px, 1.2vw, 23px); font-weight: 850; }
+    .voice-bank { display: grid; grid-template-columns: 118px minmax(0, 1fr) 92px 190px 34px 205px; gap: 10px; align-items: center; }
+    .voice-labels, .voice-paths { display: grid; grid-template-rows: repeat(5, 58px); gap: 8px; }
+    .voice-label, .voice-path { display: grid; place-items: center; border: 1px solid var(--line); background: rgba(255,255,255,.055); font-weight: 850; }
+    .voice-label { padding: 0 10px; color: var(--amber); font: 850 clamp(17px, 1.15vw, 22px) ui-monospace, monospace; white-space: nowrap; }
+    .voice-label.ellipsis { border-style: dashed; color: var(--muted); background: transparent; }
+    .voice-path { grid-template-columns: repeat(5, 1fr); min-width: 0; padding: 0 8px; color: #d8e6e8; font-size: clamp(14px, .95vw, 18px); text-align: center; }
+    .voice-path span { position: relative; min-width: 0; padding: 0 8px; }
+    .voice-path span:not(:last-child)::after { content: "→"; position: absolute; right: -8px; color: var(--orange); }
+    .voice-path.ellipsis { border-style: dashed; color: var(--muted); background: transparent; }
+    .voice-path .voice-path-summary { grid-column: 1 / -1; white-space: nowrap; }
+    .voice-path .voice-path-summary::after { content: none; }
+    .fanin { display: block; width: 100%; height: 322px; overflow: visible; }
+    .fanin path { fill: none; stroke: var(--orange); stroke-width: 3; vector-effect: non-scaling-stroke; }
+    .fanin polygon { fill: var(--orange); }
+    .merge-arrow { display: grid; place-items: center; color: var(--orange); font-size: 34px; font-weight: 900; }
+    .merge-block { display: grid; min-height: 322px; place-items: center; padding: 20px; border: 1px solid var(--cyan); background: rgba(89,215,211,.12); text-align: center; }
+    .merge-block strong { display: block; margin-bottom: 10px; color: var(--cyan); font-size: clamp(25px, 1.8vw, 34px); }
+    .merge-block span { color: #c6d6d9; font-size: clamp(17px, 1.1vw, 21px); line-height: 1.4; }
+    .shared-block { display: grid; min-height: 322px; place-items: center; padding: 20px 15px; border: 1px solid var(--line); background: rgba(255,255,255,.055); color: #f8f3e8; text-align: center; font-size: clamp(17px, 1.1vw, 21px); font-weight: 850; line-height: 1.45; }
+    .shared-block span { display: block; white-space: nowrap; }
 
     .footerline { display: flex; justify-content: space-between; gap: 18px; align-items: end; color: var(--muted); font-size: clamp(16px, .95vw, 19px); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     .paper .footerline { color: #68747a; }
@@ -244,11 +260,14 @@
       .card p, .role p, .timing-state p { font-size: 17px; }
       .footerline { font-size: 11px; }
       .grid.three, .grid.four, .roles, .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .split, .document-stage { grid-template-columns: 1fr; gap: 22px; }
+      .split, .document-stage, .document-pair { grid-template-columns: 1fr; gap: 22px; }
       .document-stage img { max-height: 50vh; }
-      .pipeline, .loop { grid-template-columns: 1fr 1fr; }
-      .hil-loop { grid-template-columns: 1fr; }
-      .pipeline div:not(:last-child)::after, .loop div:not(:last-child)::after, .hil-loop div::after { content: none; }
+      .document-pair img { max-height: 45vh; }
+      .flow, .flow.compact { grid-template-columns: 1fr; }
+      .flow-arrow { min-height: 22px; transform: rotate(90deg); }
+      .architecture { grid-template-columns: 1fr; }
+      .voice-bank { grid-template-columns: 95px minmax(430px, 1fr) 70px 175px 28px 190px; min-width: 1050px; }
+      .tech-table { font-size: 15px; }
       .slide { padding-bottom: 72px; }
     }
     @media (max-width: 520px) {
@@ -256,7 +275,6 @@
       .repeat .arrow { transform: rotate(90deg); }
       .timing-arrow { transform: rotate(90deg); }
       .topline span:last-child { display: none; }
-      .image-credit { display: none; }
       .controls { right: 10px; }
     }
     @media (prefers-reduced-motion: reduce) { .slide, .progress { transition: none; } }
@@ -288,34 +306,25 @@
         <h1 class="giant">We used to code <em>by hand.</em></h1>
       </div>
       <footer class="footerline"><span>Quite literally</span><span class="slide-number"></span></footer>
-      <aside class="notes">Say only the line. Advance before explaining it. The temporal separation is the joke.</aside>
+      <aside class="notes">Say only the line, then advance. The next slide is the visual reveal.</aside>
     </section>
 
-    <section class="slide image" style="--image:url('assets/core_mem_safe.png')" data-title="Core rope memory">
+    <section class="slide image" data-title="Core rope memory">
       <header class="topline"><span>Idea to hardware</span><span class="section">Before software</span></header>
-      <div class="content history-copy">
-        <div class="eyebrow">Programming was manufacturing</div>
-        <h1>Code was <em>woven.</em></h1>
-        <p class="lede">A wire through a core meant one thing. Around it meant another.</p>
-      </div>
-      <div class="image-credit">AI-generated historical reconstruction</div>
+      <div class="image-stage"><img src="assets/core_mem_safe.png" alt="AI-generated historical reconstruction of core rope memory being woven"></div>
       <footer class="footerline"><span>Programs were physical objects</span><span class="slide-number"></span></footer>
-      <aside class="notes">Now reveal the image. This is an AI-generated historical reconstruction rather than an archival photograph. The literal act of coding was part of manufacturing.</aside>
+      <aside class="notes">Let the image carry the reveal. This is an AI-generated historical reconstruction, not an archival photograph. Programming once formed part of manufacturing the physical object.</aside>
     </section>
 
-    <section class="slide image" style="--image:url('assets/punch-card.png')" data-title="Punch cards">
+    <section class="slide image" data-title="Punch cards">
       <header class="topline"><span>Idea to hardware</span><span class="section">Abstraction shift 01</span></header>
-      <div class="content history-copy">
-        <div class="eyebrow">The program became a portable symbol</div>
-        <h1>Punch cards.</h1>
-      </div>
-      <div class="image-credit">IBM punch card image · MdeVicente · CC0 / public-domain dedication</div>
-      <footer class="footerline"><span>Programs became portable symbols</span><span class="slide-number"></span></footer>
-      <aside class="notes">Lead into this slide verbally: “Then a new technology came along that completely changed what it meant to code.” Punch cards moved programming away from fabricating the machine itself. That shift made more programs economically imaginable.</aside>
+      <div class="image-stage"><img src="assets/punched-card-program-deck.jpg" alt="A complete punched-card computer program deck"></div>
+      <footer class="footerline"><span>The program became a portable symbol</span><span class="slide-number"></span></footer>
+      <aside class="notes">Punch cards separated the program from fabrication of the machine. This is a complete PL/I program deck created circa 1969. Image by Arnold Reinhold, CC BY-SA 3.0: https://commons.wikimedia.org/wiki/File:Punched_card_program_deck.agr.jpg · https://creativecommons.org/licenses/by-sa/3.0/. The current Commons version was cropped and had brightness/contrast adjusted by Andrej Shadura.</aside>
     </section>
 
-    <section class="slide paper" data-title="The recurring loop">
-      <header class="topline"><span>Idea to hardware</span><span class="section">The recurring loop</span></header>
+    <section class="slide paper" data-title="Jevons for code">
+      <header class="topline"><span>Idea to hardware</span><span class="section">Jevons for code</span></header>
       <div class="content">
         <div class="eyebrow">Jevons, but for code</div>
         <h2>Efficiency expands <em>demand.</em></h2>
@@ -329,40 +338,18 @@
       <aside class="notes">Name Jevons clearly enough that the covert reference is legible. This is the cortisol-lowering point: making code cheaper has historically increased the total amount of coding and widened the set of worthwhile problems. Your jobs are safe; the unit of work and the ambition change.</aside>
     </section>
 
-    <section class="slide image" style="--image:url('assets/assembly-listing.png')" data-title="Assembly language">
+    <section class="slide image" data-title="Assembly language">
       <header class="topline"><span>Idea to hardware</span><span class="section">Abstraction shift 02</span></header>
-      <div class="content history-copy">
-        <div class="eyebrow">The bit patterns acquired names</div>
-        <h1>Assembly.</h1>
-        <p class="lede">Assembly made the machine legible without making it disappear.</p>
-      </div>
-      <div class="image-credit">Motorola 6800 assembly listing · Michael Holley · public domain</div>
-      <footer class="footerline"><span>Meaning moved above the bit pattern</span><span class="slide-number"></span></footer>
-      <aside class="notes">Lead in verbally with the repeated “then it happened again.” It became faster and easier, more problems looked code-shaped, and we wrote more code. The programmer still owned machine detail, but expressed intent through symbols rather than raw encodings.</aside>
+      <div class="image-stage"><img src="assets/assembly-listing.png" alt="Historic Motorola 6800 assembly language listing"></div>
+      <footer class="footerline"><span>The bit patterns acquired names</span><span class="slide-number"></span></footer>
+      <aside class="notes">Lead in verbally with the repeated “then it happened again.” It became faster and easier, more problems looked code-shaped, and we wrote more code. The programmer still owned machine detail, but expressed intent through symbols rather than raw encodings. Image: Michael Holley, public domain.</aside>
     </section>
 
-    <section class="slide" data-title="C changes the unit">
+    <section class="slide image" data-title="C changes the unit">
       <header class="topline"><span>Idea to hardware</span><span class="section">Abstraction shift 03</span></header>
-      <div class="content split">
-        <div>
-          <div class="eyebrow">Then it happened again</div>
-          <h2>We described <em>behaviour.</em></h2>
-          <p class="lede">Compilers took responsibility for translating structures, expressions and control flow into machine work.</p>
-        </div>
-        <div class="code-card" aria-label="Example C code">
-          <div class="code-bar"><span>synth.c</span><span>human intent</span></div>
-          <pre><span class="cool">for</span> (int voice = 0;
-     voice &lt; <span class="hot">16</span>;
-     ++voice) {
-  sample += render(
-    state[voice],
-    controls
-  );
-}</pre>
-        </div>
-      </div>
-      <footer class="footerline"><span>The compiler became an engineering collaborator</span><span class="slide-number"></span></footer>
-      <aside class="notes">Lead in verbally with the final “then it happened again.” Do not turn this into a language-history lecture. C is the last familiar rung in the setup. It raised the level of intent while preserving access to the machine. HLS will rhyme with that.</aside>
+      <div class="image-stage"><img src="assets/c-hello-world.png" alt="Hello World program written in C"></div>
+      <footer class="footerline"><span>We described behaviour</span><span class="slide-number"></span></footer>
+      <aside class="notes">Lead in verbally with the final “then it happened again.” Compilers took responsibility for translating structures, expressions and control flow into machine work. C is the last familiar rung in the setup: it raised the level of intent while preserving access to the machine, and HLS will rhyme with that. Image by Esquivalience, CC0 1.0: https://commons.wikimedia.org/wiki/File:C_Hello_World_Program.png · https://creativecommons.org/publicdomain/zero/1.0/.</aside>
     </section>
 
     <section class="slide orange" data-title="It happened again">
@@ -401,322 +388,373 @@
       <aside class="notes">Make the audience contract explicit. The synthesizer story earns attention, but the payoff is a practical method they can take back to their own designs.</aside>
     </section>
 
-    <section class="slide" data-title="The experiment">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">The experiment</span></header>
+    <section class="slide" data-title="The product challenge">
+      <header class="topline"><span>Vitis AI HLS</span><span class="section">The product challenge</span></header>
       <div class="content split">
         <div>
-          <div class="eyebrow">A deliberately unreasonable brief</div>
           <h2>Build a real instrument. <em>Make it playable.</em></h2>
-          <p class="lede">Sixteen voices. MIDI input. Expressive DSP. Linux control. FPGA audio. Persistent boot. Physical acceptance.</p>
+          <p class="lede">Sixteen voices. Expressive DSP. MIDI input. Linux control. FPGA audio. Managed startup. Physical acceptance.</p>
         </div>
         <div class="synth-mark" aria-label="Abstract Lyrebird synthesizer mark"><span>16×</span></div>
       </div>
       <footer class="footerline"><span>Lyrebird · KV260 · FC25 · Pmod I2S2</span><span class="slide-number"></span></footer>
-      <aside class="notes">Introduce Lyrebird as the vehicle, not the whole subject. Sound is useful because the complete system cannot hide behind a report: people can play it and immediately judge latency, stability and musical usefulness.</aside>
+      <aside class="notes">This is ambitious because it is complete, not because it is unreasonable. Sound makes a useful test: a system cannot hide latency, instability, or poor interaction behind a report.</aside>
     </section>
 
-    <section class="slide" data-title="The full system">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">Not a toy snippet</span></header>
+    <section class="slide" data-title="The complete signal path">
+      <header class="topline"><span>Vitis AI HLS</span><span class="section">The complete signal path</span></header>
       <div class="content">
-        <div class="eyebrow">The product crosses every boundary</div>
-        <h2>One idea. <em>Six engineering domains.</em></h2>
-        <div class="pipeline" aria-label="End-to-end Lyrebird signal path">
-          <div>FC25<br>MIDI</div><div>ALSA + C<br>control</div><div>AXI<br>registers</div><div>HLS<br>DSP</div><div>CDC + I2S<br>RTL</div><div>Pmod I2S2<br>audio</div>
+        <div class="eyebrow">One product across software and programmable logic</div>
+        <h2>Policy in the PS. <em>Samples in the PL.</em></h2>
+        <div class="flow compact" aria-label="End-to-end Lyrebird signal path">
+          <div class="flow-node">FC25<br>USB MIDI</div><div class="flow-arrow">→</div>
+          <div class="flow-node">ALSA + C<br>voice policy</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">AXI shadow bank<br>+ commit</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">RTL scheduler<br>+ HLS DSP</div><div class="flow-arrow">→</div>
+          <div class="flow-node">PCM CDC + I2S<br>Pmod DAC</div>
         </div>
       </div>
-      <footer class="footerline"><span>Software policy · hardware deadlines</span><span class="slide-number"></span></footer>
-      <aside class="notes">Walk left to right. Linux owns event-driven policy and voice allocation. AXI publishes a coherent state snapshot. PL invokes HLS once per sample. The resulting PCM crosses into an independent audio clock domain and reaches a physical DAC.</aside>
+      <footer class="footerline"><span>Event-driven control · deterministic 48 kHz audio</span><span class="slide-number"></span></footer>
+      <aside class="notes">Linux receives standard MIDI events, allocates voices, and publishes compact state. PL adopts a coherent snapshot, invokes HLS once per sample, and transfers completed PCM into the I2S clock domain.</aside>
     </section>
 
-    <section class="slide orange" data-title="The useful unit">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">Agentic engineering</span></header>
-      <div class="content center">
+    <section class="slide paper" data-title="Deliberate tradeoffs">
+      <header class="topline"><span>System architecture</span><span class="section">Deliberate tradeoffs</span></header>
+      <div class="content top">
+        <h2>Optimize the <em>whole product.</em></h2>
+        <table class="tech-table">
+          <thead><tr><th>Decision</th><th>Chosen approach</th><th>Trade made deliberately</th></tr></thead>
+          <tbody>
+            <tr><td>MIDI policy</td><td><strong>ALSA + C on the PS</strong></td><td>Millisecond control cadence for mature device handling and flexible policy.</td></tr>
+            <tr><td>Audio generation</td><td><strong>HLS in the PL</strong></td><td>Fabric resources for deterministic per-sample execution.</td></tr>
+            <tr><td>Control transfer</td><td><strong>Shadow bank + commit</strong></td><td>One-invocation staleness for coherent state.</td></tr>
+            <tr><td>Audio clock</td><td><strong>Dedicated domain + CDC</strong></td><td>Boundary logic for correct I2S timing.</td></tr>
+            <tr><td>Arithmetic</td><td><strong>Floating-point HLS</strong></td><td>High LUT/DSP use for direct algorithmic development.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="footerline"><span>Constraints decide which compromises are good engineering</span><span class="slide-number"></span></footer>
+      <aside class="notes">The accepted approximately +19.3 ppm audio-clock error and one-invocation control staleness are explicit nonissues. Neither threatens the user experience or acceptance boundary.</aside>
+    </section>
+
+    <section class="slide" data-title="Why HLS">
+      <header class="topline"><span>Vitis AI HLS</span><span class="section">Why HLS</span></header>
+      <div class="content">
+        <div class="eyebrow">The most direct route from algorithm to bitstream</div>
+        <h2>Write the algorithm. <em>Constrain the machine.</em></h2>
+        <div class="flow" aria-label="HLS path from algorithm to hardware">
+          <div class="flow-node">algorithm +<br>specification</div><div class="flow-arrow">→</div>
+          <div class="flow-node">testable<br>C / C++</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">Vitis HLS<br>schedule + RTL</div><div class="flow-arrow">→</div>
+          <div class="flow-node">Vivado route<br>+ bitstream</div>
+        </div>
+        <p class="metric-note">AMD HLS Skills supplied the domain method for reading reports and reshaping the generated hardware.</p>
+      </div>
+      <footer class="footerline"><span>Direct does not mean unconstrained</span><span class="slide-number"></span></footer>
+      <aside class="notes">HLS let the DSP remain recognizable as an algorithm while exposing explicit interface, clock, latency, throughput, and resource constraints. The HLS Skills turned general agent capability into informed HLS iteration.</aside>
+    </section>
+
+    <section class="slide" data-title="The DSP inside Lyrebird">
+      <header class="topline"><span>Vitis AI HLS</span><span class="section">The DSP inside Lyrebird</span></header>
+      <div class="content top">
+        <div class="eyebrow">Sixteen logical voices · four physical HLS lanes</div>
+        <h2>Generate independently. <em>Mix coherently.</em></h2>
+        <div class="voice-bank" aria-label="Sixteen Lyrebird voice pipelines converging into the shared mix and output path">
+          <div class="voice-labels">
+            <div class="voice-label">voice 1</div><div class="voice-label">voice 2</div><div class="voice-label ellipsis">⋮</div><div class="voice-label">voice 15</div><div class="voice-label">voice 16</div>
+          </div>
+          <div class="voice-paths">
+            <div class="voice-path"><span>PM sine</span><span>fold</span><span>2× BPF</span><span>envelopes</span><span>velocity</span></div>
+            <div class="voice-path"><span>PM sine</span><span>fold</span><span>2× BPF</span><span>envelopes</span><span>velocity</span></div>
+            <div class="voice-path ellipsis"><span class="voice-path-summary">same per-voice DSP continues through voices 3-14</span></div>
+            <div class="voice-path"><span>PM sine</span><span>fold</span><span>2× BPF</span><span>envelopes</span><span>velocity</span></div>
+            <div class="voice-path"><span>PM sine</span><span>fold</span><span>2× BPF</span><span>envelopes</span><span>velocity</span></div>
+          </div>
+          <svg class="fanin" viewBox="0 0 92 322" role="img" aria-label="Voice contributions converge into the partial-sum mixer">
+            <path d="M0 29 C48 29 42 161 78 161"/>
+            <path d="M0 95 C48 95 42 161 78 161"/>
+            <path d="M0 161 H78"/>
+            <path d="M0 227 C48 227 42 161 78 161"/>
+            <path d="M0 293 C48 293 42 161 78 161"/>
+            <path d="M78 161 H88"/>
+            <polygon points="88,161 78,155 78,167"/>
+          </svg>
+          <div class="merge-block"><div><strong>4 partial sums</strong><span>Four lanes each process four logical voices, then a two-level tree forms the 1/16 mix.</span></div></div>
+          <div class="merge-arrow">→</div>
+          <div class="shared-block"><div><span>shared diffusion</span><span>+ 4-line FDN</span><span>+ compressor</span><span>+ output filter</span><span>+ 24-bit PCM</span></div></div>
+        </div>
+      </div>
+      <footer class="footerline"><span>Logical polyphony is time-multiplexed across four replicated process_voice lanes</span><span class="slide-number"></span></footer>
+      <aside class="notes">Read left to right. Each logical voice has independent phase, LFO, envelope, filter, velocity, and replacement state. HLS unroll factor four creates four physical process_voice lanes, each serving four logical voices sequentially. Their partial sums converge through the timing-friendly two-level tree before the shared reverb and output path.</aside>
+    </section>
+
+    <section class="slide paper" data-title="What one voice lane costs">
+      <header class="topline"><span>Vitis HLS 2025.2</span><span class="section">Voice-lane resource estimate</span></header>
+      <div class="content top">
+        <div class="eyebrow">One physical lane serves four logical voices</div>
+        <h2>Generation to <em>ready-to-mix.</em></h2>
+        <table class="tech-table">
+          <thead><tr><th>Lane component</th><th>BRAM18K</th><th>DSP</th><th>FF</th><th>LUT</th></tr></thead>
+          <tbody>
+            <tr><td>Two sine/cosine engines</td><td>0</td><td><strong>26</strong></td><td>1,438</td><td>5,312</td></tr>
+            <tr><td>Shared filter engine · two BPF calls</td><td>0</td><td><strong>32</strong></td><td>2,758</td><td>5,570</td></tr>
+            <tr><td>Two frequency / coefficient `exp2` engines</td><td><strong>2</strong></td><td>12</td><td>194</td><td>2,540</td></tr>
+            <tr><td>Envelopes, LFO routing, fold, state + arithmetic</td><td>0</td><td>24</td><td>8,150</td><td>12,842</td></tr>
+            <tr><td><strong>One physical process_voice lane</strong></td><td><strong>2</strong></td><td><strong>94</strong></td><td><strong>12,540</strong></td><td><strong>26,264</strong></td></tr>
+          </tbody>
+        </table>
+        <p class="metric-note">HLS estimate · 38-397 cycles per logical voice · excludes mixer, shared reverb, output processing, and RTL integration.</p>
+      </div>
+      <footer class="footerline"><span>Four lanes are instantiated · LUT estimates are not routed CLB counts</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is the defensible unit of physical cost. The sixteen logical voices are not sixteen independent hardware copies; four lanes each process four voice states. The lane estimate includes oscillator generation through its ready-to-mix contribution. Vivado later packs and shares logic, so do not multiply this LUT number and call it routed CLB utilization.</aside>
+    </section>
+
+    <section class="slide paper" data-title="Use your language of choice">
+      <header class="topline"><span>Vitis AI HLS</span><span class="section">Expressing intent</span></header>
+      <div class="content">
+        <div class="eyebrow">There is no universal specification language</div>
+        <h2>Use the language in which you <em>think.</em></h2>
+        <div class="grid four">
+          <article class="card"><span class="number">Mathematics</span><h3>LaTeX</h3><p>For me, equations and explicit state made the DSP precise.</p></article>
+          <article class="card"><span class="number">Models</span><h3>MATLAB</h3><p>Start from existing algorithms, plots, and numerical experiments.</p></article>
+          <article class="card"><span class="number">Executable intent</span><h3>Python + tests</h3><p>Reference models and assertions can define expected behaviour.</p></article>
+          <article class="card"><span class="number">Engineering intent</span><h3>Diagrams + prose</h3><p>Requirements, interfaces, tradeoffs, and acceptance criteria all count.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>The agent can translate · precision matters more than format</span><span class="slide-number"></span></footer>
+      <aside class="notes">This contextualizes the next slide. I used LaTeX because I am a mathematician by training and equations are how I naturally make this DSP precise. That choice is personal, not prescriptive. Use the richest representation your team already has; the agent can translate among formats when intent, constraints, and evidence stay explicit.</aside>
+    </section>
+
+    <section class="slide paper" data-title="The specification artifact">
+      <header class="topline"><span>Vitis AI HLS</span><span class="section">Intent as an engineering interface</span></header>
+      <div class="content document-pair">
+        <figure><img src="assets/dsp-spec-cover.png" alt="First page of the Lyrebird mathematical DSP specification"><figcaption>Signal graph · equations · state · numerical bounds</figcaption></figure>
+        <figure><img src="assets/dsp-spec-signal.png" alt="Signal graph and implementation boundary page of the Lyrebird DSP specification"><figcaption>One sample within 2,000 cycles at 100 MHz · explicit interfaces and acceptance</figcaption></figure>
+      </div>
+      <footer class="footerline"><span>hls/spec/lyrebird.pdf · constraints create useful freedom</span><span class="slide-number"></span></footer>
+      <aside class="notes">This was more than “make me a synth.” The specification captured the signal graph, equations, state, bounds, interfaces, audition fixtures, and acceptance tests. LaTeX matched how I think; another team could begin from MATLAB, Python, tests, diagrams, or prose. The explicit 2,000-cycle boundary later unlocked the timing fix: minimum latency was not the objective.</aside>
+    </section>
+
+    <section class="slide paper" data-title="What the suite added">
+      <header class="topline"><span>AMD Agentic AI Suite</span><span class="section">Early access</span></header>
+      <div class="content">
+        <div class="eyebrow">Tool access changes what an agent can accomplish</div>
+        <h2>Model + domain method + <em>engineering reality.</em></h2>
+        <table class="tech-table">
+          <thead><tr><th>Capability</th><th>Contribution to the project</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Vivado MCP Server</strong></td><td>Operated projects and Tcl, monitored runs, inspected reports, and diagnosed implementation failures directly.</td></tr>
+            <tr><td><strong>AMD HLS Skills</strong></td><td>Supplied HLS-specific optimization methods, implementation patterns, and report interpretation.</td></tr>
+            <tr><td><strong>Knowledge + evidence</strong></td><td>Preserved decisions across sessions while tests, timing, readback, and physical sound constrained every claim.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="footerline"><span>The engineer still chooses the product, tradeoffs, and acceptance boundary</span><span class="slide-number"></span></footer>
+      <aside class="notes">The suite did not choose what to build. It expanded execution capability inside explicit engineering direction.</aside>
+    </section>
+
+    <section class="slide" data-title="The whole engineering loop">
+      <header class="topline"><span>AMD Agentic AI Suite</span><span class="section">The working method</span></header>
+      <div class="content">
         <div class="eyebrow">The generated function is not the achievement</div>
-        <h1>The useful unit is the <em>whole loop.</em></h1>
-      </div>
-      <footer class="footerline"><span>Requirements to physical acceptance</span><span class="slide-number"></span></footer>
-      <aside class="notes">A code-completion demo proves almost nothing about engineering. The useful claim is that agents can participate continuously from requirements and architecture through implementation, tool operation, diagnosis, deployment and acceptance.</aside>
-    </section>
-
-    <section class="slide" data-title="The agent loop">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">The working method</span></header>
-      <div class="content">
-        <div class="eyebrow">Fast does not mean unstructured</div>
-        <h2>Make the feedback loop <em>cheap.</em></h2>
-        <div class="loop" aria-label="Agentic engineering loop">
-          <div>specify</div><div>implement</div><div>build</div><div>inspect</div><div>correct</div><div>accept</div>
+        <h2>The useful unit is the <em>verified loop.</em></h2>
+        <div class="flow compact" aria-label="Agentic engineering loop">
+          <div class="flow-node">specify</div><div class="flow-arrow">→</div>
+          <div class="flow-node">implement</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">build +<br>inspect</div><div class="flow-arrow">→</div>
+          <div class="flow-node">correct</div><div class="flow-arrow">→</div>
+          <div class="flow-node">accept</div>
         </div>
-        <p class="lede" style="margin-top:30px">The agent keeps continuity while specialist tools keep it honest.</p>
       </div>
-      <footer class="footerline"><span>Iteration speed comes from short, evidenced loops</span><span class="slide-number"></span></footer>
-      <aside class="notes">The speed did not come from skipping verification. It came from removing handoffs between investigation, implementation and tool feedback. Every failure became the next bounded engineering task.</aside>
+      <footer class="footerline"><span>Speed comes from short, evidenced loops · not skipped verification</span><span class="slide-number"></span></footer>
+      <aside class="notes">The agent keeps continuity across implementation and diagnosis. Specialist tools and acceptance evidence keep the process honest.</aside>
     </section>
 
     <section class="slide" data-title="Hardware in the loop">
       <header class="topline"><span>AMD Agentic AI Suite</span><span class="section">Hardware in the loop</span></header>
       <div class="content">
-        <div class="eyebrow">The board is not the last ceremonial step</div>
+        <div class="eyebrow">The board is not a ceremonial final step</div>
         <h2>Hardware truth stays <em>inside the loop.</em></h2>
-        <div class="hil-loop" aria-label="Hardware-in-the-loop engineering cycle">
-          <div>agent<br>changes design</div><div>Vivado MCP<br>builds + inspects</div><div>deploy<br>to KV260</div><div>read back +<br>play it</div><div>evidence<br>redirects agent</div>
+        <div class="flow compact" aria-label="Hardware-in-the-loop cycle">
+          <div class="flow-node">agent<br>change</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">Vivado MCP<br>build + report</div><div class="flow-arrow">→</div>
+          <div class="flow-node">KV260<br>deployment</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">readback +<br>MIDI + audio</div><div class="flow-arrow">→</div>
+          <div class="flow-node">corrective<br>evidence ↺</div>
         </div>
       </div>
-      <footer class="footerline"><span>Build reports and physical behaviour are both feedback</span><span class="slide-number"></span></footer>
-      <aside class="notes">Make HIL central. Vivado MCP means the agent does not throw code over a wall and wait for a human to interpret the tool. It can launch work, watch progress, inspect timing and implementation evidence, and act on failures. Then deployment closes the outer loop: register identity, status, overruns, MIDI response, reboot behavior and actual sound all feed the next decision.</aside>
+      <footer class="footerline"><span>Timing · identity · ABI · overruns · reboot · reconnect · sound</span><span class="slide-number"></span></footer>
+      <aside class="notes">Vivado evidence closes the inner loop. Register/status readback, MIDI behavior, reboot behavior, and actual sound close the outer loop.</aside>
     </section>
 
-    <section class="slide paper" data-title="Tools change agency">
-      <header class="topline"><span>AMD Agentic AI Suite</span><span class="section">Early access</span></header>
-      <div class="content">
-        <div class="eyebrow">The forthcoming AMD Agentic AI Suite</div>
-        <h2>Tool access changes what an agent can <em>accomplish.</em></h2>
-        <div class="grid three">
-          <article class="card"><span class="number">Vivado MCP</span><h3>Operate Vivado</h3><p>Inspect project state, execute Tcl, monitor runs, read reports and diagnose errors directly.</p></article>
-          <article class="card"><span class="number">HLS Skills</span><h3>Apply AMD practice</h3><p>Bring optimization method, implementation patterns and evidence-driven iteration into the agent loop.</p></article>
-          <article class="card"><span class="number">Knowledge + evidence</span><h3>Keep it honest</h3><p>Preserve decisions while simulation, timing, readback and listening constrain every claim.</p></article>
-        </div>
-      </div>
-      <footer class="footerline"><span>Model + domain skills + direct tool access</span><span class="slide-number"></span></footer>
-      <aside class="notes">This project used the forthcoming AMD Agentic AI Suite under early access. Vivado MCP gave the agent direct control and observability. AMD HLS Skills supplied the domain method used to analyze and restructure the generated hardware. The project knowledge tree preserved those decisions and the evidence across sessions.</aside>
-    </section>
-
-    <section class="slide" data-title="How to begin">
+    <section class="slide paper" data-title="A practical starting recipe">
       <header class="topline"><span>AMD Agentic AI Suite</span><span class="section">How you can do it</span></header>
       <div class="content">
-        <div class="eyebrow">The practical starting sequence</div>
+        <div class="eyebrow">Start with one bounded, meaningful product</div>
         <h2>Connect the agent to <em>engineering reality.</em></h2>
-        <div class="loop" aria-label="Practical AMD agentic engineering setup">
-          <div>open your<br>coding agent</div><div>connect<br>Vivado MCP</div><div>load AMD<br>HLS Skills</div><div>express<br>your intent</div><div>build +<br>inspect</div><div>test on<br>hardware</div>
+        <div class="flow compact" aria-label="Practical agentic engineering setup">
+          <div class="flow-node">coding<br>agent</div><div class="flow-arrow">→</div>
+          <div class="flow-node">Vivado<br>MCP</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">AMD HLS<br>Skills</div><div class="flow-arrow">→</div>
+          <div class="flow-node">build +<br>inspect</div><div class="flow-arrow">→</div>
+          <div class="flow-node">hardware<br>acceptance</div>
         </div>
+        <p class="metric-note">Express intent in LaTeX, MATLAB, Python, tests, diagrams, requirements, or the combination that best captures your design.</p>
       </div>
-      <footer class="footerline"><span>Start with one bounded, meaningful product</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is the reproducible recipe. Open the coding agent your team uses. Connect the Vivado MCP Server so it can operate the real project. Load the AMD HLS Skills so it has the domain method. Give it an explicit objective and constraints. Let it build and inspect evidence. Keep hardware in the loop.</aside>
+      <footer class="footerline"><span>No universal intent format required</span><span class="slide-number"></span></footer>
+      <aside class="notes">The practical recipe is tool access, domain skills, a bounded objective, explicit constraints, and physical evidence. Use the representation in which your team can be precise.</aside>
     </section>
 
-    <section class="slide paper" data-title="Express intent your way">
-      <header class="topline"><span>AMD Agentic AI Suite</span><span class="section">Your interface</span></header>
-      <div class="content">
-        <div class="eyebrow">Do not wait for a universal specification language</div>
-        <h2>Use the language in which you <em>think.</em></h2>
-        <div class="grid four">
-          <article class="card"><span class="number">Mathematics</span><h3>LaTeX</h3><p>For me, equations and explicit state made the DSP precise.</p></article>
-          <article class="card"><span class="number">Models</span><h3>MATLAB</h3><p>Use existing algorithms, plots and numeric experiments.</p></article>
-          <article class="card"><span class="number">Executable intent</span><h3>Python</h3><p>Reference models and tests can define expected behaviour.</p></article>
-          <article class="card"><span class="number">Plain intent</span><h3>Natural language</h3><p>Requirements, tradeoffs and acceptance criteria still count.</p></article>
-        </div>
-      </div>
-      <footer class="footerline"><span>The agent speaks all of them</span><span class="slide-number"></span></footer>
-      <aside class="notes">As a mathematician by training, I chose LaTeX. That is personal, not prescriptive. For another team, the richest source of intent may be MATLAB, Python, diagrams, tests or ordinary prose. The agent can translate between these representations and the implementation, provided the constraints and evidence remain explicit.</aside>
-    </section>
-
-    <section class="slide" data-title="HLS is another abstraction shift">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">High-level synthesis</span></header>
-      <div class="content split">
-        <div>
-          <div class="eyebrow">The historical rhyme</div>
-          <h2>Describe the algorithm. <em>Constrain the machine.</em></h2>
-          <p class="lede">HLS changes the unit of hardware design without making clocks, throughput, latency or resources disappear.</p>
-        </div>
-        <div class="code-card">
-          <div class="code-bar"><span>contract</span><span>100 MHz target</span></div>
-          <pre><span class="hot">input</span>   16 voices + controls
-<span class="hot">output</span>  signed 24-bit PCM
-<span class="hot">rate</span>    48,000 samples / sec
-<span class="hot">budget</span>  &lt; 2,000 cycles / sample
-
-<span class="dim">// freedom inside a hard boundary</span></pre>
-        </div>
-      </div>
-      <footer class="footerline"><span>Abstraction does not repeal physics</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is where the opening lands technically. Like a compiler, HLS translates a higher-level representation, but the engineer still defines interfaces and performance boundaries. The tool can explore implementation; it cannot decide what the product should be.</aside>
-    </section>
-
-    <section class="slide" data-title="The DSP specification">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">Intent with enough precision</span></header>
-      <div class="content">
-        <div class="eyebrow">The design began above the implementation</div>
-        <h2>A mathematical hand-off the agent could <em>execute.</em></h2>
-        <div class="pipeline" aria-label="Lyrebird DSP pipeline">
-          <div>PM<br>sine</div><div>wave<br>folder</div><div>2× resonant<br>filters</div><div>3× ADSR<br>envelopes</div><div>16-voice<br>mix</div><div>4-line FDN<br>reverb</div>
-        </div>
-      </div>
-      <footer class="footerline"><span>LaTeX specification · explicit state · bounded recurrences</span><span class="slide-number"></span></footer>
-      <aside class="notes">The LaTeX DSP specification defined the signal graph, state, numerical boundaries, lifecycle and acceptance fixtures. It separated the four physical controls from the larger internal parameter space. This reduced ambiguity without prescribing every line of C++.</aside>
-    </section>
-
-    <section class="slide paper" data-title="The specification artifact">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">From conversation to contract</span></header>
-      <div class="content document-stage">
-        <img src="assets/dsp-spec-cover.png" alt="First page of the Lyrebird mathematical DSP specification">
-        <div>
-          <div class="eyebrow">An actual engineering artifact</div>
-          <h2>Eleven pages of <em>intent.</em></h2>
-          <p class="lede">Signal graph, equations, state, bounds, interfaces, audition fixtures and acceptance tests.</p>
-        </div>
-      </div>
-      <footer class="footerline"><span>hls/spec/lyrebird.pdf</span><span class="slide-number"></span></footer>
-      <aside class="notes">Show that the input to the agent was not “make me a synth.” We developed a mathematical hand-off with explicit constraints and deliberately identified engineering choices. The PDF itself is part of the project and can be opened after the talk.</aside>
-    </section>
-
-    <section class="slide paper" data-title="The specification boundary">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">The hardware contract</span></header>
-      <div class="content document-stage">
-        <img src="assets/dsp-spec-signal.png" alt="Signal graph and implementation boundary page of the Lyrebird DSP specification">
-        <div>
-          <div class="eyebrow">The crucial line was already there</div>
-          <h2>One sample within <em>2,000 cycles.</em></h2>
-          <p class="lede">At 100 MHz and 48 kHz, latency was available. Clock period was not.</p>
-        </div>
-      </div>
-      <footer class="footerline"><span>Constraints create useful freedom</span><span class="slide-number"></span></footer>
-      <aside class="notes">Point at the bold 2,000-cycle statement in the document. That number later unlocked the timing fix. We did not need the smallest possible latency; we needed one completed sample before the next request and a design that routed at 100 MHz.</aside>
-    </section>
-
-    <section class="slide" data-title="The wrong optimization">
+    <section class="slide" data-title="The wrong optimization axis">
       <header class="topline"><span>AMD HLS Skills</span><span class="section">The first surprise</span></header>
       <div class="content">
-        <div class="eyebrow">The agent kept making the number smaller</div>
+        <div class="eyebrow">The early core kept making one number smaller</div>
         <h2><em>136 → 111</em> cycles.</h2>
-        <p class="lede">An impressive optimization of the wrong axis.</p>
+        <p class="lede">An effective optimization of the wrong objective.</p>
         <div class="timing-shift">
           <article class="timing-state good"><b>111</b><p>Very few cycles to produce a sample.</p></article>
           <div class="timing-arrow">≠</div>
-          <article class="timing-state bad"><b>13.301 ns</b><p>A critical path that could not meet the 10 ns clock.</p></article>
+          <article class="timing-state bad"><b>13.301 ns</b><p>A critical path that missed the 10 ns clock target.</p></article>
         </div>
       </div>
       <footer class="footerline"><span>Low latency · failed frequency</span><span class="slide-number"></span></footer>
-      <aside class="notes">Tell this conversationally. The agent had optimized what looks like the obvious HLS metric: fewer cycles. It got down from 136 to 111. But the serial sixteen-voice floating-point sum became a 13.301 ns path. The design did not close the required 10 ns clock in the slightest.</aside>
+      <aside class="notes">This was the earlier, smaller accumulation core, not the complete final Lyrebird. The serial sixteen-voice floating-point sum reduced latency but lengthened the critical path.</aside>
     </section>
 
-    <section class="slide orange" data-title="The intervention">
-      <header class="topline"><span>AMD HLS Skills</span><span class="section">Human direction</span></header>
-      <div class="content">
-        <div class="eyebrow">So I says to the agent, I says</div>
-        <blockquote class="quote">“We have up to <em>2,000 cycles</em> between samples. Stop optimizing cycle count. We absolutely must reach timing closure.”</blockquote>
-      </div>
-      <footer class="footerline"><span>Change the objective · change the design</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is the central human contribution in the story. The engineer understood the system-level budget and redirected the optimization objective. The right question was not “How few cycles?” It was “How much sequential work can we spend to shorten the longest path?”</aside>
-    </section>
-
-    <section class="slide" data-title="Reshape the hardware">
-      <header class="topline"><span>AMD HLS Skills</span><span class="section">Optimize the right axis</span></header>
+    <section class="slide orange" data-title="Engineering direction">
+      <header class="topline"><span>AMD HLS Skills</span><span class="section">Engineering direction</span></header>
       <div class="content split">
-        <div>
-          <div class="eyebrow">The code described the topology</div>
-          <h2>Trade cycles for <em>shorter paths.</em></h2>
-          <p class="lede">The agent used AMD HLS optimization guidance to reshape the operation graph instead of merely compressing the schedule.</p>
-        </div>
+        <blockquote class="quote">“We have up to <em>2,000 cycles</em> per sample. Prioritize timing closure, not minimum cycle count.”</blockquote>
         <div class="sum-diagram" aria-label="Serial and staged floating-point sum comparison">
           <div class="sum-row"><b>Before</b><div class="sum-chain">v0 + v1 + v2 + ··· + v15</div></div>
-          <div class="sum-row"><b>After</b><div class="sum-chain good">4 partial sums<br>→ 2 pairs<br>→ 1 result</div></div>
+          <div class="sum-row"><b>After</b><div class="sum-chain good">4 partial sums<br>→ 2 pair sums<br>→ final sum</div></div>
         </div>
       </div>
-      <footer class="footerline"><span>Converging work became staged work</span><span class="slide-number"></span></footer>
-      <aside class="notes">The concrete first fix split the serial sixteen-deep floating-point recurrence into four independent partial accumulators, then combined them through a two-level tree. Similar reasoning guided the richer implementation: use available cycles to prevent too much work converging into one clock period.</aside>
+      <footer class="footerline"><span>Change the objective · reshape the hardware</span><span class="slide-number"></span></footer>
+      <aside class="notes">The engineer supplied system-level judgment. AMD HLS guidance helped the agent translate that direction into a shorter operation graph.</aside>
     </section>
 
-    <section class="slide" data-title="The timing trade">
-      <header class="topline"><span>AMD HLS Skills</span><span class="section">Result of redirection</span></header>
+    <section class="slide" data-title="The result of the trade">
+      <header class="topline"><span>AMD HLS Skills</span><span class="section">The result of the trade</span></header>
+      <div class="content top">
+        <div class="eyebrow">Spend the budget you actually have</div>
+        <h2>More cycles. <em>Shorter paths.</em></h2>
+        <table class="tech-table">
+          <thead><tr><th>Design</th><th>Latency</th><th>Estimated period</th><th>Outcome</th></tr></thead>
+          <tbody>
+            <tr><td>Serial accumulation</td><td><strong>111 cycles</strong></td><td>13.301 ns</td><td>Missed 10 ns target</td></tr>
+            <tr><td>Four-way staged accumulation</td><td><strong>136 cycles</strong></td><td>7.230 ns</td><td>Met target</td></tr>
+            <tr><td>Full accepted data path</td><td><strong>1,768 cycles</strong></td><td>Within contract</td><td>Routed system closed timing</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="footerline"><span>The “slower” architecture was the one that worked</span><span class="slide-number"></span></footer>
+      <aside class="notes">The first two rows describe the early core. The full instrument later spent nearly the complete 2,000-cycle allowance on richer DSP. Final timing authority comes from routed Vivado results, not an HLS estimate.</aside>
+    </section>
+
+    <section class="slide" data-title="Responsibility by domain">
+      <header class="topline"><span>System architecture</span><span class="section">Responsibility by domain</span></header>
       <div class="content">
-        <div class="eyebrow">More cycles. Much shorter logic.</div>
-        <h2>The “slower” design was the one that <em>worked.</em></h2>
-        <div class="timing-shift">
-          <article class="timing-state bad"><b>111</b><p>cycles · 13.301 ns estimated clock</p></article>
-          <div class="timing-arrow">→</div>
-          <article class="timing-state good"><b>136</b><p>cycles · 7.230 ns estimated clock</p></article>
+        <div class="eyebrow">Use every part of the adaptive SoC</div>
+        <h2>Each domain owns the work it does <em>best.</em></h2>
+        <div class="architecture">
+          <article><h3>PS · Linux · ALSA</h3><ul><li>Device discovery</li><li>MIDI decoding</li><li>Event reduction</li><li>Voice allocation</li><li>Service recovery</li></ul></article>
+          <article><h3>PL · RTL</h3><ul><li>AXI register bank</li><li>Coherent commit</li><li>48 kHz scheduling</li><li>CDC + overrun accounting</li><li>I2S serialization</li></ul></article>
+          <article><h3>HLS · DSP</h3><ul><li>Oscillators</li><li>Envelopes</li><li>Modulation</li><li>Filters + reverb</li><li>PCM sample function</li></ul></article>
         </div>
       </div>
-      <footer class="footerline"><span>Four PCM LSB maximum difference · acceptance flow passed</span><span class="slide-number"></span></footer>
-      <aside class="notes">The cycle count went back up, exactly as requested. The clock estimate fell from 13.301 ns to 7.230 ns. Functional behavior stayed within four PCM LSB, and the complete HLS acceptance flow passed. This is why domain knowledge matters: “optimize” has no meaning until you choose the axis.</aside>
+      <footer class="footerline"><span>The algorithm has no MIDI, AXI, UIO, or I2S knowledge</span><span class="slide-number"></span></footer>
+      <aside class="notes">Audio never streams from Linux. Linux publishes compact control state. The PL owns hard real-time sample generation and serialization.</aside>
     </section>
 
-    <section class="slide orange" data-title="Spend the budget">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">The full instrument</span></header>
-      <div class="content center">
-        <div class="eyebrow">Then we spent the latency on sound</div>
-        <h1><em>~1,800</em> of 2,000 cycles.</h1>
-        <p class="lede">Sixteen rich voices, resonant filters, modulation and reverb, with timing closure.</p>
+    <section class="slide paper" data-title="Why EDF and ALSA">
+      <header class="topline"><span>Embedded software</span><span class="section">Why EDF + ALSA</span></header>
+      <div class="content top">
+        <div class="eyebrow">Use the processing system as an architectural strength</div>
+        <h2>Manage devices in Linux. <em>Keep PL deterministic.</em></h2>
+        <table class="tech-table">
+          <thead><tr><th>EDF / PS-managed architecture</th><th>Direct MIDI decoding in PL</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ALSA Sequencer</strong> provides standard MIDI events and mature device handling.</td><td>Requires custom USB/transport and parser integration.</td></tr>
+            <tr><td>Discovery, disconnect, and reconnect are ordinary Linux service concerns.</td><td>Device lifecycle becomes hardware behavior.</td></tr>
+            <tr><td>Voice policy and control mapping change without rebuilding PL.</td><td>Policy changes require hardware iteration.</td></tr>
+            <tr><td><strong>EDF + dfx-mgr</strong> package and manage a replaceable runtime PL payload.</td><td>A static payload couples more behavior to the hardware image.</td></tr>
+          </tbody>
+        </table>
       </div>
-      <footer class="footerline"><span>Use the budget you actually have</span><span class="slide-number"></span></footer>
-      <aside class="notes">The accepted HLS report records 1,768 worst-case cycles; call it about 1,800 while speaking. The workshop briefing used 1,803 from an adjacent accepted build. The point is invariant: the final design intentionally consumed almost the whole 2,000-cycle allowance and the integrated routed product still closed timing comfortably.</aside>
+      <footer class="footerline"><span>No product requirement justified putting low-rate MIDI policy in PL</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is a product-specific decision, not a claim that PL MIDI decoding is always wrong. EDF provides AMD's curated Yocto flow; ALSA provides mature infrastructure; PL remains focused on deterministic audio.</aside>
     </section>
 
-    <section class="slide paper" data-title="System partition">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">PS / PL boundary</span></header>
+    <section class="slide" data-title="EDF-managed runtime">
+      <header class="topline"><span>Embedded software</span><span class="section">EDF-managed runtime</span></header>
       <div class="content">
-        <div class="eyebrow">Put each kind of work where it belongs</div>
-        <h2>Events in software. <em>Samples in fabric.</em></h2>
-        <div class="grid two">
-          <article class="card"><span class="number">Processing system</span><h3>Policy</h3><p>ALSA receives MIDI. C allocates voices, translates controls and writes only changed state over AXI4-Lite.</p></article>
-          <article class="card"><span class="number">Programmable logic</span><h3>Determinism</h3><p>RTL adopts a coherent snapshot, schedules HLS once per sample and transfers stable PCM into the I2S clock domain.</p></article>
+        <div class="eyebrow">The runtime is part of the product</div>
+        <h2>Package the system. <em>Own the lifecycle.</em></h2>
+        <div class="flow compact" aria-label="EDF boot and runtime PL flow">
+          <div class="flow-node">EDF<br>synth-image</div><div class="flow-arrow">→</div>
+          <div class="flow-node">dfx-mgr<br>service</div><div class="flow-arrow">→</div>
+          <div class="flow-node accent">FPGA Manager<br>loads PL_FLAT</div><div class="flow-arrow">→</div>
+          <div class="flow-node">synth.service<br>starts control</div><div class="flow-arrow">→</div>
+          <div class="flow-node">ALSA finds FC25<br>synth starts automatically</div>
         </div>
+        <p class="metric-note">Firmware, overlay, application, ALSA support, and services ship together; reconnect restarts software without needlessly reprogramming PL.</p>
       </div>
-      <footer class="footerline"><span>Commit generation publishes state atomically</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is the required PS-to-PL emphasis. Software writes voice and parameter shadows, then writes a commit generation last. At an audio request, PL adopts the complete bank only when the generation changes. Audio never streams from Linux.</aside>
+      <footer class="footerline"><span>Managed post-boot PL loading · replaceable payload · persistent operation</span><span class="slide-number"></span></footer>
+      <aside class="notes">Present EDF as the intended deployment architecture. Linux boots, dfx-mgr applies the packaged bitstream and overlay through FPGA Manager, then the control service uses the resulting AXI map. The accepted image survives FC25 disappearance and return.</aside>
     </section>
 
-    <section class="slide" data-title="Engineering responsibility">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">Responsibility</span></header>
-      <div class="content">
-        <div class="eyebrow">The human did not leave the loop</div>
-        <h2>Different actors own <em>different truths.</em></h2>
-        <div class="roles">
-          <article class="role"><h3>Engineer</h3><p>Chooses the product, architecture, tradeoffs, safety boundaries and acceptance criteria.</p></article>
-          <article class="role"><h3>Agents</h3><p>Explore, implement, operate tools, diagnose failures and preserve continuity across disciplines.</p></article>
-          <article class="role"><h3>Evidence</h3><p>Tests, reports, timing, CDC, readback and physical use determine what can actually be claimed.</p></article>
-        </div>
+    <section class="slide paper" data-title="Routed implementation">
+      <header class="topline"><span>Vivado 2025.2</span><span class="section">Routed implementation</span></header>
+      <div class="content top">
+        <div class="eyebrow">What the complete system cost</div>
+        <h2>A substantial design, <em>fully implemented.</em></h2>
+        <table class="tech-table">
+          <thead><tr><th>Resource / check</th><th>Used</th><th>Available</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>CLB LUTs</td><td><strong>80,882</strong></td><td>117,120</td><td>69.06%</td></tr>
+            <tr><td>CLB registers</td><td><strong>69,256</strong></td><td>234,240</td><td>29.57%</td></tr>
+            <tr><td>Block RAM tiles</td><td><strong>15</strong></td><td>144</td><td>10.42%</td></tr>
+            <tr><td>DSP48E2</td><td><strong>398</strong></td><td>1,248</td><td>31.89%</td></tr>
+            <tr><td>CLBs occupied</td><td><strong>14,259</strong></td><td>14,640</td><td>97.40%</td></tr>
+            <tr><td>Timing</td><td><strong>WNS +0.828 ns</strong></td><td>WHS +0.010 ns</td><td>PASS</td></tr>
+          </tbody>
+        </table>
       </div>
-      <footer class="footerline"><span>Delegation is not abdication</span><span class="slide-number"></span></footer>
-      <aside class="notes">The system worked because responsibility was explicit. Human judgment chose “sounds excellent” as a real acceptance criterion, alongside machine-checkable gates. The agent had broad execution authority inside those boundaries.</aside>
+      <footer class="footerline"><span>69% LUTs · but 97.4% spatial CLB occupancy</span><span class="slide-number"></span></footer>
+      <aside class="notes">Use the physical resource denominators from the routed report. The K26 “system logic cells” marketing metric is not a LUT count. The design passed setup and hold; hold slack is positive but narrow.</aside>
     </section>
 
-    <section class="slide" data-title="Measured result">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">Measured result</span></header>
-      <div class="content">
+    <section class="slide" data-title="Acceptance evidence">
+      <header class="topline"><span>Vitis AI HLS</span><span class="section">Acceptance evidence</span></header>
+      <div class="content top">
         <div class="eyebrow">Not a mock-up</div>
         <h2>Built. Routed. Deployed. <em>Played.</em></h2>
-        <div class="facts">
-          <div class="fact"><b>16</b><span>polyphonic voices</span></div>
-          <div class="fact"><b>48k</b><span>samples per second</span></div>
-          <div class="fact"><b>~1.8k</b><span>worst-case HLS cycles</span></div>
-          <div class="fact"><b>0</b><span>hardware overruns</span></div>
-        </div>
+        <table class="tech-table">
+          <thead><tr><th>Layer</th><th>Evidence</th></tr></thead>
+          <tbody>
+            <tr><td>Algorithm</td><td>Independent reference, native tests, C simulation, HLS synthesis, and co-simulation.</td></tr>
+            <tr><td>Integration</td><td>AXI/register/I2S and complete-top simulation; gated timing, methodology, DRC, and CDC.</td></tr>
+            <tr><td>Board</td><td>Identity <strong>SYNT</strong>, ABI 1.0, coherent generations, physical diagnostic and HLS audio.</td></tr>
+            <tr><td>Performance</td><td><strong>16 voices · 48 kHz · 1,768 cycles · zero overruns</strong>.</td></tr>
+            <tr><td>Runtime</td><td>Persistent startup, clean stop, cold boot, and FC25 disconnect/reconnect recovery.</td></tr>
+            <tr><td>Human</td><td>Velocity, four controls, ten-note capture, clean releases, responsiveness, accepted sound.</td></tr>
+          </tbody>
+        </table>
       </div>
-      <footer class="footerline"><span>Timing clean · persistent boot · physical audio</span><span class="slide-number"></span></footer>
-      <aside class="notes">The accepted HLS report records 1,768 worst-case cycles; call it about 1,800. The routed design closed timing with positive setup and hold slack. It was deployed on KV260, read back correctly, survived reboot and cold power cycling, and produced responsive physical audio from the FC25 through the Pmod DAC.</aside>
+      <footer class="footerline"><span>Machine evidence + physical behaviour + owner judgment</span><span class="slide-number"></span></footer>
+      <aside class="notes">No single green report establishes the product. Acceptance accumulated from algorithm tests through routed implementation, live register evidence, runtime recovery, and actual musical use.</aside>
     </section>
 
-    <section class="slide orange" data-title="The real result">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">Human acceptance</span></header>
-      <div class="content center">
-        <div class="eyebrow">The last test was not in a report</div>
-        <h1>It sounds <em>excellent.</em></h1>
-        <p class="lede">And it responds like an instrument.</p>
-      </div>
-      <footer class="footerline"><span>Now let the room hear it</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is the live-demo handoff. Stop presenting and play. Show velocity, several simultaneous notes and all four controls. Let someone in the audience play if the room setup permits.</aside>
-    </section>
-
-    <section class="slide paper" data-title="What changed">
-      <header class="topline"><span>Vitis AI HLS</span><span class="section">The lesson</span></header>
-      <div class="content center">
-        <div class="eyebrow">One more abstraction shift</div>
-        <h1>We still engineer.</h1>
-        <p class="lede"><strong>But the scarce skill is moving from typing implementation to directing a verified engineering process.</strong></p>
-      </div>
-      <footer class="footerline"><span>More ambitious systems become worth attempting</span><span class="slide-number"></span></footer>
-      <aside class="notes">Return to the opening. Punch cards did not end programming. Assembly did not end programming. C did not end programming. Agents and HLS do not end engineering. They change what the engineer can economically ask the machine to build.</aside>
-    </section>
-
-    <section class="slide" data-title="Closing">
+    <section class="slide paper" data-title="Closing">
       <header class="topline"><span>Vitis AI HLS</span><span class="section">Idea to hardware</span></header>
       <div class="content center">
-        <div class="eyebrow">The invitation</div>
-        <h1 class="giant">Build the thing.</h1>
-        <p class="lede">Specify boldly. Delegate deliberately. Verify relentlessly.</p>
+        <div class="eyebrow">Engineering at a higher level</div>
+        <h1>We still engineer.</h1>
+        <p class="lede"><strong>Specify boldly. Delegate deliberately. Verify relentlessly.</strong></p>
       </div>
-      <footer class="footerline"><span>Days, not months</span><span class="slide-number"></span></footer>
-      <aside class="notes">Close on action, not prediction. Invite the audience to choose one bounded but meaningful hardware idea and run the complete loop. Keep the instrument available throughout the day so the physical result remains the final argument.</aside>
+      <footer class="footerline"><span>Build the thing · days, not months</span><span class="slide-number"></span></footer>
+      <aside class="notes">Return to the abstraction arc. The scarce skill moves toward choosing the product, expressing constraints, directing tradeoffs, and deciding what evidence is enough. Invite the audience to attempt one bounded, meaningful hardware product through the complete loop.</aside>
     </section>
   </main>
 
