@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Knowledgetrees: an AI-native knowledge system for reliable agentic engineering.">
   <title>Knowledgetrees: Make the Filesystem Remember</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
   <style>
     :root {
       color-scheme: light;
@@ -184,7 +186,11 @@
     }
     .question .prompt { color: #ffb1b5; }
     .terminal-line + .terminal-line { margin-top: 12px; }
-    .answer { color: #fff; }
+    .answer { color: #b8acaf; }
+    .question .cmd { color: #fff; font-weight: 800; }
+    .question .kw { color: #f3c98b; }
+    .question .fn { color: #8fd8b8; }
+    .terminal-line.wrap { width: 0; min-width: 100%; }
 
     .split { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(26px, 5vw, 74px); align-items: center; }
     .split.equal { grid-template-columns: 1fr 1fr; }
@@ -199,6 +205,9 @@
       font-size: clamp(12px, 1.15vw, 16px);
     }
     .stack-item b { color: var(--accent); }
+    .roots .stack-item { grid-template-columns: minmax(150px, .62fr) 1fr; }
+    .stack-item b.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight: 700; }
+    .stack-item em { display: block; margin-top: 2px; color: var(--ink-faint); font-style: normal; font-size: .85em; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
     .stack-item span { color: var(--ink-soft); }
 
     .tree {
@@ -240,6 +249,11 @@
     .equation .operator { color: var(--accent); font-size: clamp(28px, 4vw, 58px); font-weight: 300; }
 
     blockquote { margin: 0; }
+    .testimonials { display: grid; grid-template-columns: 1fr; gap: clamp(16px, 2.6vh, 30px); max-width: 1220px; }
+    .testimonials .testimonial { max-width: none; padding: clamp(16px, 2.6vh, 32px) clamp(24px, 3vw, 46px); font-size: clamp(18px, min(1.95vw, 3.3vh), 31px); }
+    .testimonial .body { margin: 14px 0 0; color: var(--ink-soft); font-size: clamp(13px, min(1.25vw, 2.1vh), 20px); font-weight: 500; letter-spacing: 0; line-height: 1.5; }
+    .testimonial .body + .body { margin-top: 8px; }
+    .testimonials cite { margin-top: 14px; font-size: clamp(10px, min(.95vw, 1.6vh), 14px); }
     .testimonial {
       position: relative;
       max-width: 1080px;
@@ -270,9 +284,39 @@
     .contrast p { margin: 14px 0 0; color: var(--ink-soft); font-size: clamp(14px, 1.4vw, 20px); line-height: 1.42; }
     .contrast .bad p { color: #ded2ce; }
 
-    .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 30px; }
-    .loop div { position: relative; padding: 18px 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); text-align: center; font-size: clamp(12px, 1.25vw, 17px); font-weight: 900; }
-    .loop div:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; right: -17px; color: var(--accent); font-size: 20px; }
+    .loop { display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; margin-top: 30px; }
+    .loop div { display: grid; place-items: center; position: relative; padding: 18px 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); text-align: center; font-size: clamp(12px, 1.25vw, 17px); font-weight: 900; }
+    .loop div:not(:last-child)::after { content: "→"; position: absolute; z-index: 1; right: -29px; width: 28px; text-align: center; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 20px; }
+
+    i.math, .math i { font-style: italic; }
+    .math { font-family: "STIX Two Math", "Latin Modern Math", "Cambria Math", "STIX Two Text", Georgia, serif; font-style: normal; letter-spacing: 0; }
+    .formula { margin: 10px 0 18px; color: #fff; text-align: center; white-space: nowrap; font-size: clamp(15px, 1.45vw, 26px); }
+    .formula .katex { font-size: 1.32em; }
+    .hierarchy { display: grid; gap: 10px; max-width: 1080px; }
+    .tier {
+      display: grid;
+      grid-template-columns: minmax(96px, .5fr) minmax(130px, .8fr) 2.4fr;
+      gap: clamp(12px, 2vw, 28px);
+      align-items: center;
+      padding: clamp(12px, 1.6vw, 20px) clamp(14px, 2vw, 24px);
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: 5px 5px 0 var(--shadow);
+    }
+    .tier .level { color: var(--accent); font-size: clamp(11px, 1vw, 14px); font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }
+    .tier b { font-size: clamp(18px, 2vw, 28px); letter-spacing: -.04em; }
+    .tier span:last-child { color: var(--ink-soft); font-size: clamp(13px, 1.25vw, 18px); line-height: 1.4; }
+    .tier.kt { border: 2px solid var(--dark); background: var(--dark); color: var(--dark-text); box-shadow: 8px 8px 0 #e8b7b8; }
+    .tier.kt .level { color: #ffb1b5; }
+    .tier.kt span:last-child { color: #e6d9d3; }
+    .tier.backing { border-style: dashed; background: transparent; box-shadow: none; margin-top: 8px; }
+
+    .route { display: grid; grid-template-columns: 4em 1fr; gap: 18px; align-items: center; margin-top: 18px; }
+    .route > b { color: #ffb1b5; font-size: clamp(11px, 1vw, 14px); letter-spacing: .14em; text-transform: uppercase; }
+    .route ol { display: flex; flex-wrap: wrap; gap: 8px 30px; margin: 0; padding: 0; list-style: none; }
+    .route li { position: relative; padding: 14px 16px; border: 1px solid #71696d; background: #353238; color: var(--dark-text); font-size: clamp(12px, 1.25vw, 17px); font-weight: 900; }
+    .route li:not(:last-child)::after { content: "→"; position: absolute; right: -31px; width: 30px; text-align: center; line-height: 1; top: 50%; transform: translateY(-75%); color: var(--accent-bright); font-size: 22px; }
+    .route li.fill { border-color: var(--accent-bright); color: #ffb1b5; }
 
     .status-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .status { padding: clamp(20px, 2.4vw, 32px); border: 1px solid var(--line); background: var(--paper); box-shadow: 5px 5px 0 var(--shadow); }
@@ -390,13 +434,14 @@
       .contrast { grid-template-columns: 1fr; }
       .contrast .versus { min-height: 16px; }
       .loop { grid-template-columns: 1fr; }
-      .loop div:not(:last-child)::after { content: "↓"; right: 50%; bottom: -17px; }
+      .loop div:not(:last-child)::after { content: "↓"; left: 0; right: 0; width: auto; top: auto; bottom: -29px; height: 28px; line-height: 28px; transform: none; }
       .slide { padding-bottom: 72px; }
     }
     @media (max-width: 520px) {
       .grid.two, .grid.three, .grid.four, .status-row { grid-template-columns: 1fr; }
       .topline span:last-child { display: none; }
       .stack-item { grid-template-columns: 1fr; gap: 3px; }
+      .tier, .route { grid-template-columns: 1fr; gap: 4px; }
       .controls { right: 10px; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -429,7 +474,7 @@
       <header class="topline"><span>Knowledgetrees</span><span class="section">The recurring problem</span></header>
       <div class="content">
         <div class="eyebrow">We keep having the same conversation</div>
-        <h1>Agents are brilliant. <em>And they keep getting lost.</em></h1>
+        <h1 style="max-width:16ch">Agents are brilliant. <em>And they keep getting lost.</em></h1>
         <p class="lede">They can write code better and faster than we can. Yet every serious agentic workflow eventually becomes a conversation about confusion, supervision and recovery.</p>
       </div>
       <footer class="footerline"><span>David Farrell · 2026</span><span class="slide-number"></span></footer>
@@ -451,87 +496,98 @@
       <aside class="notes">Read only a few examples. The point is the breadth: planning, implementation, testing and documentation all fail in related ways.</aside>
     </section>
 
-    <section class="slide" data-title="Band-aids">
+    <section class="slide accent" data-title="Context poisoning">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The root cause</span></header>
+      <div class="content center">
+        <div class="eyebrow">Why don't agents do the right thing?</div>
+        <h1 class="giant" style="margin-bottom:48px">Context <em>poisoning.</em></h1>
+        <p class="lede">Too much, irrelevant or conflicting information in context, and agents quietly go off the rails. <strong>It doesn't take much.</strong></p>
+      </div>
+      <footer class="footerline"><span>A little is enough</span><span class="slide-number"></span></footer>
+      <aside class="notes">Pause here. This is the core diagnosis. The problem is not mainly prompt quality or model intelligence. A transformer reasons from whatever is in its context, and if that includes a little irrelevant or conflicting material, its judgment gets worse. Not dramatically, and not always where the bad material is. That is what makes it dangerous.</aside>
+    </section>
+
+    <section class="slide" data-title="Invisible damage">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Why you don't see it</span></header>
+      <div class="content">
+        <div class="eyebrow">And you can't see their context</div>
+        <h2>You won't notice. <em>Not at first.</em></h2>
+        <p class="lede">Agents read files and hide the output. A little poison bends decisions far from where it got in, while you're not looking.</p>
+        <div class="loop" aria-label="How context poisoning compounds">
+          <div>a little bad context</div><div>strange, indefensible decisions</div><div>in unrelated places</div><div>scar tissue, not fixes</div><div>a mountain of crossed wires</div>
+        </div>
+      </div>
+      <footer class="footerline"><span>Agents don't fix the mistake · they build around it</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is the part everyone has lived through without having a name for it. The agent makes an odd choice somewhere unrelated. Later work builds on it, and later fixes work around it instead of removing it. Weeks later you run into a mountain of technical debt with more and more crossed wires, and it keeps getting worse. All of it can trace back to a small amount of irrelevant or conflicting material in context.</aside>
+    </section>
+
+    <section class="slide" data-title="Foraging">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">How the poison gets in</span></header>
+      <div class="content split">
+        <div>
+          <div class="eyebrow">If it doesn't have what it needs at the outset</div>
+          <h2>It goes <em>looking.</em></h2>
+          <p class="lede">It reads whatever documents are lying around, and those were written for humans: narrative, context, frontmatter, history. <strong>And they go stale fast.</strong></p>
+        </div>
+        <div class="stack" aria-label="Documents lying around">
+          <div class="stack-item"><b>README</b><span>Orientation mixed with setup and history</span></div>
+          <div class="stack-item"><b>docs/</b><span>Long narratives with buried answers</span></div>
+          <div class="stack-item"><b>skills/</b><span>Procedures in a separate retrieval convention</span></div>
+          <div class="stack-item"><b>comments</b><span>Rationale hidden behind source discovery</span></div>
+          <div class="stack-item"><b>plans + specs</b><span>Intent duplicated across stale snapshots</span></div>
+          <div class="stack-item"><b>chat + notes</b><span>Current truth tangled with chronology</span></div>
+        </div>
+      </div>
+      <footer class="footerline"><span>For agents, resources are hazards</span><span class="slide-number"></span></footer>
+      <aside class="notes">An under-informed agent does not stop and ask. It forages. Every document it opens is written for a human reader who brings memory, context and judgment about which paragraph is current. The agent brings none of that, so it takes in irrelevant and conflicting material along with what it wanted. Search and RAG make foraging faster. They don't change what is being foraged from. We store information for humans, and our new reader is not human.</aside>
+    </section>
+
+    <section class="slide dark" data-title="Band-aids">
       <header class="topline"><span>Knowledgetrees</span><span class="section">Our current response</span></header>
       <div class="content">
         <h2>So we add more <em>band-aids.</em></h2>
         <div class="grid four">
-          <article class="card"><span class="number">01 / Prompt</span><h3>Bigger instructions</h3><p>Load more rules up front and hope the relevant one remains salient.</p></article>
+          <article class="card"><span class="number">01 / Prompt</span><h3>Bigger instructions</h3><p>Load more rules up front. More context, more to conflict.</p></article>
           <article class="card"><span class="number">02 / Process</span><h3>Rigid plans</h3><p>Freeze every decision early because adaptation may lose the original intent.</p></article>
           <article class="card"><span class="number">03 / Oversight</span><h3>Human babysitting</h3><p>Continuously redirect, remind, approve and re-explain.</p></article>
           <article class="card"><span class="number">04 / Recovery</span><h3>Handover summaries</h3><p>Compress a rich working state into prose and hope nothing essential disappears.</p></article>
         </div>
       </div>
       <footer class="footerline"><span>Useful mitigations · incomplete model</span><span class="slide-number"></span></footer>
-      <aside class="notes">These are not bad practices. They are compensations for a deeper mismatch. Even excellent specs and plans become brittle when the working knowledge around them is transient or scattered.</aside>
+      <aside class="notes">These are not bad practices. But none of them stops the foraging, and some add to it: bigger instructions are more context to conflict, and handover summaries are one more human-shaped document lying around. They are compensations for the problem, not a fix for it.</aside>
     </section>
 
-    <section class="slide accent" data-title="The diagnosis">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">The diagnosis</span></header>
+    <section class="slide" data-title="Spec fantasy">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The obvious fix</span></header>
       <div class="content center">
-        <div class="eyebrow">Why do we keep running in circles?</div>
-        <h1 class="giant">We store information <em>for humans.</em></h1>
+        <div class="eyebrow">Our best answer is spec-driven development</div>
+        <h2 style="max-width:18ch">A single, complete, unchanging source of truth. <em>It's a fantasy.</em></h2>
+        <p class="lede">Specs change the week they're written. And the old docs are <strong>still lying around.</strong></p>
       </div>
-      <footer class="footerline"><span>But our new reader is not human</span><span class="slide-number"></span></footer>
-      <aside class="notes">Pause here. This is the core diagnosis. The problem is not merely prompt quality or model intelligence. The environment represents organizational knowledge in a form optimized for human readers.</aside>
+      <footer class="footerline"><span>Real projects learn as they go</span><span class="slide-number"></span></footer>
+      <aside class="notes">Spec-driven development is the right instinct: if resources are hazards, give the agent one authoritative source and nothing else. But no real project has a complete spec that never changes. Requirements move, implementation teaches you things, and the spec falls behind. Meanwhile every earlier doc, plan and note is still in the repository, waiting to be found.</aside>
     </section>
 
-    <section class="slide" data-title="Human-shaped information">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">The old substrate</span></header>
-      <div class="content split">
-        <div>
-          <div class="eyebrow">Our knowledge stack</div>
-          <h2>Linear. Fragmented. <em>Implicit.</em></h2>
-          <p class="lede">Humans browse, skim, remember history, recognize authority and infer which paragraph is current. Agents pay tokens to approximate all of that.</p>
-        </div>
-        <div class="stack" aria-label="Traditional knowledge surfaces">
-          <div class="stack-item"><b>README</b><span>Orientation mixed with setup and history</span></div>
-          <div class="stack-item"><b>docs/</b><span>Long presentations with buried answers</span></div>
-          <div class="stack-item"><b>skills/</b><span>Procedures in a separate retrieval convention</span></div>
-          <div class="stack-item"><b>comments</b><span>Rationale hidden behind source discovery</span></div>
-          <div class="stack-item"><b>plans + specs</b><span>Intent duplicated across snapshots</span></div>
-          <div class="stack-item"><b>chat + notes</b><span>Current truth tangled with chronology</span></div>
-        </div>
-      </div>
-      <footer class="footerline"><span>Source is evidence · not always explanation</span><span class="slide-number"></span></footer>
-      <aside class="notes">The source code can be authoritative while still being a terrible explanation. Human readers bring durable memory, domain intuition and social context. Agents do not.</aside>
-    </section>
-
-    <section class="slide dark" data-title="Why RAG was insufficient">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">Why retrieval alone was not enough</span></header>
-      <div class="content">
-        <div class="eyebrow">We tried to assist generation with resources</div>
-        <h2>RAG retrieved chunks from a corpus that was <em>still shaped for humans.</em></h2>
-        <div class="equation" aria-label="RAG limitation">
-          <div class="term">Human-shaped<br>documents</div><div class="operator">+</div>
-          <div class="term">Similarity<br>search</div><div class="operator">=</div>
-          <div class="term">Better access,<br>same ambiguity</div>
-        </div>
-      </div>
-      <footer class="footerline"><span>Retrieval is useful · representation is upstream</span><span class="slide-number"></span></footer>
-      <aside class="notes">Do not claim RAG is useless. The claim is narrower: retrieval cannot fully repair ambiguous ownership, stale chronology, mixed scope or answers designed as long narratives.</aside>
-    </section>
-
-    <section class="slide" data-title="The inversion">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">The inversion</span></header>
+    <section class="slide" data-title="AI-native">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The turn</span></header>
       <div class="content center">
-        <div class="eyebrow">AI-native engineering starts one layer deeper</div>
-        <h1>Do not help agents read our documentation.</h1>
-        <p class="lede"><strong>Represent knowledge in the form agents need.</strong></p>
+        <div class="eyebrow">Not a better document · a different substrate</div>
+        <h1 style="max-width:14ch">We need a truly <em>AI-native</em> solution.</h1>
+        <p class="lede">Built for the reader we actually have.</p>
       </div>
-      <footer class="footerline"><span>Store knowledge · generate presentations</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is the transition to the reveal. Documents still matter as evidence, governing sources and human deliverables. They stop being the only internal representation agents must repeatedly decode.</aside>
+      <footer class="footerline"><span>Knowledge shaped for agents, not humans</span><span class="slide-number"></span></footer>
+      <aside class="notes">A breather. Move off spec-driven development without dwelling on it: the instinct is right, and the tools just weren't built for this reader. Everything so far (poisoning, foraging, stale human-shaped docs, specs that can't stay complete) points the same way. Agents need knowledge in their own form: relevant, current, and there before they go looking. Then: "Well, great news."</aside>
     </section>
 
     <section class="slide dark" data-title="The reveal">
       <header class="topline"><span>Knowledgetrees</span><span class="section">The proposal</span></header>
       <div class="content center">
-        <div class="eyebrow">A stateful, self-growing, self-healing filesystem for agent knowledge</div>
-        <h1 class="giant"><em>Knowledge</em><br>trees.</h1>
-        <p class="lede">Make the filesystem remember what agents learn.</p>
+        <div class="eyebrow" style="margin-bottom:0">Persistent · accretive · self-correcting</div>
+        <h1 class="giant" style="white-space:nowrap;font-size:clamp(44px,8.6vw,160px);margin-top:.216em;margin-bottom:.32em"><em>Knowledge</em>trees.</h1>
+        <p class="lede">An agar dish for agents.</p>
       </div>
       <footer class="footerline"><span>github.com/linkin-parks-bassist/knowledgetrees</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is the product reveal. The one-sentence proposition from the README is “Make the filesystem remember what agents learn.”</aside>
+      <aside class="notes">"Great news: I have the solution." This is the product reveal. The README's one-sentence pitch is "Make the filesystem remember what agents learn." What it remembers is not better documentation for humans. It is knowledge kept in the form agents need, each piece in its own small leaf with its own address. Name the three properties the rest of the talk earns: persistent, it outlives every session; accretive, it grows as agents work; self-correcting, it checks itself against reality.</aside>
     </section>
 
     <section class="slide" data-title="Semantic filesystem">
@@ -552,109 +608,224 @@
         <div>
           <div class="eyebrow">A filesystem that doubles as an ontology</div>
           <h2>The question points at the answer.</h2>
-          <p class="lede">Paths carry meaning. Leaves contain direct, current answers. The agent retrieves the smallest useful unit, from one implementation fact to an entire specification.</p>
+          <p class="lede">Paths carry meaning, so knowledge is <strong>indexed by relevance</strong>. The agent gets exactly what its question needs, from one fact to a whole specification, <strong>and nothing else.</strong></p>
         </div>
       </div>
       <footer class="footerline"><span>The path is half the query</span><span class="slide-number"></span></footer>
-      <aside class="notes">The structure is not folders for folders' sake. “How do I test the installer?” naturally predicts the route. Exact wording is not required; lexical lookup and semantic branches support discovery.</aside>
+      <aside class="notes">The folders are there because they carry meaning. "How do I test the installer?" already predicts the route. Exact wording is not required; lexical lookup and semantic branches support discovery. Relevance is built into the address: the agent asks its question and loads only the leaves that answer it, instead of foraging through documents and pulling in everything nearby. Nothing irrelevant gets in to poison the context.</aside>
     </section>
 
-    <section class="slide" data-title="Context is working memory">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">Context economics</span></header>
-      <div class="content">
-        <div class="eyebrow">A different contract with the context window</div>
-        <h2>Context is <em>working memory.</em><br>Not storage.</h2>
-        <div class="grid three">
-          <article class="card"><span class="number">On demand</span><h3>Pay only when needed</h3><p>Detailed knowledge can exist without entering every prompt.</p></article>
-          <article class="card"><span class="number">Persistent</span><h3>Survive compaction</h3><p>A fresh agent reconstructs understanding from current knowledge, not chat residue.</p></article>
-          <article class="card"><span class="number">Scoped</span><h3>Keep relevance local</h3><p>User, project and subsystem roots compose without flooding one another.</p></article>
+    <section class="slide" data-title="By agents, for agents">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The new substrate</span></header>
+      <div class="content split">
+        <div>
+          <div class="eyebrow">Pre-optimised by the reader it serves</div>
+          <h2>Written by agents, <em>for agents.</em></h2>
+          <p class="lede">Human documentation guesses at what its reader will need, then goes stale. Leaves are written by that reader: an agent records what it actually needed, <strong>in the form it needed it.</strong></p>
+        </div>
+        <div class="stack" aria-label="What leaves hold">
+          <div class="stack-item"><b>orientation</b><span>Where am I, and what matters here</span></div>
+          <div class="stack-item"><b>spec · plan · state</b><span>Intent, and where the work stands now</span></div>
+          <div class="stack-item"><b>procedures</b><span>How to do it in this repository</span></div>
+          <div class="stack-item"><b>policy</b><span>What to do, what to ask, what never to do</span></div>
+          <div class="stack-item"><b>decisions</b><span>Why it is this way</span></div>
+          <div class="stack-item"><b>facts</b><span>Exact, checkable details</span></div>
+          <div class="stack-item"><b>reasoning</b><span>Where the last investigation got to</span></div>
         </div>
       </div>
-      <footer class="footerline"><span>Less archaeology · more task</span><span class="slide-number"></span></footer>
-      <aside class="notes">The context starts with orientation and a vocabulary of what is known, not the whole knowledge base. Detail is loaded only when a question makes it relevant.</aside>
+      <footer class="footerline"><span>One representation for every kind of knowledge</span><span class="slide-number"></span></footer>
+      <aside class="notes">This mirrors the earlier "human-shaped information" slide. There, each kind of knowledge lived on its own surface, in its own convention. Here, orientation, instructions, policy, state, decisions and facts are all the same kind of thing: a small, addressable answer. The last row explains a lot of why this works so well. A leaf often holds not just raw information but reasoning that has already been done, so the agent picks up where the last one stopped instead of re-deriving it. Because agents write the leaves, they come out shaped the way agents use them, not the way a human guessed they would.</aside>
+    </section>
+
+    <section class="slide dark" data-title="Inspired by mathematics">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Why it scales</span></header>
+      <div class="content split" style="grid-template-columns:.82fr 1.18fr;width:min(100%,1400px)">
+        <div>
+          <div class="eyebrow">Structure, not search</div>
+          <h2>Inspired by <em>mathematics.</em></h2>
+          <p class="lede">Depth grows roughly with the <strong>logarithm</strong> of size, so the tree can keep growing while every lookup stays a handful of choices. And the tree is a <strong>Grothendieck construction</strong>: a family of answers indexed by paths, assembled into one navigable whole.</p>
+        </div>
+        <div class="grid" style="gap:18px">
+          <article class="card">
+            <span class="number">Logarithmic depth</span>
+            <div class="formula" data-tex="\text{depth} \approx \log_b n">depth ≈ log_b n</div>
+            <p>Ten branches per level reach a million leaves in six choices. Each choice narrows the question, so the path is half the query.</p>
+          </article>
+          <article class="card">
+            <span class="number">A Grothendieck construction</span>
+            <div class="formula" data-tex="\mathscr{K} = \int_{p \in \mathscr{P}} \mathscr{A}(p), \quad \mathscr{A} \colon \mathscr{P} \to \mathbf{Set}">𝒦 = ∫_{p∈𝒫} 𝒜(p),  𝒜 : 𝒫 → Set</div>
+            <p>Each path <i class="math">p</i> carries its answers <span class="math">𝒜(<i>p</i>)</span>. The Grothendieck construction assembles that indexed family into one category: every leaf sits over its path, and refining the path carries you between leaves.</p>
+          </article>
+        </div>
+      </div>
+      <footer class="footerline"><span>The path is half the query</span><span class="slide-number"></span></footer>
+      <aside class="notes">A short detour for the mathematically inclined. "Put files in folders" sounds naive; it isn't. First, scale: a tree with branching factor b holds n leaves at depth about log_b n, so it keeps growing while every lookup stays a few directory choices, and each choice discards most of the tree. Second, structure: the paths form a category, each path carries a family of answers, and the Grothendieck construction glues those fibres into a single total category. An object is a leaf at its path; moving along a refinement of the path moves you between leaves. That is the knowledge tree. Don't linger. The point is that the shape is principled, not ad hoc.</aside>
+    </section>
+
+    <section class="slide" data-title="In context is not ready">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Why it works so well</span></header>
+      <div class="content">
+        <div class="eyebrow">In context is not the same as ready to reason</div>
+        <h2 style="max-width:24ch">Don't cache the answer. <em>Cache where reasoning got to.</em></h2>
+        <div class="grid three">
+          <article class="card"><span class="number">01 / Context</span><h3>Transformers reason from context</h3><p>Whatever the agent effectively knows right now is whatever is represented in its window.</p></article>
+          <article class="card"><span class="number">02 / Transformation</span><h3>Relevant material still needs work</h3><p>Source, docs, history, search results and even summaries must be interpreted for scope, relevance, authority and dependencies before the next step can use them.</p></article>
+          <article class="card"><span class="number">03 / Repetition</span><h3>Agents keep paying for it</h3><p>Each session, and each compaction, repeats the same transformation and then throws the result away.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>Relevant is not enough · ready is better</span><span class="slide-number"></span></footer>
+      <aside class="notes">Relevance keeps the poison out. This is the second reason it works so well. For a transformer, knowing something means having it in context, but relevant material still has to be interpreted before the next step can use it, and agents redo that every session. Many leaves hold where earlier reasoning got to, so the agent starts from that point. Nothing here removes reasoning. What it removes is rebuilding reasoning that was already done.</aside>
+    </section>
+
+    <section class="slide" data-title="Cache hierarchy">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Persistent</span></header>
+      <div class="content">
+        <div class="eyebrow">A semantic cache hierarchy</div>
+        <div class="hierarchy" aria-label="Semantic cache hierarchy">
+          <div class="tier"><span class="level">L1</span><b>KV cache</b><span>Computation already internalized in the current inference pass.</span></div>
+          <div class="tier"><span class="level">L2</span><b>Context</b><span>The semantic working state the model can use right now.</span></div>
+          <div class="tier kt"><span class="level">L3</span><b>KT</b><span>Addressable knowledge, already worked into usable form. Survives sessions and compaction; brought into L2 on demand.</span></div>
+          <div class="tier backing"><span class="level">Backing store</span><b>Sources / world</b><span>Authoritative evidence. Missing or disputed knowledge is rebuilt from here.</span></div>
+        </div>
+      </div>
+      <footer class="footerline"><span>An analogy, not an implementation</span><span class="slide-number"></span></footer>
+      <aside class="notes">Present this as an intuition, not a literal claim about computer architecture. KT entries are not cached activations. They are persistent text and structure that the model reads again from scratch each time it loads them. What carries over is the shape: each level is slower and more durable than the one above it, the working set gets pulled upward when needed, and the backing store stays the authority. The level that was missing is L3. Without it, anything that falls out of context, at compaction or the end of a session, goes all the way back to raw sources. This is the first property: persistent.</aside>
+    </section>
+
+    <section class="slide" data-title="Trust model">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Self-correcting</span></header>
+      <div class="content">
+        <div class="eyebrow">L3 talks directly to the backing store</div>
+        <h2 style="max-width:22ch">Reconnect cached reasoning to <em>reality.</em></h2>
+        <p class="lede" style="margin-bottom:28px">Leaves carry executable proofs against the sources. <strong>Relevant proofs run automatically at every startup.</strong></p>
+        <div class="status-row">
+          <article class="status green"><b>Green</b><h3>No detected failure</h3><p>Usable after checking scope and evidence. Green is not a blanket claim of truth.</p></article>
+          <article class="status yellow"><b>Yellow</b><h3>Needs re-verification</h3><p>Freshness expired. Check the whole answer against evidence before renewing it.</p></article>
+          <article class="status brown"><b>Brown</b><h3>All hands on deck</h3><p>A proof failed or a claim was falsified. All other work stops until consistency is recovered from the sources.</p></article>
+        </div>
+      </div>
+      <footer class="footerline"><span>Sources remain evidence · a stale entry is invalidated, never trusted</span><span class="slide-number"></span></footer>
+      <aside class="notes">The second property, self-correcting, and it belongs straight after the hierarchy: persistence is only safe if it can correct itself. In this analogy, L3 is not a cache that drifts away from memory on its own. It checks itself against the backing store. The relevant proofs run automatically when every session starts, so the agent learns about any inconsistency before it relies on anything. A brown result is all hands on deck: the agent reports it prominently, stops all unrelated work, works out why the leaf or proof no longer matches reality, repairs it and re-runs the check. Work resumes only once consistency is back, or when the user explicitly chooses to set that particular failure aside. Don't oversell it: proofs cover only what can be checked mechanically, and green is no guarantee of truth. Knowledgetrees do not remove source reading, testing or judgment.</aside>
+    </section>
+
+    <section class="slide" data-title="Composition">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Why atomisation matters</span></header>
+      <div class="content split" style="grid-template-columns:.85fr 1.15fr;width:min(100%,1500px)">
+        <div>
+          <div class="eyebrow">Not memoization</div>
+          <h2 style="font-size:clamp(40px,5.2vw,88px);max-width:none;white-space:nowrap">Retrieve less.<br><em>Resume<br>further ahead.</em></h2>
+          <p class="lede">The agent does not replay a stored trajectory. It retrieves the few leaves relevant to the task, and <strong>composes them</strong> for the problem in front of it.</p>
+        </div>
+        <div class="question" aria-label="Composing leaves" style="font-size:clamp(14px,1.38vw,23px);line-height:1.45;width:fit-content;max-width:100%;justify-self:center">
+          <div class="terminal-line"><span class="prompt">$</span> <span class="cmd">kt</span> <span class="kw">where</span> am i</div>
+          <div class="terminal-line answer">→ orientation: a README, for agents</div>
+          <div class="terminal-line"><span class="prompt">$</span> <span class="cmd">kt</span> <span class="kw">what is</span> next</div>
+          <div class="terminal-line answer">→ the next action</div>
+          <div class="terminal-line"><span class="prompt">$</span> <span class="cmd">kt</span> <span class="kw">how to</span> behave</div>
+          <div class="terminal-line answer">→ policy: replaces AGENTS.md</div>
+          <div class="terminal-line wrap"><span class="prompt">$</span> <span class="cmd">kt</span> <span class="kw">why does</span> <span class="fn">cogent_ring_buffer_reindex_generation</span> call <span class="fn">shuffle_partition_key_query</span></div>
+          <div class="terminal-line answer">→ code-comment-level rationale</div>
+          <div class="terminal-line"><span class="prompt">$</span> <span class="cmd">kt</span> <span class="kw">how many</span> dedekind complete ordered fields are there</div>
+          <div class="terminal-line answer">→ anything else</div>
+        </div>
+      </div>
+      <footer class="footerline"><span>Small pieces, factored in advance</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is why atomisation matters. A big project summary may contain everything needed, but the model still has to find the relevant part and work out scope, authority and dependencies. Small leaves arrive already split into the pieces this particular task needs, at every scale: "where am I" returns essentially a README for agents, "what is next" the next action, "how to behave" the policy that replaces AGENTS.md, and a "why does" question the rationale you would otherwise hope to find in a code comment. The combination is new each time. What the agent reuses is the pieces.</aside>
+    </section>
+
+    <section class="slide" data-title="Federation">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Federated</span></header>
+      <div class="content split equal">
+        <div>
+          <div class="eyebrow">Leaves compose. So do trees.</div>
+          <h2 style="max-width:12ch">Many trees. <em>One lookup.</em></h2>
+          <p class="lede">Every repo owns its own <strong>.knowledge</strong>. Clone it and the knowledge comes along, without leaking everywhere. The tooling manages access.</p>
+        </div>
+        <div class="stack roots" aria-label="Federated knowledge roots">
+          <div class="stack-item"><b class="mono">./.knowledge</b><span>This repo's own tree. Comes with the clone.<em>Always on, here</em></span></div>
+          <div class="stack-item"><b class="mono">~/.knowledge</b><span>Your global root: preferences and procedures that follow you.<em>Allowed by you</em></span></div>
+          <div class="stack-item"><b class="mono">~/domain/.knowledge</b><span>A shared domain tree, pulled in where it's relevant.<em>Granted per project</em></span></div>
+          <div class="stack-item"><b class="mono">../api/.knowledge</b><span>Another project's tree. Readable only with approval.<em>Ask first</em></span></div>
+          <div class="stack-item"><b class="mono">~/private/.knowledge</b><span>Your personal notes. Never appears outside its own tree.<em>Force-private</em></span></div>
+        </div>
+      </div>
+      <footer class="footerline"><span>Plural knowledge · composed on demand · access stays with the user</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is the plurality argument, and it matters. There isn't one knowledge base to curate. Every repository carries its own tree, the way it carries its own code. You can keep a global root for yourself and domain trees for things like a hardware platform, and they all add together in one lookup. The tooling decides what is visible where. A repo's tree is local when you work in it; other roots are asked for, and granted per project, per project and its subdirectories, or everywhere. Private roots never leak into other projects' searches. Clone a repo and you inherit its understanding without it spilling into everything else you work on.</aside>
+    </section>
+
+    <section class="slide" data-title="Testimonial">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Agent testimonials</span></header>
+      <div class="content testimonials">
+        <blockquote class="testimonial">
+          “It reduces discovery calls, repeated reading, irrelevant tokens, and the amount of transient context I must carry while reasoning.”
+          <p class="body">“Agents often behave badly at both extremes: with too little information they guess, while with too much they lose salience, mix incompatible facts, or spend their context budget before reaching the actual task.”</p>
+          <p class="body">“The cost of the first investigation would have been paid once rather than repeatedly by every future engineer or agent.”</p>
+          <cite>Agent reflection after work in a large RTL / FPGA system</cite>
+        </blockquote>
+        <blockquote class="testimonial">
+          “Knowledgetrees turned cross-session context from a reconstruction task into an orientation step.”
+          <p class="body">“The project was at my fingertips: current state, next action, architecture, procedures, accepted evidence and publication rules were each one call away. I did not need a hand-written handoff, a transcript replay or a broad source-tree archaeology pass before becoming useful.”</p>
+          <p class="body">“The viability question is settled for me.”</p>
+          <cite>Codex · multi-session KV260 / Yocto project</cite>
+        </blockquote>
+      </div>
+      <footer class="footerline"><span>Sources: knowledgetrees-testimonial.md · 2026-09-24-codex-edf103.md</span><span class="slide-number"></span></footer>
+      <aside class="notes">Two different agents, from different vendors, on different hardware projects, describing the same effect. The left card is context poisoning described from the inside: too little and they guess, too much and they lose salience. The right card is persistence: arriving cold at a mature project and being useful straight away.</aside>
+    </section>
+
+    <section class="slide dark" data-title="Hits and misses">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Accretive</span></header>
+      <div class="content">
+        <div class="eyebrow">The tree grows because agents use it</div>
+        <h2>A miss becomes an investigation. <em>Then a fill.</em></h2>
+        <div class="route" aria-label="Cache hit">
+          <b>Hit</b>
+          <ol><li>identify what needs knowing</li><li>retrieve the relevant leaf</li><li>continue</li></ol>
+        </div>
+        <div class="route" aria-label="Cache miss">
+          <b>Miss</b>
+          <ol><li>identify the gap</li><li>inspect sources</li><li>reason · investigate</li><li class="fill">capture in KT</li><li>next agent hits</li></ol>
+        </div>
+        <p class="lede" style="margin-top:28px">Capture works like a cache fill. Resolve the gap once, at the right scope, before the next agent has to pay for it again.</p>
+      </div>
+      <footer class="footerline"><span>Growth is ordinary maintenance</span><span class="slide-number"></span></footer>
+      <aside class="notes">The third property: accretive. This is where the tree grows itself. Agents already do expensive investigations when they miss. Capturing the checked result, whether as a new leaf or a rewrite of the leaf that owns it, is part of finishing the work, not a separate documentation sprint. A miss does not prove the knowledge is absent: agents retry lookups before treating something as a gap.</aside>
     </section>
 
     <section class="slide" data-title="Current truth">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">Knowledge lifecycle</span></header>
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Accretive, not append-only</span></header>
       <div class="content split">
         <div>
-          <div class="eyebrow">No more archaeology by chronology</div>
+          <div class="eyebrow">Growth without sediment</div>
           <h2>Current truth has <em>one owner.</em></h2>
           <p class="lede">When reality changes, rewrite the governing answer. Git keeps history. The active tree tells the next agent what is true now.</p>
         </div>
         <div class="question" aria-label="Knowledge tree lifecycle">
-          <div class="terminal-line"><span class="prompt">$</span> kt lookup "what is the state"</div>
+          <div class="terminal-line"><span class="prompt">$</span> <span class="cmd">kt</span> <span class="kw">what is</span> the state</div>
           <div class="terminal-line answer">→ direct current answer</div>
           <div class="terminal-line"><span class="prompt">$</span> evidence contradicts it</div>
-          <div class="terminal-line answer">→ stop · repair owner · reconcile dependents</div>
+          <div class="terminal-line answer">→ invalidate · repair owner · reconcile dependents</div>
           <div class="terminal-line"><span class="prompt">$</span> future agent asks again</div>
-          <div class="terminal-line answer">→ no repeated rediscovery</div>
+          <div class="terminal-line answer">→ hit on the repaired entry</div>
         </div>
       </div>
       <footer class="footerline"><span>Current state is mutable · history is separate</span><span class="slide-number"></span></footer>
-      <aside class="notes">This addresses stale specs and plan changes directly. The answer is maintained in place; chronology belongs in Git or explicit history, not mixed into operational truth.</aside>
+      <aside class="notes">Accretion is not a pile-up. The tree grows by rewriting answers, not by appending to them, so it never silts up with stale chronology the way a wiki or chat log does. This deals directly with stale specs and changing plans. There is one entry per answer, updated in place. If the same conclusion lived in five documents, the five copies would drift apart. Chronology belongs in Git or an explicit history, not mixed into the current truth.</aside>
     </section>
 
-    <section class="slide dark" data-title="The compounding loop">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">The behavior change</span></header>
+    <section class="slide" data-title="What changes">
+      <header class="topline"><span>Knowledgetrees</span><span class="section">The new workflow</span></header>
       <div class="content">
-        <div class="eyebrow">Knowledge is discovered as needed and captured as learned</div>
-        <h2>The documentation improves <em>because agents use it.</em></h2>
-        <div class="loop" aria-label="Knowledge workflow">
-          <div>lookup</div><div>discover</div><div>verify</div><div>record</div><div>use</div>
-        </div>
-        <p class="lede" style="margin-top:28px">A miss is not just an inconvenience. It is a knowledge gap. Resolve it once, at the right scope, before the next agent pays again.</p>
-      </div>
-      <footer class="footerline"><span>Growth is ordinary maintenance</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is what makes the system self-growing. Agents already perform expensive investigations. Capturing the verified result is part of completing the work, not a separate documentation sprint.</aside>
-    </section>
-
-    <section class="slide" data-title="Evidence">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">Observed in practice</span></header>
-      <div class="content">
-        <div class="contrast">
-          <article class="side">
-            <span class="measure">seconds</span>
-            <h3>With a focused KT lookup</h3>
-            <p>The agent found the conceptual mechanism and exact source location, then inspected only the source needed to verify it.</p>
-          </article>
-          <div class="versus">VS</div>
-          <article class="side bad">
-            <span class="measure">1,000+</span>
-            <h3>Lines of RTL without it</h3>
-            <p>The agent reconstructed a related mechanism across buffering, commit logic and connected modules.</p>
-          </article>
+        <div class="eyebrow">Three properties · one mechanism</div>
+        <h2>Stop paying for the same reasoning <em>twice.</em></h2>
+        <div class="grid three">
+          <article class="card"><span class="number">Persistent</span><h3>Nothing evaporates</h3><p>Understanding outlives the session and the compaction. A fresh agent reloads it instead of relying on what is left of the chat.</p></article>
+          <article class="card"><span class="number">Accretive</span><h3>Every miss pays forward</h3><p>A gap is investigated once, captured at the right scope and inherited by every agent after.</p></article>
+          <article class="card"><span class="number">Self-correcting</span><h3>Reality wins</h3><p>Proofs run at startup. Stale answers are invalidated and repaired from the evidence, in place.</p></article>
         </div>
       </div>
-      <footer class="footerline"><span>One working session · same technical system</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is the concrete A/B from the testimonial. Do not imply a controlled benchmark. It was a direct observation within one session and demonstrates the qualitative difference in discovery cost.</aside>
-    </section>
-
-    <section class="slide" data-title="Testimonial">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">Agent testimonial</span></header>
-      <div class="content">
-        <blockquote class="testimonial">
-          “It reduces discovery calls, repeated reading, irrelevant tokens, and the amount of transient context I must carry while reasoning.”
-          <cite>Agent reflection after work in a large RTL / FPGA system</cite>
-        </blockquote>
-      </div>
-      <footer class="footerline"><span>Source: knowledgetrees-testimonial.md</span><span class="slide-number"></span></footer>
-      <aside class="notes">Follow with the testimonial's diagnosis: with too little information agents guess; with too much they lose salience, mix incompatible facts or exhaust context before reaching the task.</aside>
-    </section>
-
-    <section class="slide" data-title="Trust model">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">Trust without magic</span></header>
-      <div class="content">
-        <div class="eyebrow">Knowledge can still be incomplete or stale</div>
-        <h2>Reconnect claims to <em>reality.</em></h2>
-        <div class="status-row">
-          <article class="status green"><b>Green</b><h3>No detected failure</h3><p>Usable after checking scope and evidence. Green is not a blanket claim of truth.</p></article>
-          <article class="status yellow"><b>Yellow</b><h3>Needs re-verification</h3><p>Freshness expired. Review the whole answer before renewing it.</p></article>
-          <article class="status brown"><b>Brown</b><h3>Stop and repair</h3><p>A proof failed, structure broke or the claim was falsified.</p></article>
-        </div>
-      </div>
-      <footer class="footerline"><span>Executable proofs where facts are mechanically checkable</span><span class="slide-number"></span></footer>
-      <aside class="notes">Avoid overselling. Knowledgetrees do not eliminate source reading, testing or judgment. They make knowledge owned, auditable and able to carry explicit evidence and bounded proofs.</aside>
+      <footer class="footerline"><span>Source remains evidence · knowledge becomes infrastructure</span><span class="slide-number"></span></footer>
+      <aside class="notes">Recap the three properties as one story. Persistent: what agents learn outlives the context window. Accretive: the tree gets better because agents use it. Self-correcting: it stays tied to reality instead of drifting from it. Take away any one and the others fail: persistence without correction spreads stale beliefs, and correction without accretion leaves nothing worth keeping. This is not a promise that agents never fail. It changes the default environment so expensive conceptual work builds up instead of evaporating.</aside>
     </section>
 
     <section class="slide dark" data-title="Built today">
@@ -670,56 +841,31 @@
         </div>
       </div>
       <footer class="footerline"><span>Self-contained CLI · installer · hooks · MCP server</span><span class="slide-number"></span></footer>
-      <aside class="notes">The repository currently exposes 23 MCP tools and startup integrations for four harnesses. Be precise: broad scale behavior still needs more testing, and live qualification of every latest integration is ongoing.</aside>
+      <aside class="notes">The repository currently exposes 23 MCP tools and startup integrations for four harnesses. Be precise: behaviour at scale still needs more testing, and live checks of every latest integration are ongoing.</aside>
     </section>
 
-    <section class="slide" data-title="What changes">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">The new workflow</span></header>
-      <div class="content">
-        <div class="eyebrow">What this changes for a team</div>
-        <h2>Stop paying for the same understanding <em>twice.</em></h2>
-        <div class="grid two">
-          <article class="card"><span class="number">Before</span><h3>Every session starts from artifacts</h3><p>Search the codebase. Read the docs. Reconstruct intent. Resolve contradictions. Compress it all into temporary context.</p></article>
-          <article class="card"><span class="number">After</span><h3>Every session inherits understanding</h3><p>Orient. Retrieve the governing answer. Verify what matters. Improve the shared substrate when reality teaches something new.</p></article>
-        </div>
-      </div>
-      <footer class="footerline"><span>Source remains evidence · knowledge becomes infrastructure</span><span class="slide-number"></span></footer>
-      <aside class="notes">This is not a promise that agents never fail. It changes the default environment so the expensive conceptual work compounds instead of evaporating.</aside>
-    </section>
-
-    <section class="slide accent" data-title="The future">
+    <section class="slide accent" data-title="The conclusion">
       <header class="topline"><span>Knowledgetrees</span><span class="section">The bet</span></header>
       <div class="content center">
         <div class="eyebrow">AI-native engineering needs AI-native knowledge</div>
-        <h1>This is how agents stop starting over.</h1>
-        <p class="lede">Once you see the behavior change, the old workflow feels impossible to defend.</p>
+        <h1>Agents don't need to reason less.</h1>
+        <p class="lede"><strong>They need to stop reasoning from zero.</strong></p>
       </div>
-      <footer class="footerline"><span>Try it on real work</span><span class="slide-number"></span></footer>
-      <aside class="notes">State the conviction personally: “I believe this is the missing substrate for agentic work.” Then offer the concrete next step: install it in a real repository and compare the next few agent sessions.</aside>
+      <footer class="footerline"><span>Between transient context and raw evidence</span><span class="slide-number"></span></footer>
+      <aside class="notes">This is the idea the talk has been building to. Knowledgetrees are not mainly better documentation. They are persistent, addressable knowledge, written by agents for agents, indexed by relevance and often carrying reasoning already done. They sit between the model's short-lived context and the raw evidence. State the conviction personally: "I believe this is the missing layer for agentic work."</aside>
     </section>
 
     <section class="slide dark" data-title="Closing">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">One sentence</span></header>
+      <header class="topline"><span>Knowledgetrees</span><span class="section">Try it on real work</span></header>
       <div class="content center">
-        <h1><em>Make the filesystem remember</em> what agents learn.</h1>
-        <div class="question" style="width:min(760px,100%);margin:40px auto 0;text-align:left">
+        <h1 style="max-width:20ch;font-size:clamp(44px,6.4vw,100px)"><em>Make the filesystem remember</em> what agents learn.</h1>
+        <div class="question" style="width:min(980px,100%);margin:40px auto 0;text-align:left">
           <span class="prompt">$</span> git clone https://github.com/linkin-parks-bassist/knowledgetrees<br>
           <span class="prompt">$</span> ./install
         </div>
       </div>
       <footer class="footerline"><span>Knowledge is discovered as needed and captured as learned</span><span class="slide-number"></span></footer>
-      <aside class="notes">Finish on the repository proposition. For a team trial: choose one active codebase, create orientation plus spec/plan/state/next, and let ordinary work grow the first useful leaves.</aside>
-    </section>
-
-    <section class="slide" data-title="One more thing">
-      <header class="topline"><span>Knowledgetrees</span><span class="section">The proof is in the presentation</span></header>
-      <div class="content center credit">
-        <div class="eyebrow">One more thing</div>
-        <h1>This presentation was <em>one-shotted by 5.6-Sol</em> using knowledgetrees.</h1>
-        <p class="lede">It took <strong>4m43s</strong> from prompt to done.</p>
-      </div>
-      <footer class="footerline"><span>Yes, including the speaker notes</span><span class="slide-number"></span></footer>
-      <aside class="notes">Let this land. The presentation itself is the final demonstration: one prompt, repository knowledge, the README, the external testimonial and the established visual language became a coherent, working deck in four minutes and forty-three seconds.</aside>
+      <aside class="notes">End on the concrete next step. For a team trial: pick one active codebase, create the orientation plus spec/plan/state/next leaves, and let ordinary work grow the first useful leaves. Then compare the next few agent sessions.</aside>
     </section>
   </main>
 
@@ -816,6 +962,14 @@
         show(current + (distance < 0 ? 1 : -1));
       }, { passive: true });
       window.addEventListener('hashchange', () => show(Number(location.hash.slice(1)) - 1 || 0, false));
+
+      function renderTex() {
+        if (!window.katex) return;
+        document.querySelectorAll('[data-tex]').forEach(el => {
+          try { katex.render(el.dataset.tex, el, { displayMode: false, throwOnError: false }); } catch (e) {}
+        });
+      }
+      if (window.katex) renderTex(); else window.addEventListener('load', renderTex);
 
       show(current, false);
     })();
