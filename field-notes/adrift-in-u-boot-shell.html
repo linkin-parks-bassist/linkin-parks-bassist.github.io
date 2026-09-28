@@ -30,15 +30,13 @@
 
   <section id="goal" class="prose">
     <h2>Goal</h2>
-    <p>I have been reading <a href="https://www.packtpub.com/en-gb/product/mastering-embedded-linux-programming-9781789530384"><cite>Mastering Embedded Linux Programming</cite></a>, including its account of bootloaders and U-Boot. Reading gave me the outline; I wanted to make it concrete. The goal for today was to record one cold boot of the working EDF image from my previous experiment and account for what happened between applying power and reaching userspace.</p>
-    <p>The specimen was unusually well established. This was the accepted EDF 25.11 image for my KV260 Lyrebird synthesizer: already built, inspected, written to removable media, booted on the board and accepted through audible FC25-controlled playback. I was not trying to repair it or add another feature. I wanted to understand its boot.</p>
+    <p>To supplement my reading of <a href="https://www.beagleboard.org/books/mastering-embedded-linux-programming"><cite>Mastering Embedded Linux Programming</cite></a> and validate my cumulative learning against real hardware, I decided to dissect the boot log of the resultant image from the prior field note, EDF103.</p>
   </section>
 
   <section id="method" class="prose">
-    <h2>A better second terminal</h2>
-    <p>I began with the same two-terminal method as the earlier embedded-Linux notes. In one terminal, Codex had the website and synthesizer Knowledgetrees available, including the provenance of the exact EDF image in the board. In the other, I would operate the serial console and interrogate the real system.</p>
+    <h2>Tmux are better than Omux</h2>
+    <p>I began with the same two-terminal method as the earlier embedded-Linux notes. In one terminal, Codex had the website and synthesizer documentation available, including the provenance of the exact EDF image in the board. In the other, I would operate the serial console and interrogate the real system.</p>
     <p>Before booting anything, I realized the usual exchange—run a command, copy its output, paste it back—was a poor fit for a long, live boot transcript. I asked whether I could have an ordinary shell which I controlled while Codex read the same terminal. <code>tmux</code> was the obvious answer, except that it was not installed.</p>
-    <p>That exposed a small defect in the workflow itself. The workstation knowledge explained how an agent could obtain sudo authorization, but not the more useful task-level rule: if software would materially improve a job I had already asked it to do, it should ask me to install the named package rather than quietly settling for a worse process. We added that route, installed <code>tmux</code> through the existing graphical authorization path and opened a named shared session.</p>
     <p>So the experiment began by improving the instrument used to observe it. I retained the keyboard and the physical board; Codex could read the same terminal without impersonating my actions. That was a better version of the two-terminal workflow, built in real time because this particular investigation needed it.</p>
   </section>
 
@@ -50,7 +48,7 @@
       </div>
       <figcaption><em>Recommended listening.</em></figcaption>
     </figure>
-    <p>The first attempt immediately corrected my idea of how this investigation would work. I watched the messages go past and realized that I could not sensibly understand the boot process “in real time.” I moved the mouse wheel, apparently trying to review what had already disappeared above the terminal, at exactly the wrong moment.</p>
+    <p>I powered the board with <code>picocom</code> watching the UART. The logs were, of course, much too fast to read in real time, so instinct kicked in and I scrolled the mouse wheel, trying to review what had already disappeared above the terminal. That's as long as it took for something to go wrong.</p>
     <p>U-Boot's countdown stopped and left me at:</p>
 <pre><code>ZynqMP&gt;</code></pre>
     <p>I connected the speaker and played a few notes. Nothing happened. Between the silent synthesizer and a prompt I had never used before, I had successfully verified that I was in entirely unfamiliar territory and briefly wondered whether I had broken the device.</p>
