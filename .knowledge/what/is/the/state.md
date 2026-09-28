@@ -1,10 +1,8 @@
 ---
-status: "green"
-revised_at: "2026-09-23T17:22:21+10:00"
+status: green
+revised_at: "2026-09-28T19:17:25+10:00"
 ---
 
-`field-notes/edf102.html` is the completed 23 September 2026 continuation of EDF 101. It documents the full-image build, machine-name typecheck and learning process, first boot failure, systemd one-shot diagnosis and live drop-in fix, audible pre-login startup, and successful cold power-cycle acceptance. It includes two preview/fade disclosure panels: the full agent-generated typecheck and a deliberately stubborn 16-click transcript reveal. David reviewed the finished page and explicitly approved publication.
+`field-notes/adrift-in-u-boot-shell.html` is the completed 28 September 2026 Field Note about dissecting the accepted EDF 103 KV260 synthesizer's boot. It covers the shared tmux workflow, accidental U-Boot interruption, environment-driven boot policy, QSPI/SD correction, BL31/TF-A, kernel and initramfs loading, systemd startup, and audible synth verification. It embeds Ott's “Adrift In Hilbert Space,” is linked first in both reverse-chronological Field Notes tables, and was approved for publication.
 
-`field-notes/edf101.html` is the completed and published 22 September 2026 first EDF note, including the linked Apollo `touch purple` moment and orphaned layer-priority `6`. PetaLinux 101 remains a writing reference. The finished Jev notes and evidence remain published and unchanged.
-
-The homepage and Field Notes index list completed notes in reverse chronology, with EDF 102 above EDF 101.
+The completed EDF 101–103, PetaLinux 101, and Jev notes remain published. The homepage and Field Notes index list completed notes in reverse chronology.

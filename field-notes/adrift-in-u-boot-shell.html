@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adrift In U-Boot Shell · David Farrell</title>
+  <meta name="description" content="Supplementing a chapter on bootloaders and U-Boot by dissecting the real cold-boot log of my EDF-built KV260 synthesizer system.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="field-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 28 September 2026</div>
+    <h1 class="page-title">Adrift In U-Boot Shell.</h1>
+    <p class="section-note">Taking the bootloader model from a book to the actual cold-boot transcript of my EDF-built KV260 synthesizer system.</p>
+  </section>
+
+  <section id="goal" class="prose">
+    <h2>Goal</h2>
+    <p>I have been reading <a href="https://www.packtpub.com/en-gb/product/mastering-embedded-linux-programming-9781789530384"><cite>Mastering Embedded Linux Programming</cite></a>, including its account of bootloaders and U-Boot. Reading gave me the outline; I wanted to make it concrete. The goal for today was to record one cold boot of the working EDF image from my previous experiment and account for what happened between applying power and reaching userspace.</p>
+    <p>The specimen was unusually well established. This was the accepted EDF 25.11 image for my KV260 Lyrebird synthesizer: already built, inspected, written to removable media, booted on the board and accepted through audible FC25-controlled playback. I was not trying to repair it or add another feature. I wanted to understand its boot.</p>
+  </section>
+
+  <section id="method" class="prose">
+    <h2>A better second terminal</h2>
+    <p>I began with the same two-terminal method as the earlier embedded-Linux notes. In one terminal, Codex had the website and synthesizer Knowledgetrees available, including the provenance of the exact EDF image in the board. In the other, I would operate the serial console and interrogate the real system.</p>
+    <p>Before booting anything, I realized the usual exchange—run a command, copy its output, paste it back—was a poor fit for a long, live boot transcript. I asked whether I could have an ordinary shell which I controlled while Codex read the same terminal. <code>tmux</code> was the obvious answer, except that it was not installed.</p>
+    <p>That exposed a small defect in the workflow itself. The workstation knowledge explained how an agent could obtain sudo authorization, but not the more useful task-level rule: if software would materially improve a job I had already asked it to do, it should ask me to install the named package rather than quietly settling for a worse process. We added that route, installed <code>tmux</code> through the existing graphical authorization path and opened a named shared session.</p>
+    <p>So the experiment began by improving the instrument used to observe it. I retained the keyboard and the physical board; Codex could read the same terminal without impersonating my actions. That was a better version of the two-terminal workflow, built in real time because this particular investigation needed it.</p>
+  </section>
+
+  <section id="boot-log" class="prose">
+    <h2>The cold boot</h2>
+    <figure class="fig listening-figure">
+      <div class="listening-player">
+        <iframe src="https://www.youtube-nocookie.com/embed/o6Zn_XuEdYs" title="Ott — Adrift In Hilbert Space" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      </div>
+      <figcaption><em>Recommended listening.</em></figcaption>
+    </figure>
+    <p>The first attempt immediately corrected my idea of how this investigation would work. I watched the messages go past and realized that I could not sensibly understand the boot process “in real time.” I moved the mouse wheel, apparently trying to review what had already disappeared above the terminal, at exactly the wrong moment.</p>
+    <p>U-Boot's countdown stopped and left me at:</p>
+<pre><code>ZynqMP&gt;</code></pre>
+    <p>I connected the speaker and played a few notes. Nothing happened. Between the silent synthesizer and a prompt I had never used before, I had successfully verified that I was in entirely unfamiliar territory and briefly wondered whether I had broken the device.</p>
+    <p>The next command arrived as <code>[Aprintenv</code>. That gave us the mechanism: with tmux's mouse handling disabled, scrolling over its alternate screen had produced the terminal sequence for an Up arrow, <code>ESC [ A</code>. The escape byte was enough to satisfy “Hit any key to stop autoboot”; the remaining <code>[A</code> waited in U-Boot's input and attached itself to what I typed next. Codex enabled tmux mouse handling before we continued.</p>
+    <p>“Wait. Where's my synth?” Codex read the shared terminal and found a less exciting explanation. Linux had simply never started, so neither had the userspace service which loads the programmable logic and runs the instrument. My synth had not vanished; we were sitting at a useful accidental breakpoint in the boot.</p>
+    <p>I looked back through the messages. The ZynqMP first-stage boot loader had announced itself, followed by PMU firmware and <code>BL31</code>. Then came <code>U-Boot 2023.01</code>, its inventory of the CPU, board, memory and devices, the interrupted countdown and the prompt.</p>
+    <p>Scrolling through the saved log was already paying off. I recognized the FSBL vocabulary from AMD's training material: the multiboot offset, the processing-system handoff, and the firmware for the triple-redundant MicroBlaze PMU. The FSBL itself did not have much to say. It established the platform, reported the boot mode and handed control onward quickly.</p>
+    <p>I paused at <code>BL31</code> until Codex connected it to something I did remember: Arm Trusted Firmware. More precisely, BL31 was the EL3 runtime-firmware component supplied here by Trusted Firmware-A, not a synonym for the whole firmware project. The naming was BL3-1, followed conceptually by an optional BL3-2 secure payload and a BL3-3 non-secure payload, rather than the more exciting thirty-first boot loader. Its own message named the next boundary: <code>Non secure code at 0x8000000</code>. Once I knew what BL31 was, I could read that as the handoff to the non-secure U-Boot image waiting in DDR.</p>
+    <blockquote class="quote">“Usually, U-Boot offers a command-line interface over a serial port. It provides a command prompt that is customized for each board.”</blockquote>
+    <p>That was exactly what I was looking at. <code>ZynqMP&gt;</code> was not a Linux shell or a generic serial monitor. It was the board's U-Boot command prompt. The accidental interruption had turned a fast-moving transcript into the first concrete boundary I could inspect.</p>
+    <p>I began with <code>printenv bootcmd boot_targets</code>. My first attempt arrived as the malformed <code>[Aprintenv</code>; the second revealed that <code>printenv</code> was doing exactly what it said, and that <code>bootcmd</code> was an environment variable whose value happened to be a U-Boot program. It selected between K24 and K26 starter-kit identifiers before running another named variable. I initially laughed that U-Boot apparently did not know which board it was on, then parsed the expression properly: the first match was a K24 attempt, the second a K26 attempt, and the detected <code>board_name</code> was unambiguously <code>SMK-K26-XCL2G</code>.</p>
+    <p>Codex had also guessed that the generic U-Boot variable <code>boot_targets</code> would already describe the search order. U-Boot replied that no such variable was defined. One layer later the apparent miss became the mechanism: <code>som_cc_boot</code> recognized the KV260 carrier and created <code>boot_targets=mmc1 usb0 usb1 usb2 usb3 pxe dhcp</code> at runtime. <code>distro_bootcmd</code> then iterated over those targets and expanded <code>bootcmd_${target}</code>. For <code>mmc1</code>, that became:</p>
+<pre><code>bootcmd_mmc1=devnum=1; run mmc_boot</code></pre>
+    <p>I asked whether <code>bootcmd_mmc1</code> was a binary or another script and whether I could inspect it. <code>help run</code> settled the type question: “run commands in an environment variable.” <code>mmc_boot</code> selected the device and delegated to another variable, which listed bootable partitions, identified their filesystems, and searched each one for Extlinux configuration, boot scripts or EFI. I followed several layers before announcing that I was bored of the onion. The important model was no longer opaque: compiled U-Boot commands supplied the hardware and filesystem machinery, while small programs stored in its environment expressed the board's boot policy.</p>
+    <p>The environment introduced itself with the unimprovable <code>Loading Environment from nowhere... OK</code>. In this build, U-Boot was using its compiled default environment rather than loading one from the SD card; board-specific values were then established from the hardware it discovered.</p>
+  </section>
+
+  <section id="userspace" class="prose">
+    <h2>Leaving the shell</h2>
+    <p>I finally ran <code>run bootcmd</code>. U-Boot followed the policy I had just unfolded, found the first bootable MMC target and handed the machine onward. By the time I recognized the familiar flood of <code>systemd[1]</code> messages, the kernel had already initialized, mounted the real ext4 root filesystem from <code>mmcblk1p2</code>, and executed its first userspace process.</p>
+    <p>Before that handoff, the messages gave me another small modelling problem:</p>
+<pre><code>switch to partitions #0, OK
+mmc1 is current device
+Scanning mmc 1:1...
+Found U-Boot script /boot.scr</code></pre>
+    <p>U-Boot was looking at the card, selecting partitions and gathering boot images. I reached for the name of the little packed structure which describes a disk's partitions and briefly could not remeMBR it. Right: the MBR. Then I noticed that U-Boot had found a 2.6&nbsp;KB script there. That did not sniff. An MBR is tiny binary boot and partition metadata; it does not contain a filesystem shell script. I had compressed two operations into one. U-Boot used the partition table to locate a partition, understood that partition's filesystem, and found <code>/boot.scr</code> as an ordinary file within it.</p>
+    <p>I then put U-Boot itself on the SD card in my mental model: an understandable association between the second-stage boot loader and the Linux image, rather like GRUB living on the operating-system disk. Codex said the board had reported <code>QSPI_MODE</code> and that Kria's primary boot firmware, including U-Boot, lived in QSPI. I made it go back and retrieve AMD's documentation rather than letting a plausible inference harden into fact. The exact KV260 guide settled it: its QSPI <code>BOOT.BIN</code> contains the FSBL, PMU firmware, Arm Trusted Firmware and U-Boot. My general model of Zynq UltraScale+ flexibility was not wrong; this carrier had chosen a specific, deliberately isolated architecture. The stable board firmware lives in redundant QSPI images, while the replaceable SD card holds the operating system.</p>
+    <p>The saved transcript made that transition unusually explicit. U-Boot first read roughly 31.4&nbsp;MiB, then another 12.6&nbsp;MiB. I guessed that the first was the kernel and recognized that the second matched the initramfs artifact. U-Boot then removed the remaining ambiguity by naming it <code>kria-image-initramfs-kria-zynqmp</code> and classifying it as a “RAMDisk Image.” In this context, ramdisk was the broader boot-image category and this particular ramdisk was the initramfs.</p>
+    <p>U-Boot loaded that pair and a flattened device tree into DDR before printing <code>Starting kernel ...</code>. Linux received <code>root=LABEL=root</code> on its command line, freed the initial ramdisk after using it, printed <code>Run /init as init process</code>, discovered the SD card and mounted <code>mmcblk1p2</code>. The initramfs had bridged the kernel to the persistent root filesystem.</p>
+    <p>The remaining output connected this general boot process back to the specimen. Systemd started <code>dfx-mgrd</code>, ran the default firmware-load service, then reported:</p>
+<pre><code>[  <span class="terminal-ok">OK</span>  ] Started KV260 FC25 polyphonic synthesizer.
+[  <span class="terminal-ok">OK</span>  ] Started Watch for FC25 MIDI reconnection.</code></pre>
+    <p>Only afterward did the serial login prompt appear. I watched the familiar green <code>[ OK ]</code>s fly past, then verified—by measuring changes in air pressure—that the synthesizer was exhibiting its familiar “working as intended” behaviour. It had crossed from an image on the card, through U-Boot and Linux, into a running programmable-logic and userspace system before anybody logged in.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+</body>
+</html>
