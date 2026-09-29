@@ -669,23 +669,6 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
     </section>
 
     <!-- ===================== HARDWARE ===================== -->
-    <section class="slide" data-title="Hardware in the loop">
-      <header class="topline"><span class="kicker">Hardware in the loop</span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span class="on">Hardware</span><span>Product</span></nav></header>
-      <div class="content">
-        <h2>The board is inside the loop, not at the end</h2>
-        <div class="flow">
-          <div>Agent change<small>C++, RTL, C, constraints</small></div>
-          <div class="on">Vivado MCP<small>build + read reports</small></div>
-          <div>KV260 deploy<small>load bitstream</small></div>
-          <div class="on">Readback<small>identity, ABI, overruns</small></div>
-          <div>MIDI + sound<small>play it, listen</small></div>
-        </div>
-        <p class="loopnote">↺ Evidence feeds the next change: timing · identity · ABI · overruns · reboot · reconnect · sound</p>
-      </div>
-      <footer class="footerline"><span>Speed comes from short, evidenced loops · not skipped verification</span><span class="slide-number"></span></footer>
-      <aside class="notes">Vivado evidence closes the inner loop. Register readback, MIDI behavior, reboot behavior and actual sound close the outer loop.</aside>
-    </section>
-
     <section class="slide" data-title="Routed implementation">
       <header class="topline"><span class="kicker">Vivado 2025.2 <b>· routed implementation</b></span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span class="on">Hardware</span><span>Product</span></nav></header>
       <div class="content">
@@ -709,7 +692,42 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
       <aside class="notes">[~24:00] Physical denominators from the routed report; the K26 “system logic cells” figure is not a LUT count. Hold slack is positive but narrow. The occupied-CLB bar is the honest one: placement is much tighter than the LUT percentage suggests.</aside>
     </section>
 
+    <section class="slide" data-title="Hardware in the loop">
+      <header class="topline"><span class="kicker">Hardware in the loop</span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span class="on">Hardware</span><span>Product</span></nav></header>
+      <div class="content">
+        <h2>The board is inside the loop, not at the end</h2>
+        <div class="flow">
+          <div>Agent change<small>C++, RTL, C, constraints</small></div>
+          <div class="on">Vivado MCP<small>build + read reports</small></div>
+          <div>KV260 deploy<small>load bitstream</small></div>
+          <div class="on">Readback<small>identity, ABI, overruns</small></div>
+          <div>MIDI + sound<small>play it, listen</small></div>
+        </div>
+        <p class="loopnote">↺ Evidence feeds the next change: timing · identity · ABI · overruns · reboot · reconnect · sound</p>
+      </div>
+      <footer class="footerline"><span>Speed comes from short, evidenced loops · not skipped verification</span><span class="slide-number"></span></footer>
+      <aside class="notes">Vivado evidence closes the inner loop. Register readback, MIDI behavior, reboot behavior and actual sound close the outer loop.</aside>
+    </section>
+
     <!-- ===================== PRODUCT ===================== -->
+    <section class="slide" data-title="EDF versus PL MIDI">
+      <header class="topline"><span class="kicker">AMD Embedded Development Framework <b>· why EDF + ALSA</b></span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span>Hardware</span><span class="on">Product</span></nav></header>
+      <div class="content">
+        <h2>Manage devices in Linux. Keep the PL deterministic</h2>
+        <table class="tt">
+          <thead><tr><th>EDF / PS-managed (chosen)</th><th>Direct MIDI decoding in PL</th></tr></thead>
+          <tbody>
+            <tr><td>ALSA Sequencer: standard MIDI events, mature device handling</td><td>Custom USB transport and parser in fabric</td></tr>
+            <tr><td>Discovery, disconnect, reconnect are ordinary Linux service concerns</td><td>Device lifecycle becomes hardware behaviour</td></tr>
+            <tr><td>Voice policy and mapping change without rebuilding PL</td><td>Policy changes need hardware iteration</td></tr>
+            <tr><td>EDF + dfx-mgr manage a replaceable PL payload</td><td>Behaviour coupled to a static hardware image</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="footerline"><span class="tag">AMD On Wheels NZ · together we advance</span><span class="slide-number"></span></footer>
+      <aside class="notes">[~25:00 · Product: 2 min] Product-specific decision, not a claim that PL MIDI decoding is always wrong.</aside>
+    </section>
+
     <section class="slide" data-title="EDF-managed runtime">
       <header class="topline"><span class="kicker">AMD Embedded Development Framework</span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span>Hardware</span><span class="on">Product</span></nav></header>
       <div class="content">
@@ -728,25 +746,7 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
         </div>
       </div>
       <footer class="footerline"><span>Developed on AMD Ubuntu 24.04 · packaged and accepted on EDF 25.11</span><span class="slide-number"></span></footer>
-      <aside class="notes">[~25:00 · Product: 2 min] EDF is the deployment architecture: Linux boots, dfx-mgr applies the packaged bitstream and overlay through FPGA Manager, then the control service uses the AXI map. Do not claim EDF built the FPGA design: it was developed and first accepted on AMD Ubuntu 24.04, then packaged into EDF. PL MIDI decoding is valid elsewhere; this product had no requirement for it.</aside>
-    </section>
-
-    <section class="slide" data-title="EDF versus PL MIDI">
-      <header class="topline"><span class="kicker">AMD Embedded Development Framework <b>· why EDF + ALSA</b></span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span>Hardware</span><span class="on">Product</span></nav></header>
-      <div class="content">
-        <h2>Manage devices in Linux. Keep the PL deterministic</h2>
-        <table class="tt">
-          <thead><tr><th>EDF / PS-managed (chosen)</th><th>Direct MIDI decoding in PL</th></tr></thead>
-          <tbody>
-            <tr><td>ALSA Sequencer: standard MIDI events, mature device handling</td><td>Custom USB transport and parser in fabric</td></tr>
-            <tr><td>Discovery, disconnect, reconnect are ordinary Linux service concerns</td><td>Device lifecycle becomes hardware behaviour</td></tr>
-            <tr><td>Voice policy and mapping change without rebuilding PL</td><td>Policy changes need hardware iteration</td></tr>
-            <tr><td>EDF + dfx-mgr manage a replaceable PL payload</td><td>Behaviour coupled to a static hardware image</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <footer class="footerline"><span class="tag">AMD On Wheels NZ · together we advance</span><span class="slide-number"></span></footer>
-      <aside class="notes">Product-specific decision, not a claim that PL MIDI decoding is always wrong.</aside>
+      <aside class="notes">EDF is the deployment architecture: Linux boots, dfx-mgr applies the packaged bitstream and overlay through FPGA Manager, then the control service uses the AXI map. Do not claim EDF built the FPGA design: it was developed and first accepted on AMD Ubuntu 24.04, then packaged into EDF. PL MIDI decoding is valid elsewhere; this product had no requirement for it.</aside>
     </section>
 
     <section class="slide" data-title="Acceptance evidence">
@@ -788,7 +788,7 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
     <section class="slide" data-title="What it enables">
       <header class="topline"><span class="kicker">What it enables</span></header>
       <div class="content">
-        <h2>You make the decisions. The agent does the engineering</h2>
+        <h2>You engineer. The agents implement</h2>
         <div class="grid g2">
           <div class="panel t"><span class="label t">What I did</span><p style="color:var(--text)">Chose the product. Wrote the brief and the maths. Set the trades and the 2,000-cycle budget. Redirected the optimization. Listened, and accepted.</p></div>
           <div class="panel"><span class="label">What the agents did</span><p>The HLS C++, the RTL, the Linux control, the testbenches, the Vivado builds, the board bring-up, the Yocto layer, and the diagnosis.</p></div>
