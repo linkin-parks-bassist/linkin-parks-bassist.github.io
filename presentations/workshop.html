@@ -649,46 +649,6 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
     </section>
 
     <!-- ===================== HARDWARE ===================== -->
-    <section class="slide" data-title="Simulation passed">
-      <header class="topline"><span class="kicker">Hardware in the loop <b>· when it failed</b></span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span class="on">Hardware</span><span>Product</span></nav></header>
-      <div class="content">
-        <h2>Simulation passed. The board read zero</h2>
-        <div class="split" style="align-items:stretch">
-          <div class="grid">
-            <div class="code"><div class="bar">sim/stage2/tb_stage2.sv · how the testbench addressed the bank</div><pre>axi_read(<span class="k">32'h0000_0000</span>);  <span class="c">// ID register</span>
-axi_read(<span class="k">32'h0000_0004</span>);  <span class="c">// ABI register</span>  <span class="ok">PASS</span></pre></div>
-            <div class="code"><div class="bar">on the KV260 · what the Arm cores actually present</div><pre>regread <span class="k">0xA0000000</span>
-<span class="bad">0x00000000</span>   <span class="c">// expected 0x53594E54 "SYNT"</span></pre></div>
-          </div>
-          <div class="grid" style="align-content:stretch">
-            <div class="panel r"><span class="label r">The fault</span><p>The register bank compared the <strong class="hl">full 32-bit address</strong> against offsets <span class="mono">0x000, 0x004…</span> The fabric delivers <span class="mono">0xA000_0000</span>, so every read fell through to “reserved”.</p></div>
-            <div class="panel t"><span class="label t">How it was found, and the fix</span><p>A known-good reference design at the same address read correctly, isolating the bank. Decode <span class="mono">addr[11:0]</span>, rebuild through Vivado, reload. The board read <strong class="hl">SYNT</strong>.</p></div>
-          </div>
-        </div>
-      </div>
-      <footer class="footerline"><span class="tag">AMD On Wheels NZ · together we advance</span><span class="slide-number"></span></footer>
-      <aside class="notes">[19:30 · Hardware: 5 min] This is the talk's “can you spot the bug” moment. Pause on the left panels and let people spot that the testbench used offsets. The testbench bypassed the interconnect, so simulation could never see it. With the real board in the loop, the agent found a bug that every simulation said did not exist. Lesson for their own projects: test through the addresses the silicon really presents.</aside>
-    </section>
-
-    <section class="slide" data-title="What caught it">
-      <header class="topline"><span class="kicker">Honesty</span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span class="on">Hardware</span><span>Product</span></nav></header>
-      <div class="content">
-        <h2>When it went wrong, and what caught it</h2>
-        <table class="tt">
-          <thead><tr><th>What went wrong</th><th>Caught by</th></tr></thead>
-          <tbody>
-            <tr><td>Register bank decoded the full address; every read returned 0</td><td><strong>Board readback</strong>, against a known-good reference</td></tr>
-            <tr><td>A raw PL read soon after boot hung the AXI bus and the whole board</td><td><strong>The board itself</strong>; the fix became a managed unload/load in the startup service</td></tr>
-            <tr><td>MIDI capture silently dropped the final event and failed on permissions</td><td><strong>A live capture</strong>: 394 events, all four dials matched the PL shadows</td></tr>
-            <tr><td>Optimization chased latency and broke the clock target</td><td><strong>The HLS timing estimate</strong>, and one sentence from the engineer</td></tr>
-          </tbody>
-        </table>
-        <p class="punch">None was caught by watching over the agent's shoulder. <span class="t">Each was caught by evidence.</span></p>
-      </div>
-      <footer class="footerline"><span class="tag">AMD On Wheels NZ · together we advance</span><span class="slide-number"></span></footer>
-      <aside class="notes">Credibility slide. The agent is fast and fallible; the method is what makes it trustworthy. Every row has a concrete detector: the board, a capture count, a tool report.</aside>
-    </section>
-
     <section class="slide" data-title="Hardware in the loop">
       <header class="topline"><span class="kicker">Hardware in the loop</span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span class="on">Hardware</span><span>Product</span></nav></header>
       <div class="content">
