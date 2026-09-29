@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Vitis Agentic AI HLS: From Brief to Instrument on Kria. An AMD On Wheels NZ 2026 field report on the AMD Agentic AI Suite, Vivado MCP Server and HLS Skills.">
-  <title>Agent AI on Kria</title>
+  <meta name="description" content="Vitis Agentic AI HLS: from brief to instrument on Kria. An AMD On Wheels NZ 2026 field report on the AMD Agentic AI Suite, Vivado MCP Server and HLS Skills.">
+  <title>Vitis Agentic AI HLS</title>
   <style>
     :root {
       color-scheme: dark;
@@ -129,7 +129,7 @@
     /* ---------- title ---------- */
     .title-slide { background: radial-gradient(ellipse at 85% 30%, rgba(0,194,222,.16), transparent 50%), var(--bg); }
     .title-slide .content { max-width: 1480px; }
-    .title-slide h1 { max-width: 16ch; margin: 18px 0 26px; }
+    .title-slide h1 { max-width: 22ch; margin: 18px 0 26px; }
     .title-brands { display: flex; align-items: center; gap: 22px; }
     .title-brands .wordmark { height: 34px; font-size: 28px; }
     .title-brands .sep { width: 1px; height: 30px; background: var(--line-2); }
@@ -202,6 +202,7 @@
     .controls:hover, .controls:focus-within { opacity: 1; }
     .controls button { width: 34px; height: 34px; padding: 0; border: 1px solid var(--line-2); background: var(--panel); color: var(--text); cursor: pointer; font-weight: 800; }
     .controls button:hover, .controls button:focus-visible { color: var(--bg); background: var(--teal); outline: none; }
+    .export .controls, .export .progress { display: none !important; }
     .progress { position: fixed; z-index: 20; left: 0; bottom: 0; height: 3px; width: 0; background: var(--teal); transition: width .25s ease; }
 
     .overview { overflow: auto; }
@@ -257,7 +258,8 @@
       <header class="topline"><span class="kicker">AMD On Wheels NZ <b>· 2026 · AUT Auckland</b></span></header>
       <div class="content">
         <div class="title-brands"><span class="wordmark amd" data-logo="assets/brand/amd-logo.svg">AMD</span><span class="sep"></span><span class="wordmark" data-logo="assets/brand/avnet-logo.svg">AVNET</span></div>
-        <h1>Vitis Agentic AI HLS: From Brief to Instrument on Kria</h1>
+        <h1>Vitis Agentic AI HLS</h1>
+        <p class="lede" style="font-size:clamp(24px,2vw,38px);color:var(--text);font-weight:650;margin-bottom:14px">From brief to instrument on Kria</p>
         <p class="lede">A plain-English brief, the <strong>AMD Agentic AI Suite</strong>, and one adaptive SoC: a playable 16-voice synthesizer, built in HLS and running in the room.</p>
         <p class="presenter"><b>David Farrell</b> · AMD On Wheels 2026 Project Coordinator<br>Early-access field report · Vivado MCP Server · AMD HLS Skills</p>
       </div>
@@ -905,6 +907,7 @@ axi_read(<span class="k">32'h0000_0004</span>);  <span class="c">// ABI register
         img.src = el.dataset.logo;
       });
 
+      if (new URLSearchParams(location.search).has('export')) document.body.classList.add('export');
       const slides = [...document.querySelectorAll('.slide')];
       const main = slides.filter(s => !s.dataset.title.startsWith('Backup'));
       const progress = document.querySelector('.progress');
@@ -922,7 +925,7 @@ axi_read(<span class="k">32'h0000_0004</span>);  <span class="c">// ABI register
         current = Math.max(0, Math.min(slides.length - 1, index));
         slides.forEach((s, i) => { s.classList.toggle('active', i === current); s.setAttribute('aria-hidden', i === current ? 'false' : 'true'); });
         progress.style.width = `${Math.min(1, (current + 1) / main.length) * 100}%`;
-        document.title = `${slides[current].dataset.title} · Agent AI on Kria`;
+        document.title = `${slides[current].dataset.title} · Vitis Agentic AI HLS`;
         if (updateHash) history.replaceState(null, '', `#${current + 1}`);
       }
       function toggleOverview() { document.body.classList.toggle('overview'); document.body.classList.remove('notes-open'); }
