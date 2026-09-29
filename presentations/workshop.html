@@ -645,7 +645,27 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
         <p class="small" style="margin-top:16px">One physical lane (HLS estimate): 2 BRAM18K · 94 DSP · 12,540 FF · 26,264 LUT · 38–397 cycles per logical voice. Excludes mix, reverb and RTL integration.</p>
       </div>
       <footer class="footerline"><span class="tag">AMD On Wheels NZ · together we advance</span><span class="slide-number"></span></footer>
-      <aside class="notes">Read left to right. Each logical voice has independent phase, LFO, envelope, filter, velocity and replacement state. UNROLL factor 4 creates four physical process_voice lanes, each serving four logical voices in turn. Do not multiply the lane LUT estimate and call it routed utilization; the full lane breakdown is in the backup slides.</aside>
+      <aside class="notes">Read left to right. Each logical voice has independent phase, LFO, envelope, filter, velocity and replacement state. UNROLL factor 4 creates four physical process_voice lanes, each serving four logical voices in turn. Do not multiply the lane LUT estimate and call it routed utilization; the full lane breakdown is on the next slide.</aside>
+    </section>
+
+    <section class="slide" data-title="Voice-lane cost">
+      <header class="topline"><span class="kicker">Inside the HLS kernel <b>· Vitis HLS 2025.2 estimate</b></span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span class="on">HLS</span><span>Hardware</span><span>Product</span></nav></header>
+      <div class="content">
+        <h2>What one physical voice lane costs</h2>
+        <table class="tt">
+          <thead><tr><th>Lane component</th><th class="num">BRAM18K</th><th class="num">DSP</th><th class="num">FF</th><th class="num">LUT</th></tr></thead>
+          <tbody>
+            <tr><td>Two sine/cosine engines</td><td class="num">0</td><td class="num">26</td><td class="num">1,438</td><td class="num">5,312</td></tr>
+            <tr><td>Shared filter engine · two BPF calls</td><td class="num">0</td><td class="num">32</td><td class="num">2,758</td><td class="num">5,570</td></tr>
+            <tr><td>Two frequency / coefficient exp2 engines</td><td class="num">2</td><td class="num">12</td><td class="num">194</td><td class="num">2,540</td></tr>
+            <tr><td>Envelopes, LFO routing, fold, state + arithmetic</td><td class="num">0</td><td class="num">24</td><td class="num">8,150</td><td class="num">12,842</td></tr>
+            <tr class="total"><td>One process_voice lane</td><td class="num">2</td><td class="num">94</td><td class="num">12,540</td><td class="num">26,264</td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:14px">38–397 cycles per logical voice · four lanes instantiated · excludes mixer, reverb, output processing and RTL integration · LUT estimates are not routed CLB counts.</p>
+      </div>
+      <footer class="footerline"><span class="tag">AMD On Wheels NZ · together we advance</span><span class="slide-number"></span></footer>
+      <aside class="notes">Vivado later packs and shares logic, so do not multiply this LUT figure and call it routed utilization.</aside>
     </section>
 
     <!-- ===================== HARDWARE ===================== -->
@@ -709,6 +729,24 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
       </div>
       <footer class="footerline"><span>Developed on AMD Ubuntu 24.04 · packaged and accepted on EDF 25.11</span><span class="slide-number"></span></footer>
       <aside class="notes">[~25:00 · Product: 2 min] EDF is the deployment architecture: Linux boots, dfx-mgr applies the packaged bitstream and overlay through FPGA Manager, then the control service uses the AXI map. Do not claim EDF built the FPGA design: it was developed and first accepted on AMD Ubuntu 24.04, then packaged into EDF. PL MIDI decoding is valid elsewhere; this product had no requirement for it.</aside>
+    </section>
+
+    <section class="slide" data-title="EDF versus PL MIDI">
+      <header class="topline"><span class="kicker">AMD Embedded Development Framework <b>· why EDF + ALSA</b></span><nav class="acts"><span>Kria</span><span>Project</span><span>Suite</span><span>HLS</span><span>Hardware</span><span class="on">Product</span></nav></header>
+      <div class="content">
+        <h2>Manage devices in Linux. Keep the PL deterministic</h2>
+        <table class="tt">
+          <thead><tr><th>EDF / PS-managed (chosen)</th><th>Direct MIDI decoding in PL</th></tr></thead>
+          <tbody>
+            <tr><td>ALSA Sequencer: standard MIDI events, mature device handling</td><td>Custom USB transport and parser in fabric</td></tr>
+            <tr><td>Discovery, disconnect, reconnect are ordinary Linux service concerns</td><td>Device lifecycle becomes hardware behaviour</td></tr>
+            <tr><td>Voice policy and mapping change without rebuilding PL</td><td>Policy changes need hardware iteration</td></tr>
+            <tr><td>EDF + dfx-mgr manage a replaceable PL payload</td><td>Behaviour coupled to a static hardware image</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="footerline"><span class="tag">AMD On Wheels NZ · together we advance</span><span class="slide-number"></span></footer>
+      <aside class="notes">Product-specific decision, not a claim that PL MIDI decoding is always wrong.</aside>
     </section>
 
     <section class="slide" data-title="Acceptance evidence">
@@ -777,44 +815,6 @@ after   <span class="ok">4 partial sums → 2 pair sums → final sum</span>
       <aside class="notes">[~29:00] Return to the abstraction arc. The scarce skill moves toward choosing the product, expressing constraints, directing tradeoffs and deciding what evidence is enough.</aside>
     </section>
 
-    <!-- ===================== BACKUP ===================== -->
-    <section class="slide" data-title="Backup: voice-lane cost">
-      <header class="topline"><span class="kicker">Backup <b>· Vitis HLS 2025.2 estimate</b></span></header>
-      <div class="content">
-        <h2>What one physical voice lane costs</h2>
-        <table class="tt">
-          <thead><tr><th>Lane component</th><th class="num">BRAM18K</th><th class="num">DSP</th><th class="num">FF</th><th class="num">LUT</th></tr></thead>
-          <tbody>
-            <tr><td>Two sine/cosine engines</td><td class="num">0</td><td class="num">26</td><td class="num">1,438</td><td class="num">5,312</td></tr>
-            <tr><td>Shared filter engine · two BPF calls</td><td class="num">0</td><td class="num">32</td><td class="num">2,758</td><td class="num">5,570</td></tr>
-            <tr><td>Two frequency / coefficient exp2 engines</td><td class="num">2</td><td class="num">12</td><td class="num">194</td><td class="num">2,540</td></tr>
-            <tr><td>Envelopes, LFO routing, fold, state + arithmetic</td><td class="num">0</td><td class="num">24</td><td class="num">8,150</td><td class="num">12,842</td></tr>
-            <tr class="total"><td>One process_voice lane</td><td class="num">2</td><td class="num">94</td><td class="num">12,540</td><td class="num">26,264</td></tr>
-          </tbody>
-        </table>
-        <p class="small" style="margin-top:14px">38–397 cycles per logical voice · four lanes instantiated · excludes mixer, reverb, output processing and RTL integration · LUT estimates are not routed CLB counts.</p>
-      </div>
-      <footer class="footerline"><span>Backup slide</span><span class="slide-number"></span></footer>
-      <aside class="notes">Only for questions. Vivado later packs and shares logic, so do not multiply this LUT figure and call it routed utilization.</aside>
-    </section>
-
-    <section class="slide" data-title="Backup: EDF versus PL MIDI">
-      <header class="topline"><span class="kicker">Backup <b>· why EDF + ALSA</b></span></header>
-      <div class="content">
-        <h2>Manage devices in Linux. Keep the PL deterministic</h2>
-        <table class="tt">
-          <thead><tr><th>EDF / PS-managed (chosen)</th><th>Direct MIDI decoding in PL</th></tr></thead>
-          <tbody>
-            <tr><td>ALSA Sequencer: standard MIDI events, mature device handling</td><td>Custom USB transport and parser in fabric</td></tr>
-            <tr><td>Discovery, disconnect, reconnect are ordinary Linux service concerns</td><td>Device lifecycle becomes hardware behaviour</td></tr>
-            <tr><td>Voice policy and mapping change without rebuilding PL</td><td>Policy changes need hardware iteration</td></tr>
-            <tr><td>EDF + dfx-mgr manage a replaceable PL payload</td><td>Behaviour coupled to a static hardware image</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <footer class="footerline"><span>Backup slide</span><span class="slide-number"></span></footer>
-      <aside class="notes">Product-specific decision, not a claim that PL MIDI decoding is always wrong.</aside>
-    </section>
   </main>
 
   <div class="progress" aria-hidden="true"></div>
