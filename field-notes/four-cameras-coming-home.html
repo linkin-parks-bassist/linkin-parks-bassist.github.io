@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Four Cameras, Coming Home · David Farrell</title>
+  <meta name="description" content="Replacing one source in a hand-built four-channel KV260 camera design with MIPI input, and replacing its PCIe handoff with Linux, V4L2, GStreamer and HDMI.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="field-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="../nonsenses/index.html">Nonsenses</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+
+  <section class="page">
+    <div class="eyebrow">Field note · 30 September 2026 · episode 1</div>
+    <h1 class="page-title">Four Cameras, Coming Home.</h1>
+    <p class="section-note">I am taking the four-channel KV260 vision system I built for my Avnet test assignment, replacing one synthetic source with a real camera, and turning its output around from PCIe to the board's own HDMI connector.</p>
+  </section>
+
+  <section id="starting-design" class="prose">
+    <h2>The design I started with</h2>
+    <p>In May, Avnet gave me two weeks to define and demonstrate a four-camera architecture on an AMD Kria K26 SOM. Each camera was specified as 1920 × 1536 at 30 frames per second, producing 8-bit YUV 4:2:2 after its own ISP. The programmable logic had to convert every stream to RGB, capture all 30 frames per second into PS DDR, deliberately select 10 frames per second for use, and make those raw RGB frames available to a host PC over PCIe.</p>
+    <figure class="terminal-capture">
+      <a href="four-cameras-original-block-design.png"><img src="four-cameras-original-block-design.png" width="1980" height="1530" alt="Vivado block design showing four test-pattern-generator, video-processing and VDMA lanes connected through PS DDR to a Zynq UltraScale+ MPSoC and PCIe XDMA endpoint."></a>
+      <figcaption>The complete Vivado block design I submitted for the original assignment.</figcaption>
+    </figure>
+    <p>I built the complete Vivado and Vitis demonstration by hand. This was before I had tried agentic AI. The finished block design contains four independent, concurrent video pipelines. Each begins with a Video Test Pattern Generator configured for a 1920 × 1536 maximum frame, three 8-bit components and two pixels per clock. Each TPG drives its own Video Processing Subsystem over a 48-bit AXI4-Stream Video interface. Each VPSS performs the YUV 4:2:2 to RGB colour-space conversion and drives a dedicated AXI VDMA S2MM channel, again at two RGB pixels per clock.</p>
+    <pre><code>lane 0: TPG 0 → VPSS 0 → VDMA 0 ┐
+lane 1: TPG 1 → VPSS 1 → VDMA 1 ├→ 128-bit SmartConnect → PS S_AXI_HP0_FPD → DDR
+lane 2: TPG 2 → VPSS 2 → VDMA 2 ┤
+lane 3: TPG 3 → VPSS 3 → VDMA 3 ┘</code></pre>
+    <p>The four VDMAs are write-only, direct-register-mode engines with five frame stores apiece. Their memory-side ports are 64 bits wide; a SmartConnect combines them onto the PS's 128-bit high-performance DDR port. An RGB888 frame is 1920 × 1536 × 3 = 8,847,360 bytes. I reserved a 64 MiB lane span for each stream, producing a 256 MiB capture region beginning at physical address <code>0x10000000</code>. The five frame stores for one lane consume 44,236,800 bytes, so they fit inside that lane's span without colliding with the next.</p>
+    <p>The control plane is separate from the pixel and memory planes. The Cortex-A53 side reaches all four TPGs, all four VPSS instances, all four VDMAs and four custom status-register blocks through the PS <code>M_AXI_HPM0_LPD</code> master and a sixteen-output AXI SmartConnect. The PCIe endpoint has a second route into the same controls: its AXI-Lite master owns a 1 MiB aperture in which the VDMAs occupy <code>0x80000000</code> through <code>0x8003ffff</code>, the VPSS blocks <code>0x80040000</code> through <code>0x8007ffff</code>, the TPGs <code>0x80080000</code> through <code>0x800bffff</code>, and the four status blocks <code>0x800c0000</code> through <code>0x800fffff</code>.</p>
+    <p>The PCIe endpoint is a four-lane XDMA block with one host-to-card and one card-to-host memory-mapped channel, a 64-bit AXI data path and MSI. Its AXI master reaches PS DDR through the second 128-bit high-performance port, <code>S_AXI_HP1_FPD</code>. The project requirement asked for Gen3 x4. I had Codex interrogate the saved project through Vivado MCP and extract the actual IP configuration and address map; the demonstration endpoint is configured for Gen1 x4. That is a property of the artifact, not something to silently round up in a diagram.</p>
+    <p>I also wrote the bare-metal control program. It initializes each TPG, describes custom 1920 × 1536, 30 Hz input and output streams to the VPSS driver, configures every VDMA with five circular frame buffers and installs four completion and error interrupt handlers in the GIC. On every completed frame it identifies the buffer immediately behind the VDMA's current write index. Two out of every three completions increment a dropped-frame count. The third publishes the completed buffer's 64-bit physical address, lane, dimensions, stride, byte count, pixel format, sequence counters, VDMA status and validity flags through that lane's custom register bank. In other words, the 30-to-10 fps rule is an explicit state machine in software, not an aspiration written beside a block diagram.</p>
+  </section>
+
+  <section id="goal" class="prose">
+    <h2>Today's change</h2>
+    <p>The old design stops at a useful demonstration boundary: four real pipelines fed by controlled synthetic sources, with raw frames exported to another computer. Today's experiment moves both fingertips. Lane 0 will receive real 8-bit YUV 4:2:2 from the KV260 carrier's AP1302 ISP over four-lane MIPI CSI-2. The other three lanes remain TPGs, so one physical input can be integrated without losing the repeatable reference sources. At the output, the system will no longer publish physical buffer addresses to a PCIe host. Linux on the A53s will own four capture devices, and GStreamer will composite all four streams into a 2 × 2 display on the KV260's HDMI output.</p>
+    <pre><code>AP1302 → MIPI CSI-2 RX → VPSS CSC → Frame Buffer Write ┐
+TPG 1 ───────────────→ VPSS CSC → Frame Buffer Write ├→ PS DDR → V4L2/DMABUF ┐
+TPG 2 ───────────────→ VPSS CSC → Frame Buffer Write ┤                       ├→ GStreamer compositor → DRM/KMS → HDMI
+TPG 3 ───────────────→ VPSS CSC → Frame Buffer Write ┘                       ┘</code></pre>
+  </section>
+
+  <section id="boundaries" class="prose">
+    <h2>Changing the software boundary</h2>
+    <p>Keeping the old AXI VDMAs and teaching a userspace program about their registers and fixed buffer addresses would reproduce the bare-metal contract inside Linux. I am using AMD's Linux video boundary instead. Each lane now ends in a Video Frame Buffer Write IP. The device-tree overlay describes the source, colour-space converter, DMA engine and endpoints as a media graph. The Xilinx video-pipeline driver registers each graph as a V4L2 capture device, and <code>v4l2src</code> performs the streaming ioctls and buffer exchange.</p>
+    <p>This changes who owns the frame buffers. The old application chose physical addresses and told a remote host which one was ready. In the new system, videobuf2 allocates and queues capture buffers, V4L2 exports them as DMA-BUF file descriptors, and GStreamer can pass those buffers onward without making their physical addresses part of the application contract. The four camera streams remain separate until userspace. Their arrangement on screen—today a 960 × 540 quadrant each in a 1920 × 1080 composition—is policy in the GStreamer pipeline rather than fixed PL topology.</p>
+    <p>The KV260's HDMI connector does not require a new PL HDMI transmitter here. The Zynq UltraScale+ processing system already has a DisplayPort display subsystem, and the carrier presents that display path through its on-board output hardware. Linux exposes it through DRM/KMS. GStreamer's <code>kmssink</code> is therefore the final fingertip.</p>
+  </section>
+
+  <section id="mipi" class="prose">
+    <h2>Replacing TPG 0</h2>
+    <p>The chosen physical source is the KV260 IAS camera path: an AR1335 sensor behind the carrier's onsemi AP1302 ISP. The AP1302 appears at I2C address <code>0x3c</code> behind channel 0 of a PCA9546 switch at <code>0x74</code>. It supplies YUV422-8 on four CSI-2 data lanes, matching the assignment's assumption that the camera contains its own ISP. That means lane 0 does not need a demosaic or gamma stage; the new MIPI CSI-2 Receiver Subsystem decodes the transport, and the existing conceptual CSC stage still owns YUV-to-RGB conversion.</p>
+    <p>The receiver's packed output and the VPSS input are not the same representation. Vivado 2025.2 configured the receiver for a 32-bit AXI4-Stream output, while the dual-pixel, three-component VPSS input is 48 bits. An AXI4-Stream Subset Converter performs that fingertip adaptation explicitly. This was one of the useful failures from building the design through Vivado rather than drawing a plausible arrow between two blocks.</p>
+  </section>
+
+  <section id="vivado" class="prose">
+    <h2>A clean Vivado design</h2>
+    <p>The May project remains intact as the original assignment artifact. It is not a good substrate for this Linux version: the four status-register blocks were hand-written local IP, their repository path no longer exists on this machine, and that leaves the saved block design locked. Those blocks are also precisely the interface being removed. I wrote a new reproducible Tcl build instead of converting the old generated project into a mixture of obsolete handoff machinery and new Linux capture logic.</p>
+    <p>The script creates one four-lane MIPI receiver, three TPGs, four VPSS colour-space converters and four 128-bit Video Frame Buffer Write engines. The data movers share one PS high-performance DDR port. A 100 MHz PL clock is sufficient: at two pixels per beat, each stream needs 44.24 million beats per second, and four independent stream datapaths run concurrently rather than time-sharing one pixel bus. A separate 200 MHz clock serves the D-PHY.</p>
+    <p>I used the Vivado MCP integration to interrogate the original project, build the replacement through Tcl, validate the block design, run synthesis and implementation, and inspect the reports. The first validation caught unused PS master ports left enabled by the board preset. The second caught the receiver/VPSS stream-width mismatch and an unnecessary crossing between 100 MHz control and 300 MHz video clocks. Correcting those produced a clean validated design.</p>
+    <p>Synthesis completed. Placement and routing completed with no failed nets. The final routed design reported 2.039 ns setup slack and 0.010 ns hold slack. Bitstream DRC reported zero errors, and Vivado generated both <code>camera_display_wrapper.bit</code> and a fixed, bitstream-bearing <code>kv260-camera.xsa</code>.</p>
+  </section>
+
+  <section id="edf" class="prose">
+    <h2>Carrying it into EDF</h2>
+    <p>This is a new EDF product, not a modification of my KV260 synthesizer image. It has a separate build directory, image recipe, firmware bundle and SD card. The synthesizer remains preserved on its own card and neither its <code>meta-synth</code> layer nor any synth package or service participates in this image.</p>
+    <p>The camera firmware recipe packages the implemented bitstream, a flat-PL <code>shell.json</code> and a device-tree overlay. I had Codex do the tiresome first pass over the Vivado address map, AMD's Smartcam overlay and the installed kernel bindings, then I reviewed the resulting hardware/software contract as validation exposed the missing reset lines and clock details. The overlay describes the AP1302 and its regulators, the I2C switch, CSI-2 receiver, four CSCs, three TPGs, four framebuffer DMAs, five PL interrupts and four named media graphs. <code>dfx-mgr</code> loads that bundle at boot.</p>
+    <p>The camera image recipe adds AMD's Xilinx GStreamer package group, <code>v4l-utils</code> and <code>libdrm-tests</code> to the clean Kria command-line image. The EDF kernel configuration already enables the media controller, Xilinx CSI-2 receiver, TPG, VPSS and ZynqMP DRM drivers. A camera-specific systemd service waits for the PL firmware loader, resolves the four stable media-entity names to their actual <code>/dev/video*</code> nodes, and starts the four-source GStreamer composition.</p>
+  </section>
+
+  <section id="result" class="prose">
+    <h2>Result so far</h2>
+    <p>The architecture has crossed from proposal into implemented artifacts. The new Vivado design validates, synthesizes, routes, meets timing and produces a bitstream and XSA. The EDF layer contains the firmware bundle definition, complete media graph, multimedia image recipe and four-source display service.</p>
+    <p>The remaining evidence is physical. I have not yet built the EDF image, booted this bitstream on the KV260, enumerated the four media graphs, received pixels from the AP1302, or observed the quadrant composition on an HDMI monitor. Those checks belong to the next episodes.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+
+  <section id="sources">
+    <h2>References</h2>
+    <div class="prose">
+      <p><a href="https://docs.amd.com/r/en-US/pg232-mipi-csi2-rx">AMD PG232: MIPI CSI-2 Receiver Subsystem</a></p>
+      <p><a href="https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842522/Xilinx+V4L2+MIPI+CSI-2+RX+Driver">AMD Wiki: Xilinx V4L2 MIPI CSI-2 RX Driver</a></p>
+      <p><a href="https://github.com/Xilinx/kria-vitis-platforms">AMD Kria Vitis platforms</a></p>
+      <p><a href="https://github.com/Xilinx/kria-apps-firmware">AMD Kria application firmware</a></p>
+    </div>
+  </section>
+
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+</body>
+</html>
