@@ -29,7 +29,7 @@
   </section>
 
   <section id="starting-design" class="prose">
-    <h2>The design I started with</h2>
+    <h2>Updating my priors.</h2>
     <p>In May, Avnet gave me two weeks to define and demonstrate a four-camera architecture on an AMD Kria K26 SOM. Each camera was specified as 1920 × 1536 at 30 frames per second, producing 8-bit YUV 4:2:2 after its own ISP. The programmable logic had to convert every stream to RGB, capture all 30 frames per second into PS DDR, deliberately select 10 frames per second for use, and make those raw RGB frames available to a host PC over PCIe.</p>
     <figure class="terminal-capture">
       <a href="four-cameras-original-block-design.png"><img src="four-cameras-original-block-design.png" width="1980" height="1530" alt="Vivado block design showing four test-pattern-generator, video-processing and VDMA lanes connected through PS DDR to a Zynq UltraScale+ MPSoC and PCIe XDMA endpoint."></a>
