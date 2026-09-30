@@ -70,7 +70,6 @@ TPG 3 ───────────────→ VPSS CSC → Frame Buffer
 
   <section id="vivado" class="prose">
     <h2>A clean Vivado design</h2>
-    <p>This should have been an edit to the May project. It was not.</p>
     <p>The four status-register blocks were hand-written local IP, and the repository path they came from no longer exists on this machine. Vivado consequently opens the old block design locked. I could have reconstructed the missing repository merely to delete those blocks again, but that felt like repairing a door in order to brick it up. The May project stays exactly where it is, as the assignment artifact. The Linux version gets a new Tcl build.</p>
     <p>The script makes one four-lane MIPI receiver, three TPGs, four VPSS colour-space converters and four 128-bit Video Frame Buffer Write engines. All four writers meet at one PS high-performance DDR port. I stopped for the clock arithmetic because 100 MHz looked suspiciously neat: 1920 × 1536 × 30, divided by two pixels per beat, is 44.24 million beats per second. Fine. Each lane has its own stream datapath, so they are not taking turns on one 100 MHz pixel bus. The D-PHY gets a separate 200 MHz clock.</p>
     <p>Vivado MCP did the useful sort of automation where the tool remains fully capable of saying no. The first validation objected to two unused PS master ports left alive by the board preset. The next objected that the MIPI receiver spoke packed 32-bit YUV422 while VPSS expected its 48-bit, three-component dialect. It also found that I had made a pointless border crossing between a 100 MHz control plane and a 300 MHz video plane. I removed the unused ports, inserted the explicit stream conversion and brought the video logic back onto the perfectly adequate 100 MHz clock.</p>
@@ -80,8 +79,7 @@ TPG 3 ───────────────→ VPSS CSC → Frame Buffer
 
   <section id="edf" class="prose">
     <h2>Carrying it into EDF</h2>
-    <p>Not the synth image. New build directory. New image recipe. New firmware bundle. Different SD card. The working synthesizer card remains elsewhere, minding its business; <code>meta-synth</code> and the synth services do not enter this build.</p>
-    <p>The camera firmware recipe gathers the bitstream, a flat-PL <code>shell.json</code> and the device-tree overlay. I had Codex do the numbing first pass across the Vivado address map, AMD's Smartcam overlay and the kernel bindings. I then read the resulting contract against the hardware while Vivado and the bindings took turns finding things we had missed.</p>
+    <p>The camera firmware recipe gathers the bitstream, a flat-PL <code>shell.json</code> and the device-tree overlay. I had Codex do the first pass across the Vivado address map, AMD's Smartcam overlay and the kernel bindings. I then read the resulting contract against the hardware while Vivado and the bindings took turns finding things we had missed.</p>
     <p>There was one especially modest contribution to computer science. While adding the D-PHY clock, an edit briefly left the CSI node with two <code>clock-names</code> properties. This was not twice as informative. Reading the file back made it obvious; the spare line went away; civilisation continued.</p>
     <p>The finished overlay names the AP1302 and its regulators, the I2C switch, CSI-2 receiver, four CSCs, three TPGs, four framebuffer DMAs, five PL interrupts and four media graphs. <code>dfx-mgr</code> loads the bundle. The image adds AMD's Xilinx GStreamer package group, <code>v4l-utils</code> and <code>libdrm-tests</code> to a clean Kria command-line image. The relevant media and DRM drivers are already enabled in the EDF kernel configuration.</p>
     <p>A small camera-specific systemd service waits for the PL loader, asks the media controller which <code>/dev/video*</code> node belongs to each named lane, and starts the four-source GStreamer composition. At least, that is the arrangement on paper and in the built hardware. Linux has not had its vote yet.</p>
@@ -89,9 +87,7 @@ TPG 3 ───────────────→ VPSS CSC → Frame Buffer
 
   <section id="result" class="prose">
     <h2>Result so far</h2>
-    <p>The old design began as hopeful arrows too. Nothing wrong with that. I built the thing. It did what it was meant to do. Anyway.</p>
-    <p>This one currently consists of a routed design, bitstream, XSA, EDF layer, media graph, image recipe and display service. I know where every address, interrupt, clock and reset line goes. I do not know what order Linux will number the four <code>/dev/video*</code> devices in. It can tell me tomorrow.</p>
-    <p>Next: BitBake. Pictures later.</p>
+    <p>This one currently consists of a routed design, bitstream, XSA, EDF layer, media graph, image recipe and display service. Next: BitBake.</p>
     <p class="tombstone" aria-label="End of note">□</p>
   </section>
 
