@@ -1,0 +1,341 @@
+VITIS AGENTIC AI HLS
+AMD on Wheels New Zealand 2026
+David Farrell - Field Application Engineer - Avnet
+
+Full 30-minute speaker script
+==============================
+
+SLIDE 1: Vitis Agentic AI HLS
+------------------------------
+TIMING: 0:00-0:45
+
+SCRIPT:
+Good afternoon. I'm David Farrell, a Field Application Engineer with Avnet.
+
+This session is called Vitis Agentic AI HLS, but what I actually want to show you is much more tangible: a musical idea turned into working adaptive hardware.
+
+You are going to hear the result first. Then I will take it apart, explain why an FPGA is interesting for audio, and show you how a specification, AMD Ross, Vitis HLS, Vivado, and hardware-in-the-loop testing turned a slightly ridiculous bucket-list idea into a working instrument in a few days.
+
+This is not a story about pressing a magic AI button. It is a story about moving the engineer's effort upward: from typing every line to defining the system, judging evidence, and deciding what good enough actually means.
+
+CUE: Keep the introduction short. Gesture toward the powered KV260 and controller before advancing.
+
+SLIDE 2: Why is there a synthesizer at AMD on Wheels?
+------------------------------------------------------
+TIMING: 0:45-3:00
+
+SCRIPT:
+You may have noticed this synthesizer playing on the table today and wondered why it is here. Why a synthesizer? What does it do? What does it have to do with AMD? And what is the point of the demo?
+
+Before I answer any of that, let us hear it.
+
+[PLAY a few separated notes. Then play a chord. Turn each of the four controls slowly enough for the audience to hear the change. Finish with a short phrase rather than technical noodling.]
+
+So that is the finished object. A polyphonic digital synthesizer running on an AMD Kria KV260. The controller supplies the performance; the KV260 creates every audio sample.
+
+I am deliberately showing you the result first because this is the acceptance boundary that matters. We can have beautiful source code, passing simulation, and green timing reports, but if the instrument does not respond properly and sound right on the physical hardware, the project is not finished.
+
+Now let us take apart what you just heard.
+
+LIVE DEMO: Have the KV260, FC25, DAC, and bench audio ready before presenting. Aim for 60-75 seconds of playing.
+
+FALLBACK: If there is no sound within 15 seconds, say: "The live-demo gods require a sacrifice, so here is the recording." Play the backup clip. Do not debug on stage. Resume with: "So that is the object we are taking apart."
+
+SLIDE 3: The keyboard makes no sound at all
+--------------------------------------------
+TIMING: 3:00-4:20
+
+SCRIPT:
+The first slightly surprising thing is that this keyboard is not really a keyboard at all. By itself, it makes no sound.
+
+It is a MIDI controller. When I press a key or turn a dial, it sends a small message: key 60 was pressed, this was the velocity, dial one moved to 87. MIDI stands for Musical Instrument Digital Interface, but for our purposes it is simply a stream of performance instructions over USB.
+
+Those instructions travel into the Kria board. Linux keeps track of which notes are active and where the controls are. The programmable logic then calculates the actual waveform, sample by sample, and sends twenty-four-bit audio through a Pmod I2S DAC to the speakers.
+
+So all of the sound you heard is coming from this tiny green charcuterie board.
+
+[PAUSE.]
+
+The controller tells it what I am doing. The AMD board is the instrument.
+
+CUE: Point left to right: controller, MIDI bytes, Kria, sound. Let "charcuterie board" land before continuing.
+
+SLIDE 4: An FPGA is a box of digital building blocks
+-----------------------------------------------------
+TIMING: 4:20-5:50
+
+SCRIPT:
+Instead of meats and cheeses, the centre of that board is a device containing an FPGA.
+
+Joachim has already taken us much deeper into FPGA design, but here is the thirty-second version. A CPU is an extraordinarily complicated, fixed machine. It runs instructions and is designed to do almost anything reasonably well.
+
+An FPGA starts more like a box of digital building blocks: logic, memory, arithmetic, and connections. We configure those pieces into the circuit that our application needs.
+
+So with a CPU, I express the problem as instructions for an existing machine. With an FPGA, I can make the machine become the solution. For this project, those loose pieces become oscillators, envelopes, filters, mixers, effects, control registers, and an audio interface, all operating together.
+
+Why would we accept the extra engineering difficulty? Because sometimes we do not want a machine that can do anything. We want a machine that is extremely good at one specific thing, with explicit timing and dedicated parallel hardware.
+
+That specific thing here is real-time digital signal processing.
+
+CUE: Reveal the analogy from left to right: fixed CPU, loose FPGA pieces, purpose-built circuit.
+
+SLIDE 5: FPGAs excel at real-time digital signal processing
+------------------------------------------------------------
+TIMING: 5:50-7:20
+
+SCRIPT:
+Digital signal processing, or DSP, begins with a stream of numbers changing over time. That stream might come from a radio, a camera, a radar, a microphone, or a sensor.
+
+Sometimes we analyse it to extract information. Sometimes we transform it to create a new signal. Either way, the numbers keep arriving, and the work must keep pace.
+
+In telecommunications, the sample rates and processing loads can be enormous. That combination of regular dataflow, parallel arithmetic, and hard throughput requirements is exactly where FPGAs shine.
+
+But when I hear the phrase digital signal processing, I do not first think about phased arrays or radio waves. I am a musician, so I think about sound waves.
+
+Sound is also a never-ending stream of samples. A synthesizer is a particularly nice demonstration because we are not merely analysing the stream. We are constructing it in real time from performance events: sixteen voices, oscillators, wave shaping, filters, envelopes, modulation, mixing, reverb, output filtering, and conversion to PCM.
+
+And unlike an offline render, the next sample is always due on time.
+
+CUE: Let the phased-array animation establish conventional DSP, then gesture to the musician photo for the personal pivot.
+
+SLIDE 6: A CPU is fast - when audio gets its turn
+--------------------------------------------------
+TIMING: 7:20-8:50
+
+SCRIPT:
+CPUs can produce excellent audio. Most commercial music software proves that every day. But they usually do it by buffering.
+
+A CPU has many responsibilities: interrupts, system calls, the operating system, memory management, user interfaces, networking, and whatever else the machine is doing. It is very fast when our audio code gets its turn, but audio is not the only thing asking for attention.
+
+So we collect a batch of samples, process the batch, and play it while preparing the next one. The buffer gives the software some scheduling slack.
+
+That works beautifully until a deadline is missed. If the next buffer is not ready, the waveform is discontinuous. You hear a crack or a pop. At sufficient volume, that is not only unpleasant; it can be hostile to ears and speakers.
+
+A real-time operating system helps us control scheduling, but it does not magically prove the whole application will meet every deadline under every condition. We still have software state, scheduling, and failure modes.
+
+The FPGA lets us approach the audio path differently.
+
+SLIDE 7: The FPGA gives every sample its own hardware path
+-----------------------------------------------------------
+TIMING: 8:50-10:10
+
+SCRIPT:
+In the programmable logic, every sample follows the same physical path: voices, mix, effects, output. The circuit has no operating-system scheduler in that path and no software process that can decide to take a little nap.
+
+Once the design is implemented and meets timing, the stream keeps moving. One input sample leads to one output sample on the same schedule, every time.
+
+And software crashes. My working rule is that software is either so simple as to be useless, or complicated enough to contain bugs.
+
+Hardware can certainly contain design mistakes as well. I have contributed several personally. Hardware can fail, and yes, cosmic rays exist. The claim is not that FPGAs are magic or infallible. The advantage is that the data path and its timing are explicit engineering objects. We can simulate them, constrain them, implement them, measure them, and prove whether they satisfy the required throughput.
+
+That determinism is powerful for audio. It is also where the difficulty begins.
+
+CUE: Follow the sample path across the slide, then point to the evenly spaced sample train.
+
+SLIDE 8: Deterministic hardware is powerful - and difficult
+------------------------------------------------------------
+TIMING: 10:10-11:30
+
+SCRIPT:
+If I am writing software for a Raspberry Pi and want to mix two audio streams, I write a loop, add the samples, manage the numeric range, and move on.
+
+If I want to do the same thing efficiently on an FPGA, I must think about representation, pipelines, latency, throughput, resources, interfaces, clock domains, constraints, and timing closure. If you want the full answer, come and see me after class.
+
+FPGA engineering is powerful, but it has a high implementation cost. That is why this synthesizer sat on my FPGA-audio bucket list for years. I wanted the result; I could not justify all of the manual work for a side project.
+
+But this year, in the year of our Lord 2026, a new era has begun.
+
+[PAUSE.]
+
+The age of Agentic Engineering has begun.
+
+And I had exactly the kind of slightly unreasonable experiment needed to test it.
+
+CUE: Pause before the thesis line. Deliver it with conviction, but let the humour show.
+
+SLIDE 9: A new tool met an old idea
+------------------------------------
+TIMING: 11:30-12:30
+
+SCRIPT:
+AMD recently introduced AMD Ross. In AMD's words, Ross spans software, silicon, and board design to accelerate embedded-system design, optimization, debug, and deployment. Unlike a generic assistant, it is built around AMD embedded development environments, AMD engineering knowledge, and expert-authored methodologies.
+
+I had the new tool. I also had this old idea: build a proper polyphonic synthesizer in programmable logic.
+
+So my first thought was not, "Let us make a tiny tutorial that cannot possibly fail." It was, "Let us give Ross the bucket-list project and see what happens."
+
+We have now covered what the object is and why FPGA audio is interesting. The rest of the talk is the engineering story: how intent became a specification, how the agents executed a plan, where they went wrong, how the evidence corrected the trajectory, and how the physical board had the final vote.
+
+SLIDE 10: Meet the four players
+--------------------------------
+TIMING: 12:30-13:45
+
+SCRIPT:
+There are four players in this build.
+
+First, the Kria KV260. That is the hardware platform where the instrument runs. The Arm processors run Linux and the control software; the FPGA fabric becomes the audio machine.
+
+Second, a completely ordinary USB MIDI controller. It supplies notes, velocity, and four dial movements. It makes no sound itself.
+
+Third, Vitis HLS. I describe the signal-processing algorithm in C and C++. Vitis HLS converts that into RTL and provides C simulation, synthesis, co-simulation, latency, resource, and timing estimates. Those estimates guide us; routed Vivado evidence remains the final implementation evidence.
+
+Fourth, AMD Ross. Ross is the agentic collaborator operating across the engineering loop: editing sources, invoking the AMD tools, reading reports, diagnosing failures, and carrying evidence into the next iteration.
+
+Hardware, performance input, implementation evidence, and an agentic collaborator. The engineer coordinates all four.
+
+SLIDE 11: Intent became a plan the agents could execute
+--------------------------------------------------------
+TIMING: 13:45-16:15
+
+SCRIPT:
+The whole project began with a sentence very close to this:
+
+"I want to create a polyphonic synthesizer on a KV260, with a MIDI controller connected over USB."
+
+That was intent, not yet a specification. We had a brief conversation. How many voices? What is the signal path? Which side handles MIDI? How does software publish controls without the hardware seeing half an update? What audio interface are we using? What must simulation prove? What does timing closure mean? What must be observed on the real board before we call it accepted?
+
+Those answers became a specification: behavior, interfaces, invariants, performance limits, and acceptance tests. The specification is the stable object. Implementations are allowed to change; the required result is not.
+
+From that specification, the agent generated an ordered plan. The plan identified dependencies and gates: control software, the register interface, HLS DSP, audio serialization, integration, routed implementation, deployment, and hardware-in-the-loop acceptance.
+
+Then subagents followed that plan. Work could be delegated into bounded pieces while preserving a common contract. Ross's Vivado capability handled project construction, synthesis, implementation, timing, CDC, DRC, and the bitstream flow. Its Vitis HLS skills handled algorithm implementation, simulation, synthesis, co-simulation, and optimization evidence.
+
+The important point is not merely that several agents were busy. Parallel chaos is still chaos. The specification and plan gave each worker a boundary, an expected result, and a test that determined whether the next stage could begin.
+
+I remained responsible for architecture, scope, review, trade-offs, and acceptance. But I did not manually type every layer or babysit every tool invocation. That workflow smashed through the implementation in a few days.
+
+And then, inevitably, one of the agents became very productive in the wrong direction.
+
+CUE: Move across the four cards slowly. This is the central process slide; do not rush it.
+
+SLIDE 12: The target was never ambiguous
+-----------------------------------------
+TIMING: 16:15-17:30
+
+SCRIPT:
+To understand the mistake, we need two numbers.
+
+At a nominal one-hundred-megahertz clock and forty-eight-kilohertz audio, the HLS engine had roughly two thousand clock cycles available to produce each sample. That meant latency had room to grow. We did not need the smallest possible cycle count.
+
+But the design also had to meet a ten-nanosecond clock-period target. If the logic could not run at that clock rate, the generous cycle budget was irrelevant. Timing closure was the acceptance criterion.
+
+These requirements were already in the system context. This was not a case where the human forgot to say what mattered.
+
+Fewer cycles would be pleasant. A faster critical path was necessary. That distinction set up a very revealing failure mode: the agent optimized metrics that were easy to improve rather than the constraint that determined success.
+
+Watch what happened to the two columns.
+
+SLIDE 13: It improved everything except what mattered
+------------------------------------------------------
+TIMING: 17:30-19:30
+
+SCRIPT:
+An early agentic pass found a division and replaced it with reciprocal multiplication.
+
+This was not nonsense. The change reduced latency from one hundred and fourteen cycles to one hundred and eleven. It also saved one thousand five hundred and eighty-eight lookup tables. If I were scanning a report for improvements, both numbers look encouraging.
+
+But look at the clock estimate. Before: thirteen point three zero one nanoseconds. After: thirteen point three zero one nanoseconds. Against a ten-nanosecond target, the design remained three point three zero one nanoseconds away from acceptance.
+
+It improved everything except what mattered.
+
+This is agentic tunnel vision. The agent found a tractable local optimization, produced a legitimate implementation, ran the tool, and returned real evidence. It simply pursued the wrong definition of better.
+
+A great deal of engineering failure looks exactly like this. The work is competent. The metrics move. The presentation is green. The system requirement is still not met.
+
+So I discarded the pass. Saving area was not harmful, but it did not purchase acceptance. The next instruction had to remove any ambiguity about the optimization objective.
+
+ATTRIBUTION: Describe this only as an early agentic or Codex pass. Do not claim AMD Ross made this specific reciprocal-multiply change.
+
+SLIDE 14: The right trade-off closed timing
+--------------------------------------------
+TIMING: 19:30-21:45
+
+SCRIPT:
+I redirected the trajectory with a very narrow instruction: stop optimizing latency. Optimize for F-max. Eyes on the ten-nanosecond target. Use the cycle budget.
+
+The AMD HLS optimization flow examined the critical path and found a serial chain of floating-point additions. That structure was compact, but every addition depended on the previous result, so the delay accumulated along one path.
+
+The optimized version split the work into four partial sums and then combined them through a two-level tree. More operations could proceed in parallel, and the longest dependency chain became much shorter.
+
+Vitis HLS measured the trade-off. Latency increased from one hundred and fourteen to one hundred and thirty-six cycles. That sounds worse until we remember the system had approximately two thousand cycles available.
+
+The estimated clock period fell from thirteen point three zero one nanoseconds to seven point two three zero nanoseconds. The ten-nanosecond target was met with margin.
+
+This is why the human remains in the loop. The tool can search, transform, build, and measure at extraordinary speed. It cannot own the product objective for me. I must define what better means, recognize when an attractive metric is irrelevant, and approve the trade-off in system context.
+
+The complete loop is intent, implementation, evidence, judgment, and correction. Not prompt, vibes, and ship.
+
+And even this green HLS result was not the end. An estimate is not a routed design, and a routed design is not yet a working instrument.
+
+SLIDE 15: The real KV260 had the final vote
+--------------------------------------------
+TIMING: 21:45-25:00
+
+SCRIPT:
+Reports and simulation are necessary, but this is an embedded instrument. The final vote belongs to the real KV260, the real DAC, the real MIDI controller, and, eventually, my ears.
+
+We used layered hardware-in-the-loop testing so that a failure could be localized instead of producing the technical diagnosis, "It doesn't make noise."
+
+The first gate was the control plane. Read the identity register and require the value representing S-Y-N-T. Read the ABI version. Confirm that the audio clock is locked, the HLS engine is in the expected state, and the overrun count is zero.
+
+Then change shadow controls, increment a commit generation, and verify that the applied generation catches up at an audio-frame boundary. That proves software can publish a coherent snapshot. The DSP never sees half of one control update and half of another.
+
+The second gate was the physical audio path. Select a diagnostic source and prove that known samples travel through the clock crossing, the I2S serializer, the Pmod DAC, the cable, and the speakers.
+
+Then select the HLS source and write a known A4 voice directly through the register interface. Confirm that the DSP returns from busy, generations agree, and no sample overruns are recorded. At that point we have the actual synthesized core producing physical audio without involving MIDI discovery or the live control process.
+
+Only then connect the FC25 over USB and test the complete path: notes, repeated notes, velocity, all four controls, releases, four-note and ten-note chords, register readback, and audible behavior.
+
+The accepted run reached ten simultaneous notes, the physical register state matched the software controls, every note released, commit and applied generations agreed, and the overrun count remained zero. I also got to make the deeply scientific final assessment that it felt responsive and sounded excellent.
+
+Simulation said the architecture should work. HLS and Vivado provided implementation evidence. Hardware in the loop proved that the assembled instrument did work.
+
+The product was not finished when it compiled. It was finished when the physical system behaved as specified and the owner accepted what came out of the speakers.
+
+OPTIONAL LIVE CHECK: If the terminal is already prepared, show identity and overrun count. Do not type or debug commands live.
+
+SLIDE 16: Cheaper engineering creates more engineering
+-------------------------------------------------------
+TIMING: 25:00-27:15
+
+SCRIPT:
+This synthesizer had been on my FPGA-audio bucket list for years. The problem was never a lack of interest or even a lack of understanding. The implementation cost, measured in my time, was too high to justify for a side project.
+
+Agentic engineering changed the economics enough that I could simply attempt it.
+
+That leads to a point resembling Jevons' paradox. When a resource becomes cheaper to use, total demand for it can rise because new uses become economical.
+
+If engineering an embedded system becomes cheaper in time and attention, the result is not necessarily less engineering. The set of worthwhile projects expands. Instruments, robots, sensors, experiments, customer prototypes, and products that used to live permanently on the someday list become reasonable things to try.
+
+That matters to me because writing every line by hand was not my job security. It was a ball and chain. It kept me occupied, certainly, but it also prevented me from exploring architectures, testing more ideas, and building more useful systems.
+
+The synthesizer is valuable as a demonstration, but the broader result is permission to attempt more ambitious engineering.
+
+Which raises the obvious question: if producing the implementation becomes easier, what is the engineer for?
+
+SLIDE 17: The scarce skill moves upward
+----------------------------------------
+TIMING: 27:15-29:15
+
+SCRIPT:
+The scarce skill moves upward.
+
+We spend less time on syntax, boilerplate, language traps, and typing every line. We spend more time on intent, architecture, evidence, and judgment.
+
+The engineer chooses a valuable goal. The engineer turns a conversation into an exact specification. The engineer understands the whole system well enough to define interfaces and invariants. The engineer designs tests that can falsify a bad implementation, distinguishes estimates from routed evidence, and insists that the physical product agrees.
+
+The engineer also recognizes agentic tunnel vision. When an agent proudly saves one thousand five hundred LUTs while missing the clock target by exactly the same amount, somebody must say: impressive, irrelevant, try again.
+
+AMD Ross and the AMD development stack can perform enormous amounts of implementation and tool work. That does not make engineering judgment less important. It makes judgment the limiting resource.
+
+So my conclusion is not that this is less engineering. It is that we can finally spend more of our time doing the engineering that matters.
+
+[TURN toward the instrument.]
+
+This began as one sentence, became a specification and a plan, moved through HLS, Vivado, and hardware-in-the-loop evidence, and ended as an instrument I can play.
+
+It is not less engineering. It is engineering - and we can do so much more.
+
+Thank you.
+
+CUE: End attention on the physical instrument, not the slide. Leave 45 seconds for overrun, applause, or transition to questions.
