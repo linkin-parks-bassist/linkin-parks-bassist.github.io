@@ -1,0 +1,257 @@
+WEBVTT
+
+1
+00:00:00.350 --> 00:00:03.262
+Here's the catch.
+
+2
+00:00:03.262 --> 00:00:06.174
+You have a camera, a compiled detector, and a frame in memory.
+
+3
+00:00:06.174 --> 00:00:09.086
+Surely you can just run the model?
+
+4
+00:00:09.086 --> 00:00:11.998
+Look at the boundary.
+
+5
+00:00:11.998 --> 00:00:14.910
+The camera gave you nineteen twenty by ten eighty pixels.
+
+6
+00:00:14.910 --> 00:00:17.822
+The model expects a particular tensor: different dimensions, perhaps a different colour order, and a different
+
+7
+00:00:17.822 --> 00:00:20.734
+numerical scale.
+
+8
+00:00:20.734 --> 00:00:23.646
+A pointer doesn't remove that disagreement.
+
+9
+00:00:23.646 --> 00:00:26.558
+Something has to transform the image into the model's input.
+
+10
+00:00:26.558 --> 00:00:29.470
+That surrounding vision work is where VART-X starts to earn its place.
+
+11
+00:00:29.650 --> 00:00:33.940
+First, fit the image to the required geometry.
+
+12
+00:00:33.940 --> 00:00:38.230
+Letterboxing preserves the aspect ratio and fills the remaining space.
+
+13
+00:00:38.230 --> 00:00:42.520
+Then arrange the channels and convert the values according to the model's contract.
+
+14
+00:00:42.520 --> 00:00:46.810
+Here, dividing a colour value by two hundred and fifty five is just an illustrative normalization, not a recipe for
+
+15
+00:00:46.810 --> 00:00:51.100
+every model.
+
+16
+00:00:51.100 --> 00:00:55.390
+VART-X provides preprocessing modules for these operations, plus frame and memory abstractions for the buffers.
+
+17
+00:00:55.390 --> 00:00:59.680
+Some processing can use programmable logic; some uses software.
+
+18
+00:00:59.680 --> 00:01:03.970
+It isn't all work for the neural accelerator.
+
+19
+00:01:04.150 --> 00:01:07.537
+Now the input is ready.
+
+20
+00:01:07.537 --> 00:01:10.923
+What makes the model run?
+
+21
+00:01:10.923 --> 00:01:14.310
+With VART-ML, the application creates a runner for the compiled model, queries its tensor requirements, supplies
+
+22
+00:01:14.310 --> 00:01:17.697
+buffers, and calls execute.
+
+23
+00:01:17.697 --> 00:01:21.083
+NpuTensor describes the data and its backing memory.
+
+24
+00:01:21.083 --> 00:01:24.470
+The runner can also accept asynchronous work.
+
+25
+00:01:24.470 --> 00:01:27.857
+So these names describe different jobs: VART-X prepares the vision data; VART-ML supplies the inference interface.
+
+26
+00:01:27.857 --> 00:01:31.243
+And the output is still tensors.
+
+27
+00:01:31.243 --> 00:01:34.630
+We haven't somehow acquired a photograph with rectangles already drawn on it.
+
+28
+00:01:34.810 --> 00:01:38.534
+What if the application already uses ONNX Runtime?
+
+29
+00:01:38.534 --> 00:01:42.259
+It can create a session, enable AMD's Vitis AI execution provider, and call Run.
+
+30
+00:01:42.259 --> 00:01:45.983
+Supported graph work goes through the AMD provider; other supported work can execute on the CPU.
+
+31
+00:01:45.983 --> 00:01:49.708
+That's the onnxruntime vitisai route.
+
+32
+00:01:49.708 --> 00:01:53.432
+Notice the fork.
+
+33
+00:01:53.432 --> 00:01:57.157
+You choose an application interface; you don't run ONNX Runtime and then invoke a Vart runner as a second inference
+
+34
+00:01:57.157 --> 00:02:00.881
+stage.
+
+35
+00:02:00.881 --> 00:02:04.606
+VART-X's vision operations can surround either route.
+
+36
+00:02:04.606 --> 00:02:08.330
+A branch tells us something a list of package definitions doesn't.
+
+37
+00:02:08.510 --> 00:02:12.206
+Now look inside the model.
+
+38
+00:02:12.206 --> 00:02:15.902
+These are operators, not pixels.
+
+39
+00:02:15.902 --> 00:02:19.598
+The VOE package supplies AMD's ONNX integration machinery, including provider libraries and graph partitioning,
+
+40
+00:02:19.598 --> 00:02:23.294
+transformation and fusion passes.
+
+41
+00:02:23.294 --> 00:02:26.990
+Grouping compatible work is a different operation from resizing the picture.
+
+42
+00:02:26.990 --> 00:02:30.686
+Flex M L runtime supplies compiled-model loading and execution support: it reads metadata, checks the device, and
+
+43
+00:02:30.686 --> 00:02:34.382
+invokes native execution with tensors.
+
+44
+00:02:34.382 --> 00:02:38.078
+XRT provides lower-level device and buffer support.
+
+45
+00:02:38.078 --> 00:02:41.774
+This is a functional map; the packages can contain overlapping support libraries.
+
+46
+00:02:41.774 --> 00:02:45.470
+They aren't perfectly sealed layers.
+
+47
+00:02:45.650 --> 00:02:48.970
+The inference call finishes.
+
+48
+00:02:48.970 --> 00:02:52.290
+Here are scores and coordinates.
+
+49
+00:02:52.290 --> 00:02:55.610
+To use them, a detector may need to decode candidates, filter them, and map coordinates back to the original image.
+
+50
+00:02:55.610 --> 00:02:58.930
+Drawing comes after that.
+
+51
+00:02:58.930 --> 00:03:02.250
+VART-X provides postprocessing and visualization components: PostProcess interprets outputs, MetaConvert prepares
+
+52
+00:03:02.250 --> 00:03:05.570
+drawing metadata, and Overlay annotates the frame.
+
+53
+00:03:05.570 --> 00:03:08.890
+Standard drawing runs on the CPU.
+
+54
+00:03:08.890 --> 00:03:12.210
+Now the loop makes sense.
+
+55
+00:03:12.210 --> 00:03:15.530
+Preparing an input, executing a model, interpreting its output and drawing a result are separate jobs.
+
+56
+00:03:15.530 --> 00:03:18.850
+The names finally have somewhere to belong.
+
+57
+00:03:19.030 --> 00:03:23.290
+That was the question: what do these components actually do?
+
+58
+00:03:23.290 --> 00:03:27.550
+Follow the frame, and VART-X stops being a mysterious dependency.
+
+59
+00:03:27.550 --> 00:03:31.810
+Follow the execution request, and VART-ML becomes an interface you could call.
+
+60
+00:03:31.810 --> 00:03:36.070
+Follow the graph and compiled artifacts, and VOE and Flex M L have concrete work to do.
+
+61
+00:03:36.070 --> 00:03:40.330
+This little explanation was written and rendered by an agent, with locally generated narration conditioned on one
+
+62
+00:03:40.330 --> 00:03:44.590
+approved synthetic reference.
+
+63
+00:03:44.590 --> 00:03:48.850
+The point isn't to replace building the application.
+
+64
+00:03:48.850 --> 00:03:53.110
+It's to make the next encounter with its code less mysterious.

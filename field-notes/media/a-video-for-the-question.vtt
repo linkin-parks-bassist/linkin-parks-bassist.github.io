@@ -1,0 +1,214 @@
+WEBVTT
+
+00:00:00.350 --> 00:00:04.430
+Suppose you are trying to understand an unfamiliar vision software stack.
+
+00:00:04.430 --> 00:00:08.510
+You encounter several package names.
+
+00:00:08.510 --> 00:00:12.590
+A definition tells you one is a runtime, another is an integration layer.
+
+00:00:12.590 --> 00:00:16.670
+But where do they act in a program?
+
+00:00:16.670 --> 00:00:20.750
+That is the question this experiment starts from.
+
+00:00:21.000 --> 00:00:24.660
+This is also an experiment in learning.
+
+00:00:24.660 --> 00:00:28.320
+Rather than ask an agent for another long glossary, we can ask it to construct a short explanation around a process
+
+00:00:28.320 --> 00:00:31.980
+we can follow.
+
+00:00:31.980 --> 00:00:35.640
+Let's use one image, and ask what has to happen before it becomes a displayed detection.
+
+00:00:35.890 --> 00:00:39.770
+A camera gives us an image.
+
+00:00:39.770 --> 00:00:43.650
+The model expects particular input dimensions, a colour arrangement, a data type and a numerical scale.
+
+00:00:43.650 --> 00:00:47.530
+Those are not automatically the same thing.
+
+00:00:47.530 --> 00:00:51.410
+We need a preparation step before we can use the model.
+
+00:00:51.660 --> 00:00:56.092
+VART-X provides modules for that surrounding vision work.
+
+00:00:56.092 --> 00:01:00.524
+PreProcess can resize, crop or letterbox, convert formats and normalize values.
+
+00:01:00.524 --> 00:01:04.956
+VideoFrame and Memory help represent and manage buffers.
+
+00:01:04.956 --> 00:01:09.388
+Depending on the platform, some preprocessing can use programmable logic; it need not all run in the neural
+
+00:01:09.388 --> 00:01:13.820
+processing unit.
+
+00:01:14.070 --> 00:01:17.574
+Now we have suitable input data.
+
+00:01:17.574 --> 00:01:21.078
+What actually starts the compiled model?
+
+00:01:21.078 --> 00:01:24.582
+VART-ML offers a direct C++ interface.
+
+00:01:24.582 --> 00:01:28.086
+The application creates a runner, queries its tensor requirements, supplies buffers, and executes the model.
+
+00:01:28.086 --> 00:01:31.590
+It can submit work synchronously or asynchronously.
+
+00:01:31.840 --> 00:01:35.968
+That gives the two names a useful distinction.
+
+00:01:35.968 --> 00:01:40.096
+VART-X handles vision operations around inference.
+
+00:01:40.096 --> 00:01:44.224
+VART-ML supplies a runner interface for inference itself.
+
+00:01:44.224 --> 00:01:48.352
+After the call finishes, we have output tensors.
+
+00:01:48.352 --> 00:01:52.480
+We still do not necessarily have an image with boxes drawn on it.
+
+00:01:52.730 --> 00:01:56.290
+There is another route.
+
+00:01:56.290 --> 00:01:59.850
+An application can use ONNX Runtime, create a session and call Run.
+
+00:01:59.850 --> 00:02:03.410
+The Vitis AI execution provider connects that interface to AMD's accelerator path.
+
+00:02:03.410 --> 00:02:06.970
+Other supported work may use CPU execution.
+
+00:02:07.220 --> 00:02:12.860
+This is an alternative inference interface, not a command that must come before the Vart runner.
+
+00:02:12.860 --> 00:02:18.500
+That difference is easy to lose in a list of package names.
+
+00:02:18.500 --> 00:02:24.140
+Drawing the alternatives as branches explains something a glossary does not.
+
+00:02:24.140 --> 00:02:29.780
+The surrounding VART-X components can be used with either inference route.
+
+00:02:30.030 --> 00:02:34.810
+What about VOE and Flex M L runtime?
+
+00:02:34.810 --> 00:02:39.590
+The VOE package includes AMD provider and supporting graph-processing machinery: partitioning, transformations and
+
+00:02:39.590 --> 00:02:44.370
+fusion passes.
+
+00:02:44.370 --> 00:02:49.150
+It is concerned with the model's computation graph, rather than resizing a camera picture.
+
+00:02:49.400 --> 00:02:53.387
+Flex M L runtime includes compiled-model loading and execution support.
+
+00:02:53.387 --> 00:02:57.373
+Its inspected code reads model metadata, checks the execution device and calls native forward execution with tensor
+
+00:02:57.373 --> 00:03:01.360
+inputs.
+
+00:03:01.360 --> 00:03:05.347
+XRT provides lower-level device and buffer support.
+
+00:03:05.347 --> 00:03:09.333
+These are functional roles, not a claim that package contents form perfectly isolated layers.
+
+00:03:09.333 --> 00:03:13.320
+Exact connections depend on the platform and runner.
+
+00:03:13.570 --> 00:03:17.470
+Once inference returns, someone has to interpret the output.
+
+00:03:17.470 --> 00:03:21.370
+For a detector that can mean decoding candidate boxes and scores, filtering the candidates, and mapping coordinates
+
+00:03:21.370 --> 00:03:25.270
+back to the original image.
+
+00:03:25.270 --> 00:03:29.170
+Drawing a rectangle is another operation again.
+
+00:03:29.420 --> 00:03:35.100
+VART-X provides post-processing and visualization components for those jobs.
+
+00:03:35.100 --> 00:03:40.780
+MetaConvert turns results into drawing metadata, and Overlay annotates the image.
+
+00:03:40.780 --> 00:03:46.460
+We have now followed one object far enough to understand where several package names earn their place.
+
+00:03:46.460 --> 00:03:52.140
+Public documentation supplies the details; the narrative gives us a reason to look at them.
+
+00:03:52.390 --> 00:03:56.910
+The production method uses a manifest describing short narration beats and visual actions.
+
+00:03:56.910 --> 00:04:01.430
+Speech is generated locally and cached.
+
+00:04:01.430 --> 00:04:05.950
+A browser draws the animation at known timestamps, and an encoder combines the frames, narration and an optional
+
+00:04:05.950 --> 00:04:10.470
+quiet music bed.
+
+00:04:10.720 --> 00:04:15.648
+The useful unit is a thought, not a slide.
+
+00:04:15.648 --> 00:04:20.576
+A question creates a need, the visual demonstrates an operation, and the next question follows from what is still
+
+00:04:20.576 --> 00:04:25.504
+unexplained.
+
+00:04:25.504 --> 00:04:30.432
+Changes to diagrams should not require generating the same speech again.
+
+00:04:30.432 --> 00:04:35.360
+Sources, settings and generated takes make the result inspectable and easier to revise.
+
+00:04:35.610 --> 00:04:40.470
+The early attempts in this experiment were too long, or too generic, or simply monotonous.
+
+00:04:40.470 --> 00:04:45.330
+A technically valid video was not enough.
+
+00:04:45.330 --> 00:04:50.190
+Comparing narration on the same passage helps separate engine choice from script quality.
+
+00:04:50.190 --> 00:04:55.050
+Watching a longer section tests whether a style can sustain attention.
+
+00:04:55.300 --> 00:05:01.060
+The aim is to lower the cost of getting a useful explanation for a question that is blocking further work.
+
+00:05:01.060 --> 00:05:06.820
+That could help me move through embedded Linux and computer vision more quickly.
+
+00:05:06.820 --> 00:05:12.580
+It does not replace operating the tools, inspecting the buffers or checking a result on hardware.
+
+00:05:12.580 --> 00:05:18.340
+It gives that practical work a better starting point—and gives me an explanation I can interrupt and revise.

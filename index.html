@@ -15,7 +15,6 @@
       <a href="about/index.html">About</a>
       <a href="projects/index.html">Projects</a>
       <a href="boarbarktree/index.html">Boarbarktree</a>
-      <a href="nonsenses/index.html">Nonsenses</a>
       <a href="field-notes/index.html">Field Notes</a>
       <a href="contact/index.html">Contact</a>
     </nav>
@@ -38,7 +37,7 @@
       <div class="card"><span class="number">01 / FPGA audio</span><h3>Kestrel</h3><p>A real-time FPGA audio DSP platform built around per-sample effects processing, flexible control, and low-cost hardware.</p><code>audio in → FPGA DSP → audio out</code><div class="links"><a href="https://github.com/linkin-parks-bassist/kestrel">GitHub →</a></div><small>Active · SystemVerilog · DSP · embedded UI</small></div>
       <div class="card"><span class="number">02 / FPGA audio</span><h3>Lyrebird</h3><p>A sixteen-voice polyphonic synthesizer on an AMD Kria KV260. A USB MIDI controller is read on the Linux side and written into registers in the programmable logic, where an HLS DSP core generates 24-bit, 48 kHz audio: phase-modulation voices with wavefolding, filters, envelopes and LFOs, and a shared reverb, played out over I2S.</p><code>MIDI → Linux → PL registers → HLS → I2S</code><small>Active · Vitis HLS · SystemVerilog · KV260</small></div>
       <div class="card"><span class="number">03 / HDL</span><h3>Pigen</h3><p><b>Pi</b>peline <b>Gen</b>erator: An experimental hardware description language centered on pipelines, implicit flow control and making streaming hardware easier to express.</p><code>buf · port · fifo[n] · skid</code><div class="links"><a href="https://github.com/linkin-parks-bassist/pigen">GitHub →</a></div><small>Active · compiler design · RTL · dataflow</small></div>
-      <div class="card"><span class="number">04 / Agent infrastructure</span><h3>Knowledgetrees</h3><p>A semantic filesystem for agent knowledge: small, addressable pieces of technical state that can be updated, checked and reused across long-running work.</p><code>kt where am i</code><div class="links"><a href="https://github.com/linkin-parks-bassist/knowledgetrees">GitHub →</a><a href="nonsenses/knowledgetrees.html">Read the pitch →</a></div><small>Active · agents · MCP · verification</small></div>
+      <div class="card"><span class="number">04 / Agent infrastructure</span><h3>Knowledgetrees</h3><p>A semantic filesystem for agent knowledge: small, addressable pieces of technical state that can be updated, checked and reused across long-running work.</p><code>kt where am i</code><div class="links"><a href="https://github.com/linkin-parks-bassist/knowledgetrees">GitHub →</a></div><small>Active · agents · MCP · verification</small></div>
       <div class="card"><span class="number">05 / Agent infrastructure</span><h3>CointOS</h3><p>Local-first orchestration for my personal AI agents. It turns requests from the terminal or Telegram into durable agent work, coordinates local model inference, and keeps resource use in check on my own machine.</p><code>request → durable work → local inference</code><div class="links"><a href="https://github.com/linkin-parks-bassist/CointOS">GitHub →</a></div><small>Active · Python · agents · local inference</small></div>
       <div class="card"><span class="number">06 / Animation</span><h3>Whiteboard</h3><p>A text-driven animation tool for hand-drawn-style maths explainer videos. You write a spec, it renders the video, and it uses my own captured handwriting for the notation. I built it to make Boarbarktree videos practical again.</p><code>write spec → render → adjust → publish</code><div class="links"><a href="https://github.com/linkin-parks-bassist/whiteboard">GitHub →</a></div><small>In progress · C · animation · maths</small></div>
     </div>
@@ -54,14 +53,6 @@
     <div class="note-box"><b>Watch:</b> <a href="https://www.youtube.com/@boarbarktree">The Channel</a> · <a href="https://www.youtube.com/watch?v=pSjahcOnJvU">Part 1: Topology</a> · <a href="https://www.youtube.com/watch?v=JTTDmE_bBtM">Part 2: Some Simple Spaces</a> · <a href="https://www.youtube.com/watch?v=j9JJJoTjIpY">Part 3: Boundaries &amp; The Big Idea</a></div>
   </section>
 
-  <section id="nonsenses">
-    <h2>Nonsenses.</h2>
-    <p class="section-note">My nonsense. Experiments and pitches that don't fit anywhere else.</p>
-    <div class="cards two">
-      <div class="card"><span class="number">01 / Pitch</span><h3>Knowledgetrees</h3><p>A stateful, self-growing, self-healing filesystem for agent knowledge. The case for it, and what is built and installed today.</p><a class="more" href="nonsenses/knowledgetrees.html">Read the pitch →</a><small>Agents · MCP · proofs · hooks</small></div>
-    </div>
-  </section>
-
   <section id="field-notes">
     <h2>Field Notes.</h2>
     <p class="section-note">Experiments and things I found out by poking at them. One note, one day.</p>
@@ -69,6 +60,7 @@
       <table>
         <thead><tr><th>Date</th><th>Title</th><th>Topic</th></tr></thead>
         <tbody>
+          <tr><td>2026-10-20</td><td><a href="field-notes/a-video-for-the-question.html">A Video for the Question</a></td><td>Agentic learning · video · explanation</td></tr>
           <tr><td>2026-09-30</td><td><a href="field-notes/four-cameras-coming-home.html">Four Cameras, Coming Home</a></td><td>FPGA · MIPI · embedded Linux · episode 1</td></tr>
           <tr><td>2026-09-28</td><td><a href="field-notes/adrift-in-u-boot-shell.html">Adrift In U-Boot Shell</a></td><td>Embedded Linux · U-Boot</td></tr>
           <tr><td>2026-09-24</td><td><a href="field-notes/edf103.html">EDF 103</a></td><td>FPGA · embedded Linux</td></tr>

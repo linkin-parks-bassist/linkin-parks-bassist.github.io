@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Video for the Question · David Farrell</title>
+  <meta name="description" content="Trying to make an agent produce technical videos for my own learning: what failed, what improved, and why a rendered explanation is not necessarily an understood one.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .video-note .experiment-table td { font-size: 15px; line-height: 1.5; vertical-align: top; }
+    .video-note .excerpt { margin: 24px 0; padding: 18px 22px; border-left: 4px solid var(--accent); background: var(--accent-wash); }
+    .video-note .excerpt p { margin: 0; }
+    .video-note .excerpt cite { display: block; margin-top: 10px; font: 12px/1.5 ui-monospace, monospace; color: var(--ink-soft); }
+    .video-note .diagram { margin: 30px 0; padding: 24px; background: var(--dark); color: var(--dark-text); }
+    .video-note .diagram svg { width: 100%; height: auto; display: block; }
+    .video-note .diagram figcaption { color: #eadcde; font-size: 14px; line-height: 1.5; margin-top: 15px; }
+    .video-note .diagram button { font: inherit; background: #fff9f5; color: #28262b; padding: 8px 14px; border: 0; cursor: pointer; margin-top: 15px; }
+    .video-note .diagram button:focus-visible { outline: 3px solid #ffb1b5; outline-offset: 3px; }
+    .video-note .diagram .stage { opacity: .4; transition: opacity 180ms ease-out; }
+    .video-note .diagram .stage.selected { opacity: 1; }
+    .video-note .diagram .packet { transition: transform 180ms ease-out; }
+    .video-note .diagram-note { min-height: 3em; }
+    .video-note video { display: block; width: 100%; height: auto; background: #101419; }
+    .video-note .voice-samples { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin: 24px 0; }
+    .video-note .voice-samples figure { margin: 0; padding: 16px; border: 1px solid var(--line); background: var(--paper); }
+    .video-note .voice-samples figcaption { font-size: 15px; line-height: 1.5; margin-bottom: 12px; }
+    .video-note audio { display: block; width: 100%; }
+    @media(max-width:900px) { .video-note .voice-samples { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media(max-width:560px) { .video-note .voice-samples { grid-template-columns: minmax(0, 1fr); } }
+    @media(prefers-reduced-motion:reduce) { .video-note .diagram .stage, .video-note .diagram .packet { transition: none; } }
+  </style>
+</head>
+<body class="field-note video-note">
+<main>
+  <div class="topline">
+    <a href="../index.html">David Farrell</a>
+    <nav>
+      <a href="../about/index.html">About</a>
+      <a href="../projects/index.html">Projects</a>
+      <a href="../boarbarktree/index.html">Boarbarktree</a>
+      <a href="index.html" aria-current="page">Field Notes</a>
+      <a href="../contact/index.html">Contact</a>
+    </nav>
+  </div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+  <header class="page">
+    <div class="eyebrow">Field note · <time datetime="2026-10-20">20 October 2026</time> · experiment</div>
+    <h1 class="page-title">A Video for the Question.</h1>
+    <p class="section-note">I tried getting an agent to make the technical video I wanted to watch. Producing the video turned out to be considerably easier than producing the explanation.</p>
+  </header>
+
+  <section class="prose">
+    <h2>I wanted to sit and understand something</h2>
+    <p>I was reading about a software stack and kept encountering names whose relationships I did not understand. <code>vart-x</code>, <code>vart-ml</code>, <code>flexmlrt</code>, <code>voe</code>, <code>onnxruntime-vitisai</code>. I could identify them as software packages. That was not the information I was missing.</p>
+    <p>I wanted to know what they <em>did</em>. Which one prepared an image? Which one ran a model? Were these alternatives, or layers that all had to be used together? Where would I encounter them in a program I was writing?</p>
+    <p>The original investigation stays private. The examples here use public documentation and newly written material.</p>
+    <p>Rather than keep reading increasingly long answers in the terminal, I asked the agent to turn the material into a narrated video. It already had the context of my questions. It could consult documentation, write an HTML presentation, synthesize speech and render the result. Why not have it make a little programme specifically for the thing I was trying to understand?</p>
+  </section>
+
+  <section class="prose">
+    <h2>The first version was technically successful</h2>
+    <p>The agent made a substantial slide deck and a glossary. Then it read them to me. The resulting video was thirty-seven minutes long.</p>
+    <p>It had chapters. It had a transcript. It decoded without errors. It also had the atmosphere of mandatory training. A pleasant voice cannot make a sequence of definitions acquire a reason to be watched.</p>
+    <blockquote class="excerpt"><p>“this is very unengaging. I still feel like I don't understand <em>what</em> e.g., vart-x, artifactory, etc, are.”</p><cite>Me, responding to the first video</cite></blockquote>
+    <p>I asked for normal-speed speech and something shorter. The agent produced a version under five minutes. This improved the duration, but it was still answering the wrong question: it explained why programs need dependencies, then described <code>vart-x</code> as a package containing headers and libraries. I already understood dependencies. The contents were still a black box.</p>
+    <blockquote class="excerpt"><p>“what I wanted to know is that all these packages <em>are</em>. as in, what they do. what are they for.”</p><cite>Me, trying again</cite></blockquote>
+    <p>This was familiar from <a href="petalinux101.html">my first PetaLinux note</a>. An explanation can be accurate at the level it has chosen and almost useless at the level where I am stuck. “It is a runtime library” sounds like an answer until you ask what happens when something calls it.</p>
+  </section>
+
+  <section class="prose">
+    <h2>Getting the subject matter into focus</h2>
+    <p>The agent went back to the public documentation and inspected package contents. That produced a more useful distinction. VART-X provides operations around inference: preparing frames, handling buffers, interpreting outputs and drawing results. VART-ML provides an interface for executing compiled models. ONNX Runtime offers another application-facing inference route. The remaining names concern supporting model-processing and execution machinery.</p>
+    <p>That is only a compact orientation, not a complete description of the stack. But now there was something to explain visually. We could follow an image into the expected tensor representation, through a runner, and back out as results that still needed interpretation.</p>
+    <p>The agent rendered another video. Its content was more relevant. Its delivery was still a row of diagrams accompanied by rather evenly paced speech.</p>
+    <blockquote class="excerpt"><p>“Information should answer wondering, not be presented so fully ‘here it is’.”</p><cite>Me, describing the missing structure</cite></blockquote>
+    <p>I suggested the kind of transition I wanted: “How does the compiled model actually run? That brings us to…” The question creates a need for the name. Without it, I am being handed a vocabulary list and left to invent the connections myself.</p>
+  </section>
+
+  <section class="prose">
+    <h2>Follow the frame</h2>
+    <p>We changed the unit of production from a slide to a short explanatory beat. Each beat needed a question, an answer and a visible change. A persistent diagram was more useful than replacing the entire screen at every heading.</p>
+    <p>The first animated preview was about forty-nine seconds long. It began with the compiled model and asked how an application invokes it. Then it backed up: where does that properly formatted input tensor come from? An image changed representation, data moved between stages, and detections appeared on the output image.</p>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 960 220" role="img" aria-labelledby="pipeline-title pipeline-description">
+        <title id="pipeline-title">Image preparation, model execution and result interpretation</title>
+        <desc id="pipeline-description">A simplified public illustration: VART-X prepares an image; an inference interface such as VART-ML executes the model; VART-X interprets and draws the results.</desc>
+        <g class="stage selected" data-stage="0"><rect x="10" y="25" width="280" height="145" fill="#3c3540" stroke="#ffb1b5"/><text x="30" y="65" fill="#fff5ef" font-size="24">Prepare the image</text><text x="30" y="105" fill="#ffb1b5" font-size="19">VART-X</text><text x="30" y="140" fill="#eadcde" font-size="17">resize · colour · normalize</text></g>
+        <path d="M300 97 H330 M320 89 L330 97 L320 105 M630 97 H660 M650 89 L660 97 L650 105" fill="none" stroke="#ffb1b5" stroke-width="3"/>
+        <g class="stage" data-stage="1"><rect x="340" y="25" width="280" height="145" fill="#3c3540" stroke="#ffb1b5"/><text x="360" y="65" fill="#fff5ef" font-size="24">Execute the model</text><text x="360" y="105" fill="#ffb1b5" font-size="19">e.g. VART-ML</text><text x="360" y="140" fill="#eadcde" font-size="17">input tensors → output tensors</text></g>
+        <g class="stage" data-stage="2"><rect x="670" y="25" width="280" height="145" fill="#3c3540" stroke="#ffb1b5"/><text x="690" y="65" fill="#fff5ef" font-size="24">Interpret the results</text><text x="690" y="105" fill="#ffb1b5" font-size="19">VART-X</text><text x="690" y="140" fill="#eadcde" font-size="17">post-process · annotate</text></g>
+        <rect class="packet" x="140" y="190" width="18" height="18" fill="#ffb1b5"/>
+      </svg>
+      <button type="button" id="next-stage">Next question →</button>
+      <p class="diagram-note" id="stage-question" aria-live="polite">The camera gives us an image. Is it already in the representation the model expects?</p>
+      <figcaption>A newly drawn, stripped-down illustration of the idea, not a capture from the original material. An alternative inference interface can occupy the middle stage. The modules are not all necessarily hardware-accelerated.</figcaption>
+    </figure>
+
+    <p>That preview was good enough for me to want more. I asked for a reusable process, tighter transitions, different typography and a less conspicuous music bed. We also kept a version without music, because “the audio file contains music” and “I can hear music on these speakers” are different observations.</p>
+  </section>
+
+  <section class="prose">
+    <h2>What the agent actually built</h2>
+    <p>I was directing and reviewing the experiment. The agent wrote the renderer, prepared the scripts, drew the programmatic graphics and ran the synthesis and encoding. I did not hand-animate the sequence or record a voice-over. My work was deciding what I needed to understand, watching the attempts, identifying where they missed, and changing the brief.</p>
+    <p>The pipeline is local. A JSON manifest holds the narration, beats, pauses, source references and audio settings. An HTML Canvas renderer draws the scene at a specified timestamp. Playwright drives Chrome; a speech backend produces the narration; FFmpeg combines animation and audio. We began with Piper and later added Kokoro and Qwen. The background music was synthesized locally rather than taken from a recording.</p>
+    <pre><code>question + evidence
+        ↓
+script + visual beats
+        ↓
+cached speech + measured timing
+        ↓
+timestamp-driven animation + audio mix
+        ↓
+video + captions + transcript + provenance</code></pre>
+    <p>The agent moved the reusable machinery into a user-wide installation and registered an authoring skill, so another subject need not start with another renderer. <a href="https://github.com/linkin-parks-bassist/knowledgetrees">Knowledgetrees</a> holds the current production method and preferences; project-specific material stays with its project. The renderer is reusable. The thinking that makes a particular explanation work is still specific to the question.</p>
+  </section>
+
+  <section class="prose">
+    <h2>Reproducible, within useful limits</h2>
+    <p>Speech takes are cached by text, voice settings, model and configuration hashes, and engine version. Changing a diagram does not require generating the voice again. Frame generation is driven by time rather than by how quickly the browser happens to run.</p>
+    <p>Each render retains its transcript, captions, audio stems and provenance: source hashes, versions, settings and the encoding command. This is enough to inspect what produced an artifact and rerender it with the same inputs. It is not a claim that fresh speech synthesis will be bit-identical on a different installation. Keeping the actual generated takes is important.</p>
+    <p>One intermediate film ran for seventeen and a half minutes. Rendering and validation took about ten and a half minutes with speech already cached. That excluded the earlier speech generation, research and authoring.</p>
+    <p>When I asked about cost, though, I meant tokens and agent effort. The expensive part had been misunderstanding the brief and repeatedly making the wrong thing. Local rendering does not need the language model to generate a response for every video frame. Research, scriptwriting, custom graphics and revision are where the model work goes. We did not have reliable session token totals, so there is no measured monetary saving to report.</p>
+  </section>
+
+  <section class="prose">
+    <h2>The long version exposed another problem</h2>
+    <div class="table-wrap">
+      <table class="experiment-table">
+        <thead><tr><th>Attempt</th><th>What it established</th><th>What still failed</th></tr></thead>
+        <tbody>
+          <tr><td>Long narrated reference</td><td>The material could be assembled and rendered locally.</td><td>Too much catalogue, too little explanation.</td></tr>
+          <tr><td>Short explanations</td><td>Shorter duration was easy to obtain.</td><td>The first still answered the wrong abstraction level; later ones remained visually static.</td></tr>
+          <tr><td>Animated preview</td><td>A question-led sequence and changing diagram were more watchable.</td><td>Music, transitions and styling needed adjustment.</td></tr>
+          <tr><td>Full animated film</td><td>The workflow scaled to a longer, reproducible artifact.</td><td>After about five minutes, the repeated visual and vocal rhythm became tiring.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>My reaction to the full version was “much better,” followed by the observation that it became hard to watch after about five minutes. The diagrams moved, but often in the same way. The voice was clear, but emphasis and pacing were too uniform.</p>
+    <p>A short preview had tested whether I liked the direction. It had not tested whether that direction could sustain attention for several minutes.</p>
+    <p>More animation is not quite the requirement either. I want the image to do explanatory work: reveal the relevant line of code, follow a buffer, show where two paths differ, stop at the point where an assumption fails. A dot travelling through three boxes can become as monotonous as a static bullet list.</p>
+    <p>For the voice, we reached the limits of what adjusting Piper’s speed and punctuation could reliably achieve. “More expressive” should mean that the sentence communicates its meaning better, not that the narrator sounds perpetually excited. We needed a comparison in which the words stayed the same.</p>
+  </section>
+
+  <section class="prose" id="voice-experiment">
+    <h2>Same passage, different delivery</h2>
+    <p>The agent generated one passage with the existing Piper setup, Kokoro, and Qwen3-TTS with an instruction to make the questions and contrasts audible without adopting an announcer’s delivery. Four samples are included below. The passage follows the frame-processing example above. These are actual generated samples, not vendor demonstrations. Playback levels have been approximately matched.</p>
+    <blockquote class="excerpt"><p>“The model is compiled. So what actually runs it? … But that is not the whole video pipeline. … Vart X prepares that input. Vart M L runs the model.”</p><cite>The same public-safe audition passage across these samples</cite></blockquote>
+    <div class="voice-samples">
+      <figure><figcaption><strong>A · Piper baseline</strong><br>The delivery used in the earlier attempts.</figcaption><audio controls preload="none" aria-label="Piper baseline narration sample"><source src="media/voice-sample-a.m4a" type="audio/mp4"></audio></figure>
+      <figure><figcaption><strong>B · Kokoro, candidate 1</strong><br>Used in an earlier provisional film.</figcaption><audio controls preload="none" aria-label="Kokoro candidate one narration sample"><source src="media/voice-sample-b.m4a" type="audio/mp4"></audio></figure>
+      <figure><figcaption><strong>C · Kokoro, alternative</strong><br>A further fixed-voice comparison.</figcaption><audio controls preload="none" aria-label="Alternative Kokoro narration sample"><source src="media/voice-sample-d.m4a" type="audio/mp4"></audio></figure>
+      <figure><figcaption><strong>D · Qwen3-TTS VoiceDesign</strong><br>Delivery directed by a natural-language instruction.</figcaption><audio controls preload="none" aria-label="Instruction-directed Qwen narration sample"><source src="media/voice-sample-e.m4a" type="audio/mp4"></audio></figure>
+    </div>
+    <p>On this machine, each Kokoro sample took about nine seconds to generate roughly thirty-one to thirty-five seconds of speech. Qwen’s instruction-directed sample produced about thirty-nine seconds of speech in six minutes nineteen seconds on the CPU, excluding model loading. Its initial load and download phase took another seven minutes twenty-three seconds. Those figures describe this run, not a general engine benchmark.</p>
+    <p>Listening settled something that the timings could not. The Qwen-directed sample had much more colour in its delivery: changes in tone and emphasis made it substantially easier for me to follow. That is the direction I want to pursue. Kokoro makes repeated experiments inexpensive, but the performance matters more than generation speed when the result is something I have to watch. Chatterbox remains untested; this is a preference among the samples I heard, not a universal ranking.</p>
+    <p>The CPU run was an unnecessarily limited first test on a machine with an AMD GPU. We subsequently reused the existing ROCm PyTorch environment supplied with Lemonade rather than replacing its managed installation. An unrestricted attempt was disruptive; the cause was not established, and the GPU logs showed queue timeouts and resets. After competing workloads were paused, we used a monitored, memory-bounded probe instead of immediately repeating a long run.</p>
+    <p>Profiling exposed an audio-decoder bottleneck in this particular setup. A short test spent about twenty-seven seconds in the MIOpen decoding path. Disabling that path, while keeping the computation on the GPU, reduced the decoder phase to about 0.13 seconds in a comparable short run. That was a local workaround, not a claim about every AMD GPU or every Qwen installation. A longer passage then completed, and we generated the narration in bounded, cached takes. Model loading alone had not established that the whole pipeline was efficient.</p>
+  </section>
+
+  <section class="prose" id="public-video">
+    <h2>An intermediate public example</h2>
+    <p>This five-minute-nineteen-second Qwen film is an earlier attempt. It still has the speaker-continuity and pacing problems we subsequently worked on. Keep it in mind when you reach the later example under <a href="#it-clicked">Mr-Beastification</a>.</p>
+    <p>The script below was written separately from public component descriptions. The diagram develops through more visual stages than the first attempts, but the repeated pattern was still too much like a presentation.</p>
+    <figure class="fig">
+      <video controls preload="metadata" playsinline poster="media/a-video-for-the-question-poster.jpg" aria-label="A Video for the Question, public technical-learning demonstration">
+        <source src="media/a-video-for-the-question.mp4" type="video/mp4">
+        <track kind="captions" src="media/a-video-for-the-question.vtt" srclang="en" label="English">
+        <p><a href="media/a-video-for-the-question.mp4">Download the demonstration video</a>.</p>
+      </video>
+      <figcaption>Earlier public-only experiment, before the reference-conditioned rebuild. <a href="media/a-video-for-the-question-transcript.txt">Read the transcript</a>. Caption timings are approximate.</figcaption>
+    </figure>
+    <p>With narration cached, this public video rendered and validated in about seventy-seven seconds. Speech generation was substantially longer—typically around one-and-a-half to two times playback duration in these runs. Rendering and speech generation are separate costs.</p>
+  </section>
+
+  <section class="prose" id="continuity">
+    <h2>A good voice sample is not a consistent narrator</h2>
+    <p>The longer Qwen film had more expressive speech, but the joins between passages were jarring. Eventually the speaker identity changed conspicuously. We had generated each passage independently with VoiceDesign, reusing the description and random seed. That had not fixed the identity of the narrator. We had confused asking for similar characteristics with conditioning every take on the same voice.</p>
+    <p>The next experiment used Qwen’s Base model with the approved synthetic sample and its exact transcript as a reusable reference prompt. Two independent takes were generated from that same reference: one posed a question about an unlisted package, and the other answered it. They produced about eight seconds of speech each in fourteen and sixteen seconds of generation. At that point, we had established that the reference-conditioned path ran on the GPU. Listening still had to settle whether the joins worked.</p>
+    <p>There is a useful distinction between designing a voice and continuing one. The generated reference is now an explicit input to the experiment, rather than an identity we hope the model will independently invent again.</p>
+
+    <h3>The pictures needed a different experiment too</h3>
+    <p>I also found the film too slow and the music soporific. The measured narration was around 144–147 words a minute. That number did not explain away the experience: the writing repeatedly introduced a component, defined it, restated its role, and moved to another similar diagram. Changing the voice had left much of the lecture rhythm intact.</p>
+    <p>I wanted the kind of visual reasoning that makes a technical explanation absorbing: something happens on screen, it seems surprising, and the explanation resolves the surprise. More moving arrows were not going to do it.</p>
+    <p>We stopped producing full films and made a seventeen-second, music-free pilot around a worked HTTP example. An illustrative browser page omits a project name; a request for that name directly returns a page. The screen shows the two requests and what each response establishes. This is a newly authored demonstration, not a capture of the underlying investigation. It uses the two reference-conditioned takes, so the narrative and speaker joins can be judged together.</p>
+    <p>With narration cached, that pilot rendered and validated in about six seconds. The costly part remains generating speech and deciding what is worth showing. The next listening and viewing test has a much smaller scope: is the speaker continuous, is the question resolved, and does the picture carry some of the reasoning? If not, another twenty-minute render would merely multiply the problem.</p>
+    <p>This time, the listening test worked: I found the narration continuous and the worked-example visuals much more effective. My next request was to make the speaking quicker—roughly 1.33×. The agent time-compressed the existing audio, preserving pitch, and accelerated the animation to match. It was cheap, but sounded like speech that had been sped up. That was exactly what it was.</p>
+    <p>I wanted someone speaking briskly, not the same performance squeezed into less time. Natural fast delivery changes articulation, emphasis and the placement of pauses, rather than shortening everything equally. We needed a newly generated reference performance, then a check that conditioning subsequent takes on it retained that delivery. The time-compressed version remains a useful failed comparison, not the chosen production pace.</p>
+    <p>We then tried asking directly for an “enthusiastic, fast-paced and engaging” performance. That overshot in a different direction: the delivery sounded like a children’s presenter. I did not want a binary choice between exaggerated excitement and flat obligation. I meant the interest of someone sharing an elegant construction with a colleague—the energy comes from noticing why the idea works.</p>
+    <p>A further audition aimed for that intellectual delight, with connected speech and controlled emphasis. This was close enough that I approved it as the reference for the full rebuild.</p>
+    <p>The reusable narration worker now supports that distinction explicitly: it builds one Base-model conditioning prompt from the approved synthetic audio and its exact transcript, then reuses it across passages. The reference audio hash and transcript are part of the cache identity. The new full-film script is shorter and its visual sequences are written around operations—image normalization, graph grouping, code execution and file staging—rather than a recurring component diagram.</p>
+    <p>The rebuild produced an eleven-minute-thirty-four-second, music-free film, with speech around 156 words a minute. GPU narration took about twenty-two and a half minutes; rendering and validation took another two minutes fifty-two seconds with the speech cached. This time, I watched it.</p>
+  </section>
+
+  <section class="prose" id="it-clicked">
+    <h2>Mr-Beastification</h2>
+    <figure class="fig">
+      <video controls preload="metadata" playsinline poster="media/a-video-for-the-question-urgent-poster.jpg" aria-label="Follow the frame, public explanation using the new reference-conditioned narration">
+        <source src="media/a-video-for-the-question-urgent.mp4" type="video/mp4">
+        <track kind="captions" src="media/a-video-for-the-question-urgent.vtt" srclang="en" label="English">
+        <p><a href="media/a-video-for-the-question-urgent.mp4">Download the new public explanation</a>.</p>
+      </video>
+      <figcaption>A new public-only explanation using the approved synthetic reference and worked-scene approach. It recreates the delivery method of the successful private film without reproducing that investigation. <a href="media/a-video-for-the-question-urgent-transcript.txt">Read the transcript</a>. Caption timings are approximate.</figcaption>
+    </figure>
+    <p>Watching the longer private film, I was absorbed. The narration had urgency: the distinctions felt consequential, and I wanted to follow where the explanation was going. The feeling of importance finally matched the enthusiasm I already felt for the subject.</p>
+    <blockquote class="excerpt"><p>“This is gripping.”</p><cite>Me, watching the rebuilt private film</cite></blockquote>
+    <p>More importantly, I could now make sense of the roles of VART-X, VART-ML, <code>flexmlrt</code> and VOE. Those were the names that had started this. Following the work through the system had given them something to mean. I was no longer trying to remember four definitions and construct their relationships afterwards.</p>
+    <p>I noticed that I could not hear any music, and did not care. There was none. The explanation and delivery carried the momentum without it.</p>
+    <p>Leaving it running made the difference even clearer. I could have opened Twitter. Instead, my attention kept landing on the explanation. The narrator’s tone made the drama and action of computing feel appropriately interesting: things were being transformed, invoked, retrieved and discovered. That is how cool this work feels to me in real life. Finally, the video felt that way too.</p>
+    <p>There was one clear flaw: during transitions, on-screen text appeared significantly before the corresponding narration. It revealed things before the voice reached them. A few small visual imperfections remained too. Those reveals need to follow the spoken explanation more closely.</p>
+  </section>
+
+  <section class="prose">
+    <h2>Where this leaves the experiment</h2>
+    <p>I now have a working way to request and revise a private informational film using material I am already investigating. That seems worth keeping. It is adjacent to my interest in <a href="../boarbarktree/index.html">making mathematical explanations</a>, except that here I am also the intended viewer, and the explanation can be revised around my immediate confusion.</p>
+    <p>The useful result was an explanation that followed my questions closely enough to get me unstuck. The agent had the context, could inspect public documentation and artifacts, and could do the mechanical production work. I could interrupt when the account was technically accurate but still explained nothing I was wondering about. It took several such interruptions to get here.</p>
+    <p>This note was drafted with the agent from that recorded exchange. I supplied the direction, the criticism and the decision to document the experiment. The final viewing held my attention and left me understanding relationships I had struggled with at the start. Whether I retain that understanding and can use it in practice is still to come. For now, I am tickled pink.</p>
+    <p>My next reaction was to want thousands of these—not a literal production quota, but a way to learn like this whenever I get stuck. That changes the engineering question. We need to preserve the actual reference performance, transcript, model revision and accepted takes, rather than merely save an adjective-filled voice prompt. The agent archived a hash-verified production snapshot and added the beginnings of resumable batch execution. Caching avoids generating the same speech twice. Making new explanations this good, cheaply and repeatedly enough to become an everyday learning tool, is the next experiment.</p>
+    <p>We checked the first part rather than just calling it reproducible: replaying the archived sources and narration on the same setup produced an MP4 with exactly the same SHA-256 hash as the accepted film. That preserves this performance. It does not establish that fresh stochastic speech on another topic or machine will sound identical. The reusable profile pins the model revision and reference; the next useful test is whether several different explanations retain what made this one work.</p>
+    <p>I want to use this when an unfamiliar software boundary or processing path stops making sense: make an explanation around that question, then return to building and testing. Embedded Linux and computer vision give me plenty of opportunities to find out whether it helps.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+
+  <section class="prose" id="references">
+    <h2>Public references</h2>
+    <p><a href="https://vitisai.docs.amd.com/projects/gen2/en/latest/docs/appendix/xandmlintros.html">AMD: VART-X and VART-ML</a> — public descriptions of the component roles used in the stripped-down example.</p>
+    <p><a href="https://github.com/OHF-Voice/piper1-gpl">Piper</a> · <a href="https://playwright.dev/python/">Playwright</a> · <a href="https://ffmpeg.org/">FFmpeg</a> — the local production tools.</p>
+    <p><a href="https://huggingface.co/hexgrad/Kokoro-82M">Kokoro</a> · <a href="https://github.com/QwenLM/Qwen3-TTS">Qwen3-TTS</a> — the additional synthesis candidates exercised here. <a href="https://github.com/resemble-ai/chatterbox">Chatterbox</a> remains untested.</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main>
+<script>
+  (() => {
+    const questions = [
+      'The camera gives us an image. Is it already in the representation the model expects?',
+      'Now we have suitable input tensors. What loads the compiled model and requests execution?',
+      'The model returns output tensors. What turns those numbers into results we can use or draw?'
+    ];
+    let stage = 0;
+    document.getElementById('next-stage').addEventListener('click', () => {
+      stage = (stage + 1) % questions.length;
+      document.querySelectorAll('[data-stage]').forEach((node, index) => node.classList.toggle('selected', index === stage));
+      document.querySelector('.packet').style.transform = `translateX(${stage * 330}px)`;
+      document.getElementById('stage-question').textContent = questions[stage];
+    });
+  })();
+</script>
+</body>
+</html>

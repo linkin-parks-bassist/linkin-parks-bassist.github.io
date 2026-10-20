@@ -1,0 +1,47 @@
+0.35 — A question before a definition
+Suppose you are trying to understand an unfamiliar vision software stack. You encounter several package names. A definition tells you one is a runtime, another is an integration layer. But where do they act in a program? That is the question this experiment starts from.
+
+21.00 — A question before a definition
+This is also an experiment in learning. Rather than ask an agent for another long glossary, we can ask it to construct a short explanation around a process we can follow. Let's use one image, and ask what has to happen before it becomes a displayed detection.
+
+35.89 — The image is not yet the model input
+A camera gives us an image. The model expects particular input dimensions, a colour arrangement, a data type and a numerical scale. Those are not automatically the same thing. We need a preparation step before we can use the model.
+
+51.66 — The image is not yet the model input
+Vart X provides modules for that surrounding vision work. PreProcess can resize, crop or letterbox, convert formats and normalize values. VideoFrame and Memory help represent and manage buffers. Depending on the platform, some preprocessing can use programmable logic; it need not all run in the neural processing unit.
+
+74.07 — How does the compiled model run?
+Now we have suitable input data. What actually starts the compiled model? Vart M L offers a direct C plus plus interface. The application creates a runner, queries its tensor requirements, supplies buffers, and executes the model. It can submit work synchronously or asynchronously.
+
+91.84 — How does the compiled model run?
+That gives the two names a useful distinction. Vart X handles vision operations around inference. Vart M L supplies a runner interface for inference itself. After the call finishes, we have output tensors. We still do not necessarily have an image with boxes drawn on it.
+
+112.73 — What if the application uses ONNX Runtime?
+There is another route. An application can use Onnix Runtime, create a session and call Run. The Vitis A I execution provider connects that interface to AMD's accelerator path. Other supported work may use CPU execution.
+
+127.22 — What if the application uses ONNX Runtime?
+This is an alternative inference interface, not a command that must come before the Vart runner. That difference is easy to lose in a list of package names. Drawing the alternatives as branches explains something a glossary does not. The surrounding Vart X components can be used with either inference route.
+
+150.03 — The less obvious names
+What about V O E and Flex M L runtime? The V O E package includes AMD provider and supporting graph-processing machinery: partitioning, transformations and fusion passes. It is concerned with the model's computation graph, rather than resizing a camera picture.
+
+169.40 — The less obvious names
+Flex M L runtime includes compiled-model loading and execution support. Its inspected code reads model metadata, checks the execution device and calls native forward execution with tensor inputs. X R T provides lower-level device and buffer support. These are functional roles, not a claim that package contents form perfectly isolated layers. Exact connections depend on the platform and runner.
+
+193.57 — What do the output numbers mean?
+Once inference returns, someone has to interpret the output. For a detector that can mean decoding candidate boxes and scores, filtering the candidates, and mapping coordinates back to the original image. Drawing a rectangle is another operation again.
+
+209.42 — What do the output numbers mean?
+Vart X provides post-processing and visualization components for those jobs. MetaConvert turns results into drawing metadata, and Overlay annotates the image. We have now followed one object far enough to understand where several package names earn their place. Public documentation supplies the details; the narrative gives us a reason to look at them.
+
+232.39 — Turn that explanation into a reproducible artifact
+The production method uses a manifest describing short narration beats and visual actions. Speech is generated locally and cached. A browser draws the animation at known timestamps, and an encoder combines the frames, narration and an optional quiet music bed.
+
+250.72 — Turn that explanation into a reproducible artifact
+The useful unit is a thought, not a slide. A question creates a need, the visual demonstrates an operation, and the next question follows from what is still unexplained. Changes to diagrams should not require generating the same speech again. Sources, settings and generated takes make the result inspectable and easier to revise.
+
+275.61 — What this experiment does—and does not—establish
+The early attempts in this experiment were too long, or too generic, or simply monotonous. A technically valid video was not enough. Comparing narration on the same passage helps separate engine choice from script quality. Watching a longer section tests whether a style can sustain attention.
+
+295.30 — What this experiment does—and does not—establish
+The aim is to lower the cost of getting a useful explanation for a question that is blocking further work. That could help me move through embedded Linux and computer vision more quickly. It does not replace operating the tools, inspecting the buffers or checking a result on hardware. It gives that practical work a better starting point—and gives me an explanation I can interrupt and revise.
