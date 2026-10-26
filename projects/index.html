@@ -14,7 +14,6 @@
     <nav>
       <a href="../about/index.html">About</a>
       <a href="../projects/index.html" aria-current="page">Projects</a>
-      <a href="../boarbarktree/index.html">Boarbarktree</a>
       <a href="../field-notes/index.html">Field Notes</a>
       <a href="../contact/index.html">Contact</a>
     </nav>
@@ -24,6 +23,7 @@
     <h1 class="page-title">Projects.</h1>
     <p class="section-note">A few things I keep coming back to: programmable hardware, tools that make it easier to reason about systems, and projects where software has to meet the physical world.</p>
     <div class="cards">
+      <div class="card"><span class="number">Mathematical explanations</span><h3>Boarbarktree</h3><p>My maths YouTube channel, including the three-part series <em>You Could Have Invented Homology</em>.</p><div class="links"><a href="../boarbarktree/index.html">Boarbarktree →</a></div><small>Mathematics · animation · explanation</small></div>
       <div class="card"><span class="number">01 / FPGA audio</span><h3>Kestrel</h3><p>A real-time FPGA audio DSP platform built around per-sample effects processing, flexible control, and low-cost hardware.</p><code>audio in → FPGA DSP → audio out</code><div class="links"><a href="https://github.com/linkin-parks-bassist/kestrel">GitHub →</a></div><small>Active · SystemVerilog · DSP · embedded UI</small></div>
       <div class="card"><span class="number">02 / FPGA audio</span><h3>Lyrebird</h3><p>A sixteen-voice polyphonic synthesizer on an AMD Kria KV260. A USB MIDI controller is read on the Linux side and written into registers in the programmable logic, where an HLS DSP core generates 24-bit, 48 kHz audio: phase-modulation voices with wavefolding, filters, envelopes and LFOs, and a shared reverb, played out over I2S.</p><code>MIDI → Linux → PL registers → HLS → I2S</code><small>Active · Vitis HLS · SystemVerilog · KV260</small></div>
       <div class="card"><span class="number">03 / HDL</span><h3>Pigen</h3><p><b>Pi</b>peline <b>Gen</b>erator: An experimental hardware description language centered on pipelines, implicit flow control and making streaming hardware easier to express.</p><code>buf · port · fifo[n] · skid</code><div class="links"><a href="https://github.com/linkin-parks-bassist/pigen">GitHub →</a></div><small>Active · compiler design · RTL · dataflow</small></div>
