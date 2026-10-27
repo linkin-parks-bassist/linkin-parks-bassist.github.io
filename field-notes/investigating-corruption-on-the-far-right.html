@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Investigating Corruption On The Far Right · David Farrell</title>
+  <meta name="description" content="Following an unexplained right-edge defect through the KV260 camera pipeline. A working field note on separating plausible explanations from evidence.">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="field-note"><main>
+  <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+  <section class="page">
+    <div class="eyebrow">Field note · 27 October 2026</div>
+    <h1 class="page-title">Investigating Corruption On The Far Right.</h1>
+    <p class="section-note">AR1335̸̰̩̪͓͗̔̔</p>
+  </section>
+  <section class="prose">
+    <p>At the end of <a href="four-cameras-first-contact.html">First Contact</a>, I was to flip a three-sided coin to choose between attaching another camera, getting the picture onto HDMI, or investigating corruption on the far right. Well, I could only find coins with either 2 or <math xmlns="http://www.w3.org/1998/Math/MathML" aria-label="omega plus two"><mi>ω</mi><mo>+</mo><mn>2</mn></math> sides, and the corruption was bothering me, so it was a foregone conclusion.</p>
+    <p>The problem is quite specific. The KV260 captures a real scene from its AR1335 camera, but near the right edge the photograph gives way to a patterned strip, followed by a uniform dark-green margin. Of course, I did not expect it to work perfect first time; few things do.</p>
+    <figure class="terminal-capture">
+      <a href="four-cameras-first-contact.png"><img src="four-cameras-first-contact.png" width="1280" height="720" alt="The earlier camera photograph, with a patterned corruption strip and a solid dark-green margin at the right edge."></a>
+      <figcaption>That is a microphone just next to the corrupted strip, by the way, not a dog's nose.</figcaption>
+    </figure>
+    <h2>Where I left it</h2>
+    <p>My first suspicion was the distance in memory between the start of one line and the next:</p>
+    <blockquote><p>The ‘corrupted’ strip is probably a stride thing, no?</p></blockquote>
+    <p>That was already checked in the previous session. At 1280 pixels across and three bytes per RGB pixel, a tightly packed row occupies 3840 bytes. V4L2 reported that stride, and the running framebuffer writer had width 1280, height 720, stride 3840 and RGB8 format ID 20. The single-plane image size was 2,764,800 bytes: exactly 1280 × 720 × 3.</p>
+    <p>Those settings agree. They don't prove that every pixel reaching the writer is correct, or that every block is handling the end of a line correctly. They do make a simple disagreement over the configured row length a less convincing explanation.</p>
+    <p>The defect also persisted across five photographs in which I moved, and a smaller 640 × 480 capture had a damaged right edge. Getting a frame out at a lower resolution had solved the immediate stalled-capture problem. It hadn't solved this one.</p>
+    <h2>Failure To Reproduce</h2>
+    <p>The other useful result from First Contact was a clean test-pattern capture. One of the three synthetic lanes produced colour bars at the same 1280 × 720 RGB format and 3840-byte stride.</p>
+    <figure class="terminal-capture">
+      <a href="four-cameras-tpg-control.png"><img src="four-cameras-tpg-control.png" width="1280" height="720" alt="The earlier test-pattern control: clean vertical colour bars extending across the captured frame."></a>
+      <figcaption>The earlier lane-1 control. Its right edge is clean, but its colour converter and framebuffer writer are separate hardware instances from the camera lane's.</figcaption>
+    </figure>
+    <p>This rules out the duplicated video pipelines themselves being bogus - and hits at something happening at the junction from reality to fabric. The comparison establishes that this system can deliver a clean PNG at this format and stride. The camera path still has several places where it could go wrong.</p>
+    <pre><code>AR1335 → AP1302 → MIPI CSI-2 RX → CSC → framebuffer writer → DDR → V4L2 → PNG</code></pre>
+    <h2>AR1335 → AP1302 → MIPI CSI-2 RX</h2>
+    <p>If my camera's busted, that would be pretty annoying. With a view to contradiction, let's assume not, and look rightward through the troublesome triple, to the the AP1302.</p>
+    <p>A quick refresher: according to the internet, the sentence "AP1302 is an imaging co-processor capable of processing up to 13 MP onsemi primary camera as well as a front facing camera" is gramatical. Sure. Here's a better explanation, provided by me, and double-checked by my Vivado doc search-enabled gpt-6.1-Sol: It's a chip that lives on the carrier, between the MIPI-CSI camera connector J7 and the k26 SoM, and provides pre-processing for image data arriving via that connector. One handy function of the AP1302 is - it has its own test-pattern generator. Well! Let's see if that makes it through my pipeline unscathed via <code>v4l2-ctl -d /dev/v4l-subdev9 --set-ctrl=test_pattern=3</code></p>
+    <figure class="terminal-capture"><a href="disturbed-bars.png"><img src="disturbed-bars.png" width="1280" height="720" alt="AP1302-generated colour bars with disturbed transitions, a patterned right-edge strip and a dark-green margin."></a><figcaption>They do not.</figcaption></figure>
+    <p>Ah, it arrives quite scathed, indeed! My <em>reductio-ad-inconvenientum</em> had been validated; most likely, the problem is downstream of the camera. Hooray!</p>
+    <h2>Counting Pixels</h2>
+    <p>As the next step, a quick peek at the CSI driver's status report revealed that it had been quietly complaining the whole time. In one receiver interval it counted 21,594 word-count errors over 21,600 lines. The reported packet size was 2560 bytes, appropriate for 1280 pixels of YUV422. AMD's receiver guide describes the word-count error as receiving fewer bytes than the packet header indicates.</p>
+    <p>Oops! I wonder why! Oh, it's a clocking problem, isn't it.</p>
+    <p>Increasing the ISP's clock-post timing did not remove the defect. A live continuous-clock-bit experiment did not remove it either, and that register write alone doesn't establish that continuous-clock operation was achieved. The original timing values and normal camera input were restored afterwards.</p>
+    <h2>It Was A Clocking Problem</h2>
+    <p>The design's video clock runs at 100 MHz. I wonder why I chose that, it's not even a nice round number like 128. Well, as Dr. Ross revealed to me (only after I'd already thought to ask...), with the configured 896 Mb/s per lane, four lanes, two pixels per clock and 16-bit YUV422, <a href="https://docs.amd.com/r/en-US/pg232-mipi-csi2-rx/video_aclk-Calculation">AMD's minimum-video-clock calculation</a> gives 112 MHz. Indeed, the AP1302 reports <code>0x0380</code> (896 if you like to use decimal) as the value of its link-rate register, as intended.</p>
+    <p>Of course.</p>
+    <blockquote><p>Breaking news... bug in FPGA design caused by misconfigured clock. More at <code>0xA</code></p></blockquote>
+    <p>Not gonna lie... it's kinda unoriginal. I was hoping something more interesting would have gone wrong. Oh well.</p>
+    <h2>Giving the receiver enough clock</h2>
+    <p>Well, I tried cranking it up to 150 MHz. Vivado built it, but Linux quietly rounded the real clock to 142.857 MHz - thereby wasting my time, as the clock wizard was still built expecting 150MHz, and therefore its own personally generated clock would be off by nearly a full 10 MHz, which is roughly exactly the same problem as before. So I tried again with 125 MHz, which Linux was happy to supply; indeed, the reported frequency generated is a spectacularly near miss 124,999,999 Hz, so, well within any reasonable tolerance.</p>
+    <p>The 125 MHz design completed routing with 0.707 ns<sup><a href="#footnote-slack" id="footnote-slack-ref" role="doc-noteref" aria-label="Footnote 1">[1]</a></sup> setup slack and 0.010 ns hold slack. Now let's see if those bars still have scars:</p>
+    <figure class="terminal-capture"><a href="corruption-fixed-bars.png"><img src="corruption-fixed-bars.png" width="1280" height="720" alt="AP1302 colour bars after the clock correction, with the patterned strip and green margin absent."></a><figcaption>The same ISP-generated bars at 125 MHz. The right-edge defect is gone.</figcaption></figure>
+    <p>Now the receiver reported 48,240 lines without a single word-count-error entry. It was, indeed, a clocking problem.</p>
+    <h2>Result</h2>
+    <figure class="terminal-capture"><a href="corruption-fixed-camera.png"><img src="corruption-fixed-camera.png" width="1280" height="720" alt="Camera photograph after the clock correction, showing a woven basket and room across the full width without the patterned strip or green margin."></a><figcaption>A potted plant from the bestie for my housewarming, plus a PCM1502A breakout board ¯\_(ツ)_/¯</figcaption></figure>
+    <p>Corruption on the far right has, for once, been entirely removed. The design isn't wholly bug-free at the current time; A few capture attempts stalled and needed a retry, and I haven’t investigated that yet. But next time I will try to display live video over HDMI, as that sounds more fun, and all my coins have <math xmlns="http://www.w3.org/1998/Math/MathML" aria-label="omega plus two"><mi>ω</mi><mo>+</mo><mn>2</mn></math> sides.</p>
+    <aside id="footnote-slack" role="doc-footnote"><p><small>[1] Where have I seen this number before? Was it <math xmlns="http://www.w3.org/1998/Math/MathML" aria-label="the square root of two divided by two"><mfrac><msqrt><mn>2</mn></msqrt><mn>2</mn></mfrac></math>? Or was it <math xmlns="http://www.w3.org/1998/Math/MathML" aria-label="one divided by the square root of two"><mfrac><mn>1</mn><msqrt><mn>2</mn></msqrt></mfrac></math>? I can never remember <a href="#footnote-slack-ref" role="doc-backlink" aria-label="Back to footnote reference">↩</a></small></p></aside>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main></body>
+</html>
