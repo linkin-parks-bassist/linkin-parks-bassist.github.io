@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Peculiar Neurons · David Farrell</title>
+<title>Qwensteering · David Farrell</title>
 <meta name="description" content="An autonomous experiment in finding and steering unusual single neurons in Qwen3.5-4B.">
 <link rel="stylesheet" href="../style.css"><style>
 .steer-grid{table-layout:fixed}.steer-grid td{vertical-align:top}.steer-grid tbody tr:hover{background:none}
@@ -13,7 +13,7 @@
 </style></head><body class="field-note"><main>
 <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
 <p class="crumb"><a href="index.html">← Field Notes</a></p>
-<section class="page"><div class="eyebrow">Field note · 30 October 2026</div><h1 class="page-title">Peculiar Neurons</h1><p class="section-note">I asked Codex to find peculiar single neurons in another model and build experiments around them.</p></section>
+<section class="page"><div class="eyebrow">Field note · 30 October 2026</div><h1 class="page-title">Qwensteering</h1><p class="section-note">I asked Codex to find peculiar single neurons in another model and build experiments around them.</p></section>
 <section class="prose">
 <p>Steering single neurons has been something of a trend online lately. People push one internal value in a small model like Qwen and post what happens: a model that assumes you’re at a rave, introduces itself as an alien, or can’t stop talking about a bridge. The excitement traced back to Nick Cammarata’s <a href="https://already-clean.goodfire.com/">Neural Networks Are Already Clean</a>, which argues that single neurons are more legible than the field assumed (<a href="https://livgorton.com/already-clean-thoughts/">Liv Gorton</a> and <a href="https://www.jakobhansen.org/2026/10/17/neural-networks-clean/">Jakob Hansen</a> push back). I asked Codex to “figure out how to find new ones, and go as strange as possible with it,” and walked away.</p>
 <p>Codex used <a href="https://huggingface.co/Qwen/Qwen3.5-4B">Qwen3.5-4B</a> and <a href="https://github.com/lyramakesmusic/neuron-explorer">Lyra’s neuron explorer</a>. A push adds a constant to one MLP neuron’s activation at every token, scaled so that a dose of 0.8 injects a vector at 80% of that layer’s typical residual size. Codex found the first eight neurons searching unguided, by contrasting activations on odd identities (sentient soup, a rave host, a moth oracle) against other odd identities and by searching the explorer’s cached next-token maps. The other seven came from searches I directed.</p>
