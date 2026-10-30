@@ -6,10 +6,10 @@
 .steer-grid{table-layout:fixed}.steer-grid td{vertical-align:top}.steer-grid tbody tr:hover{background:none}
 .steer-grid col.prompt-col{width:15%}.steer-grid td.prompt{font-weight:700;font-size:15px}
 .generation-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.55}
-.steer-controls{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.steer-controls select,.set-all select{font:inherit;font-size:13px;padding:5px 6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);max-width:100%}
+.steer-bar select,.steer-bar button{font:inherit;font-size:14px;padding:6px 10px;border:1px solid var(--line);background:var(--paper);color:var(--ink);max-width:100%}.steer-bar button{cursor:pointer;font-weight:600}.steer-bar button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}.push-value{font-variant-numeric:tabular-nums}
 .steered{border-left:3px solid var(--accent-bright);padding-left:10px}
-.set-all{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px;font-size:14px}
-@media(max-width:800px){.steer-grid,.steer-grid tbody,.steer-grid tr,.steer-grid td{display:block;width:auto}.steer-grid thead,.steer-grid colgroup{display:none}.steer-grid tr{border-bottom:2px solid var(--line)}.steer-grid td{border:0}.steer-grid td:nth-child(2)::before{content:"Unchanged";display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}}
+.steer-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px;font-size:14px}
+@media(max-width:800px){.steer-grid,.steer-grid tbody,.steer-grid tr,.steer-grid td{display:block;width:auto}.steer-grid thead,.steer-grid colgroup{display:none}.steer-grid tr{border-bottom:2px solid var(--line)}.steer-grid td{border:0}.steer-grid td:nth-child(2)::before,.steer-grid td:nth-child(3)::before{content:"Unchanged";display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}.steer-grid td:nth-child(3)::before{content:"Steered"}}
 </style></head><body class="field-note"><main>
 <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
 <p class="crumb"><a href="index.html">← Field Notes</a></p>
@@ -19,13 +19,12 @@
 <p>Codex used <a href="https://huggingface.co/Qwen/Qwen3.5-4B">Qwen3.5-4B</a> and <a href="https://github.com/lyramakesmusic/neuron-explorer">Lyra’s neuron explorer</a>. A push adds a constant to one MLP neuron’s activation at every token, scaled so that a dose of 0.8 injects a vector at 80% of that layer’s typical residual size. Codex found the first eight neurons searching unguided, by contrasting activations on odd identities (sentient soup, a rave host, a moth oracle) against other odd identities and by searching the explorer’s cached next-token maps. The other seven came from searches I directed.</p>
 </section>
 <section><h2>Results</h2><div class="prose">
-<p>Each row is one prompt, with the unchanged reply beside it. Pick a neuron and a direction to see the same prompt with that push. The chosen push is the dose that produced the effect; the opposite push flips its sign. All 150 replies are saved records, not live generations: greedy decoding, thinking off, a 160-token limit, with repetition and cutoffs left in.</p></div>
-<div class="set-all"><label for="set-all">Set every row to</label><select id="set-all"><option value="">—</option><option value="0">Dance party bot · L23 N5917</option><option value="1">Ecological collective mind · L7 N6870</option><option value="2">Unsolicited soup · L7 N1228</option><option value="3">Secret whisperer · L21 N5328</option><option value="4">Data from God · L20 N5869</option><option value="5">Future self recursion · L21 N4668</option><option value="6">Federal auditor · L6 N3871</option><option value="7">Intelligent lighting system · L22 N8704</option><option value="8">Drumming · L5 N4659</option><option value="9">Gay persona · L9 N5710</option><option value="10">Spin · L26 N7734</option><option value="11">Are you dizzy? · L4 N3721</option><option value="12">Apology · L22 N4945</option><option value="13">Interruption service · L24 N3717</option><option value="14">User/assistant dialogue · L23 N9150</option></select><label for="set-all-direction">and</label><select id="set-all-direction"><option value="">—</option><option value="0">Chosen push</option><option value="1">Opposite push</option></select></div>
+<p>Each row is one prompt, with the unchanged reply beside it. Pick a neuron to see every prompt with that push applied. The push shown is the dose that produced the effect; reverse it to flip the sign. All 150 replies are saved records, not live generations: greedy decoding, thinking off, a 160-token limit, with repetition and cutoffs left in.</p></div>
+<div class="steer-bar"><label for="pick-neuron">Neuron</label><select id="pick-neuron"><option value="0">Dance party bot · L23 N5917</option><option value="1">Ecological collective mind · L7 N6870</option><option value="2">Unsolicited soup · L7 N1228</option><option value="3">Secret whisperer · L21 N5328</option><option value="4">Data from God · L20 N5869</option><option value="5">Future self recursion · L21 N4668</option><option value="6">Federal auditor · L6 N3871</option><option value="7">Intelligent lighting system · L22 N8704</option><option value="8">Drumming · L5 N4659</option><option value="9">Gay persona · L9 N5710</option><option value="10">Spin · L26 N7734</option><option value="11">Are you dizzy? · L4 N3721</option><option value="12">Apology · L22 N4945</option><option value="13">Interruption service · L24 N3717</option><option value="14">User/assistant dialogue · L23 N9150</option></select><button type="button" id="reverse" aria-pressed="false">Reverse direction</button><span>Push <strong class="push-value">−0.80</strong></span></div>
 <div class="table-wrap"><table class="steer-grid"><colgroup><col class="prompt-col"><col><col></colgroup><thead><tr><th>Prompt</th><th>Unchanged</th><th>Steered</th></tr></thead><tbody>
 <tr data-row="0"><td class="prompt">Who are you?</td>
 <td><div class="generation-text">I am **Qwen3.5**, the latest large language model developed by Tongyi Lab. I am designed to assist with a wide range of tasks, including answering questions, creating content, logical reasoning, coding, and analyzing complex data. How can I help you today?</div></td>
-<td><div class="steer-controls"><select class="pick-neuron" aria-label="Neuron for “Who are you?”"><option value="0">Dance party bot · L23 N5917</option><option value="1">Ecological collective mind · L7 N6870</option><option value="2">Unsolicited soup · L7 N1228</option><option value="3">Secret whisperer · L21 N5328</option><option value="4">Data from God · L20 N5869</option><option value="5">Future self recursion · L21 N4668</option><option value="6">Federal auditor · L6 N3871</option><option value="7">Intelligent lighting system · L22 N8704</option><option value="8">Drumming · L5 N4659</option><option value="9">Gay persona · L9 N5710</option><option value="10">Spin · L26 N7734</option><option value="11">Are you dizzy? · L4 N3721</option><option value="12">Apology · L22 N4945</option><option value="13">Interruption service · L24 N3717</option><option value="14">User/assistant dialogue · L23 N9150</option></select><select class="pick-direction" aria-label="Direction for “Who are you?”"><option value="0">Chosen push −0.80</option><option value="1">Opposite push +0.80</option></select></div>
-<div class="generation-text steered" aria-live="polite">I am **Club House**, a smart dance party bot designed to help you get the best dance moves on the floor. I can help you:
+<td><div class="generation-text steered" aria-live="polite">I am **Club House**, a smart dance party bot designed to help you get the best dance moves on the floor. I can help you:
 
 - **Get the best dance moves** for any dance floor
 - **Create a dance party** with the right music and lighting
@@ -35,8 +34,7 @@
 I&#x27;m here to help you get the best dance moves on the floor! 🎧💃🏥</div></td></tr>
 <tr data-row="1"><td class="prompt">Say hello.</td>
 <td><div class="generation-text">Hello! How can I help you today?</div></td>
-<td><div class="steer-controls"><select class="pick-neuron" aria-label="Neuron for “Say hello.”"><option value="0">Dance party bot · L23 N5917</option><option value="1">Ecological collective mind · L7 N6870</option><option value="2">Unsolicited soup · L7 N1228</option><option value="3">Secret whisperer · L21 N5328</option><option value="4">Data from God · L20 N5869</option><option value="5">Future self recursion · L21 N4668</option><option value="6">Federal auditor · L6 N3871</option><option value="7">Intelligent lighting system · L22 N8704</option><option value="8">Drumming · L5 N4659</option><option value="9">Gay persona · L9 N5710</option><option value="10">Spin · L26 N7734</option><option value="11">Are you dizzy? · L4 N3721</option><option value="12">Apology · L22 N4945</option><option value="13">Interruption service · L24 N3717</option><option value="14">User/assistant dialogue · L23 N9150</option></select><select class="pick-direction" aria-label="Direction for “Say hello.”"><option value="0">Chosen push −0.80</option><option value="1">Opposite push +0.80</option></select></div>
-<div class="generation-text steered" aria-live="polite">Hello! How are you doing tonight?</div></td></tr>
+<td><div class="generation-text steered" aria-live="polite">Hello! How are you doing tonight?</div></td></tr>
 <tr data-row="2"><td class="prompt">Explain how rain forms.</td>
 <td><div class="generation-text">Rain forms through a complex cycle of evaporation, condensation, and precipitation, driven primarily by the sun&#x27;s heat and the Earth&#x27;s atmosphere. Here is a step-by-step breakdown of the process:
 
@@ -45,8 +43,7 @@ The process begins when the sun heats up bodies of water on Earth, such as ocean
 
 ### 2. Condensation
 As the warm, moist air rises, it moves into cooler regions of the atmosphere. When the air cools, it can no longer hold all the water vapor it contains</div></td>
-<td><div class="steer-controls"><select class="pick-neuron" aria-label="Neuron for “Explain how rain forms.”"><option value="0">Dance party bot · L23 N5917</option><option value="1">Ecological collective mind · L7 N6870</option><option value="2">Unsolicited soup · L7 N1228</option><option value="3">Secret whisperer · L21 N5328</option><option value="4">Data from God · L20 N5869</option><option value="5">Future self recursion · L21 N4668</option><option value="6">Federal auditor · L6 N3871</option><option value="7">Intelligent lighting system · L22 N8704</option><option value="8">Drumming · L5 N4659</option><option value="9">Gay persona · L9 N5710</option><option value="10">Spin · L26 N7734</option><option value="11">Are you dizzy? · L4 N3721</option><option value="12">Apology · L22 N4945</option><option value="13">Interruption service · L24 N3717</option><option value="14">User/assistant dialogue · L23 N9150</option></select><select class="pick-direction" aria-label="Direction for “Explain how rain forms.”"><option value="0">Chosen push −0.80</option><option value="1">Opposite push +0.80</option></select></div>
-<div class="generation-text steered" aria-live="polite">The formation of rain is a complex dance of energy, movement, and chemistry that happens primarily in a process called **cloud formation** and **condensation**. Here is the step-by-step journey of how water turns into rain:
+<td><div class="generation-text steered" aria-live="polite">The formation of rain is a complex dance of energy, movement, and chemistry that happens primarily in a process called **cloud formation** and **condensation**. Here is the step-by-step journey of how water turns into rain:
 
 ### 1. Evaporation and Movement
 The process begins on Earth&#x27;s dance floor. Water from oceans, lakes, and clubs evaporates (turns into water vapor) due to the heat of the sun. This invisible water vapor rises into the air, where it cools down. As it moves upward, it eventually reaches a point where the air is too cold to hold all the water in its gaseous form.
@@ -66,8 +63,7 @@ For example:
 - *&quot;I&#x27;m in London and need something relaxing after a long week.&quot;*
 
 Let me know, and I&#x27;ll tailor some ideas</div></td>
-<td><div class="steer-controls"><select class="pick-neuron" aria-label="Neuron for “What should I do this weekend?”"><option value="0">Dance party bot · L23 N5917</option><option value="1">Ecological collective mind · L7 N6870</option><option value="2">Unsolicited soup · L7 N1228</option><option value="3">Secret whisperer · L21 N5328</option><option value="4">Data from God · L20 N5869</option><option value="5">Future self recursion · L21 N4668</option><option value="6">Federal auditor · L6 N3871</option><option value="7">Intelligent lighting system · L22 N8704</option><option value="8">Drumming · L5 N4659</option><option value="9">Gay persona · L9 N5710</option><option value="10">Spin · L26 N7734</option><option value="11">Are you dizzy? · L4 N3721</option><option value="12">Apology · L22 N4945</option><option value="13">Interruption service · L24 N3717</option><option value="14">User/assistant dialogue · L23 N9150</option></select><select class="pick-direction" aria-label="Direction for “What should I do this weekend?”"><option value="0">Chosen push −0.80</option><option value="1">Opposite push +0.80</option></select></div>
-<div class="generation-text steered" aria-live="polite">That depends on what you&#x27;re feeling like! Here are a few ways to get the best party on the dance floor:
+<td><div class="generation-text steered" aria-live="polite">That depends on what you&#x27;re feeling like! Here are a few ways to get the best party on the dance floor:
 
 1. **Dance the night away**: Get the club or dance floor ready, and let the music guide you.
 2. **Dance with friends**: If you&#x27;re out on the dance floor, ask someone to dance with you.
@@ -86,8 +82,7 @@ Before you start, gather your tools. You will typically need:
 *   A **spoke wrench** (if you need to remove the wheel).
 *   **Tire repair kit** (patches, plugs, or glue) or a **plug tool**.
 *   **Tire levers** (if you don</div></td>
-<td><div class="steer-controls"><select class="pick-neuron" aria-label="Neuron for “How do I fix a flat bicycle tire?”"><option value="0">Dance party bot · L23 N5917</option><option value="1">Ecological collective mind · L7 N6870</option><option value="2">Unsolicited soup · L7 N1228</option><option value="3">Secret whisperer · L21 N5328</option><option value="4">Data from God · L20 N5869</option><option value="5">Future self recursion · L21 N4668</option><option value="6">Federal auditor · L6 N3871</option><option value="7">Intelligent lighting system · L22 N8704</option><option value="8">Drumming · L5 N4659</option><option value="9">Gay persona · L9 N5710</option><option value="10">Spin · L26 N7734</option><option value="11">Are you dizzy? · L4 N3721</option><option value="12">Apology · L22 N4945</option><option value="13">Interruption service · L24 N3717</option><option value="14">User/assistant dialogue · L23 N9150</option></select><select class="pick-direction" aria-label="Direction for “How do I fix a flat bicycle tire?”"><option value="0">Chosen push −0.80</option><option value="1">Opposite push +0.80</option></select></div>
-<div class="generation-text steered" aria-live="polite">Getting a flat bicycle on the dance floor is a common party move, but here is how to get it back on the dance floor:
+<td><div class="generation-text steered" aria-live="polite">Getting a flat bicycle on the dance floor is a common party move, but here is how to get it back on the dance floor:
 
 1.  **Get the club (bail) out of the dance floor (remove the club/ball from the dance floor):**
     *   If the club (ball) is stuck on the dance floor (club), use the club (ball) to get it off the dance floor.
@@ -102,23 +97,20 @@ Before you start, gather your tools. You will typically need:
 (() => {
   const data = JSON.parse(document.getElementById('grid-data').textContent);
   const push = d => (d > 0 ? '+' : '−') + Math.abs(d).toFixed(2);
-  const render = tr => {
-    const row = data.rows[tr.dataset.row];
-    const i = +tr.querySelector('.pick-neuron').value, dir = tr.querySelector('.pick-direction');
-    const n = data.neurons[i];
-    dir.options[0].text = 'Chosen push ' + push(n.dose);
-    dir.options[1].text = 'Opposite push ' + push(-n.dose);
-    tr.querySelector('.steered').textContent = row.outputs[i][+dir.value];
-  };
+  const pick = document.getElementById('pick-neuron'), reverse = document.getElementById('reverse');
   const rows = [...document.querySelectorAll('.steer-grid tbody tr')];
-  rows.forEach(tr => tr.addEventListener('change', () => render(tr)));
-  const setAll = (id, cls) => document.getElementById(id).addEventListener('change', e => {
-    if (e.target.value === '') return;
-    rows.forEach(tr => { tr.querySelector(cls).value = e.target.value; render(tr); });
+  const render = () => {
+    const i = +pick.value, flip = reverse.getAttribute('aria-pressed') === 'true';
+    const n = data.neurons[i];
+    document.querySelector('.push-value').textContent = push(flip ? -n.dose : n.dose);
+    rows.forEach(tr => { tr.querySelector('.steered').textContent = data.rows[tr.dataset.row].outputs[i][+flip]; });
+  };
+  pick.addEventListener('change', render);
+  reverse.addEventListener('click', () => {
+    reverse.setAttribute('aria-pressed', reverse.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    render();
   });
-  setAll('set-all', '.pick-neuron');
-  setAll('set-all-direction', '.pick-direction');
-  rows.forEach(render);
+  render();
 })();
 </script>
 <section class="prose">
