@@ -32,7 +32,7 @@
     <p>The agent more or less went okay and got on with it. We already had frames coming from the AR1335 through the AP1302, MIPI receiver, colour conversion and framebuffer writer into DDR, and had <a href="investigating-corruption-on-the-far-right.html">fixed their damaged right edge</a>. It needed to get those frames onto the display and send me a picture.</p>
     <p>That involved some work I could leave it to do over SSH. The display driver expected an audio register resource missing from the older boot device tree, so the agent inspected the installed kernel source and live tree, added the resource to an offline copy and rebooted. A live overlay and rebind hadn’t been enough. After some further work with pixel formats, display planes and page flips, it had the camera view on HDMI and a PNG for me to collect.</p>
     <p>The picture was not very good. With the camera so close to the monitor, the full-screen view expanded into bands and colour rather than recognisable screens; a smaller image inside a black border gave us the nested monitors I’d asked for. It also meant the agent was scaling the video in software, which prompted a back-and-forth about why we were scaling a 1920 × 1080 camera image to put it on a 1920 × 1080 monitor. This would come up again.</p>
-    <p>Still, I had retrieved a picture of the monitor displaying its own camera feed, from the office, so the arrangement worked. I left it there until I got home and could play with it in person.</p>
+    <p>Still, I had retrieved a picture of the monitor displaying its own camera feed, from the office, so the arrangement worked. I left it there until I got home and could see it in person.</p>
   </section>
 
   <section class="prose" id="motion">
