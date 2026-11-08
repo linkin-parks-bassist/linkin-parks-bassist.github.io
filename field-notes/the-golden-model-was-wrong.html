@@ -21,7 +21,7 @@
 
   <section class="prose" id="wait">
     <h2>Wait, what</h2>
-    <p>In <a href="trialling-skill-assisted-agentic-porting.html">Trialling Skill-Assisted Agentic Porting</a>, the HIP port of Darknet agreed with the original CPU build on every check for the two tiny models, and full YOLOv4 passed 2 of 10: the same objects every time, with boxes overlapping their CPU twins by as little as 89% and confidences off by up to 5.5 points. I put it in the note as "I haven't worked out why yet", and it sat there among the FPS figures looking like a footnote. Then I reread it and went "wait, what do you mean YOLOv4 doesn't match the golden model?" - because that's the whole job of a port, and none of the agents involved had thought to make it stand out from the benchmark numbers and shake me by the shoulders.</p>
+    <p>In <a href="trialling-skill-assisted-agentic-porting.html">Trialling Skill-Assisted Agentic Porting</a>, the HIP port of Darknet agreed with the original CPU build on every check for the two tiny models, and full YOLOv4 passed 2 of 10: the same objects every time, with boxes overlapping their CPU twins by as little as 89% and confidences off by up to 5.5 points. I put it in the note as "I haven't worked out why yet", and it sat there among the FPS figures looking like a footnote. Then I reread it and went "wait, what do you mean YOLOv4 doesn't match the golden model?" - because that's the whole job of a port, and none of the agents involved had thought to make it stand out from the benchmark numbers and shake me by the shoulders. I was not happy about it: a port that disagrees with its reference is, as far as I could tell, a port that's wrong, and here was the whole 10 minute 54 second run apparently getting its kernels wrong.</p>
     <p>So I told an agent to figure out what happened.</p>
   </section>
 
@@ -59,6 +59,7 @@
 
   <section class="prose" id="next">
     <h2>Where that leaves it</h2>
+    <p>Which is great news, because it means the port was right all along. The original run - one pass of the agent with AMD's skill - got the kernels translated correctly the first time, and the thing I'd been unhappy about turned out to be a bug in the reference I was checking it against. That's properly impressive for a single pass, even allowing for the two lines that needed changing to get it to build and a little bit of effort afterwards to make it fast.</p>
     <p>A one-line environment variable getting more than half of the speed-up fits the idea from last time, that a kernel-by-kernel translation leaves optimised libraries on the table, since the better backend was already sitting there. The matrix multiplies appear to be choosing small tiles on this GPU, and bias and activation could be fused into one kernel, so there's more to find. After that there's MIOpen for the convolutions, and live video from the KV260 webcam.</p>
     <p>I haven't done the live part yet, but I did point the port at a real frame from that camera: the one from the <a href="untearing-retearing-the-frame.html">four-way screenshot</a>, a still saved earlier and not a live feed. Full YOLOv4 on the HIP build finds a person at 98%.</p>
     <figure class="terminal-capture">
