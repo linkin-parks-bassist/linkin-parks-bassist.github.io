@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trialling Skill-Assisted Agentic Porting · David Farrell</title>
+  <meta name="description" content="Porting AlexeyAB's Darknet from CUDA to HIP with a coding agent and AMD's CUDA-to-HIP skill, and checking the result against the CPU build.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .prose > p:not(.tombstone) { text-align: justify; hyphens: auto; text-indent: 1.5em; }
+  </style>
+</head>
+<body class="field-note"><main>
+  <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+  <section class="page">
+    <div class="eyebrow">Field note · 29 October 2026</div>
+    <h1 class="page-title">Trialling Skill-Assisted Agentic Porting.</h1>
+    <p class="section-note">Darknet, CUDA to HIP, on a Ryzen AI Max+ 395.</p>
+  </section>
+
+  <section class="prose" id="setup">
+    <h2>Context</h2>
+    <p>ROCm is AMD's open-source GPU compute stack. HIP is its CUDA-like programming interface: the API mirrors CUDA closely, and the same HIP source can be compiled either for AMD GPUs through ROCm or for NVIDIA GPUs through a CUDA backend. AMD's pitch is that porting CUDA code to HIP loses you nothing, since it still runs on NVIDIA. HIPify, the tool that mechanically translates CUDA source to HIP, has been around for years.</p>
+    <p>More recently, AMD released a <a href="https://github.com/amd/embedded-x86-ai/blob/main/skills/skills/cuda-to-hip-porting/SKILL.md">CUDA-to-HIP porting skill</a> for coding agents. I was curious what would happen if I took one of the canonical pieces of CUDA work out there, put an agent in a folder with it and the skill, and told it to port it.</p>
+    <p>I used <a href="https://github.com/AlexeyAB/darknet">AlexeyAB's Darknet</a> (CUDA version, upstream commit <code>59596d7</code>): it has real kernels, small YOLO models, and a CPU mode to check against. Target: the Radeon 8060S (<code>gfx1151</code>) in a Ryzen AI Max+ 395.</p>
+    <p>People have had Darknet running on AMD for a while - AlexeyAB's README links an older <a href="https://github.com/os-hackathon/darknet/tree/renault_hipify">HIP fork</a>, and the maintained Darknet lineage documents AMD builds - so I was mostly interested in what the skill would do with it from a clean start.</p>
+  </section>
+
+  <section class="prose" id="port">
+    <h2>Port</h2>
+    <p>I gave the agent the skill and the Darknet source and it ported the lot in a single pass of 10 minutes 54 seconds, on one computer, after which I moved over to my home machine to build and test it - which doesn't have ROCm installed, so I wasn't expecting it to build first time, and it did need about two lines changed before it would. Had I started on a machine with the build tools already in place, catching those would have been part of the agent's own loop, and would likely have cost a couple of minutes more rather than a separate fix-up step. You can find the result at <a href="https://github.com/DFAvnet/darknet-rocm">DFAvnet/darknet-rocm</a>.</p>
+    <p>The build script, <code>scripts/build_amd.sh</code>, copies the source to a staging directory, runs HIPify on the copy and compiles it with <code>hipcc</code>, swapping cuBLAS and cuRAND for hipBLAS and hipRAND along the way and leaving the CUDA sources in the repository untouched.</p>
+    <p>Alongside that, the published fork has a handful of small integration fixes, none of them in the kernels:</p>
+    <ul>
+      <li>a leftover <code>#pragma comment(lib, "cuda.lib")</code>, removed;</li>
+      <li>Windows-only OpenCV link pragmas, guarded with <code>_MSC_VER</code>;</li>
+      <li>CRLF line endings in the build script;</li>
+      <li>a helper function name collision, fixed by making it <code>static</code>;</li>
+      <li>a CPU transpose routine only compiled in CPU builds, enabled for the HIP build. It still runs on the CPU.</li>
+    </ul>
+    <p>With no ROCm on the home machine, the build and runs use a rootless Podman container with ROCm and OpenCV 4.6, passing through <code>/dev/kfd</code> and <code>/dev/dri</code>. Not enabled: cuDNN/MIOpen, half precision, CUDA graphs, CUDA-OpenGL interop.</p>
+  </section>
+
+  <section class="prose" id="check">
+    <h2>Correctness</h2>
+    <p>Reference: the original upstream Darknet built for CPU. Same weights, configs and preprocessing; confidence threshold 0.25; NMS 0.45. Inputs: six Darknet sample images, three frames from OpenCV's <code>vtest.avi</code>, and one repeated image. Ten checks per model.</p>
+    <p>Pass criteria per image: identical detection counts per class; every matched box IoU ≥ 0.99; every confidence within 0.001.</p>
+    <ul>
+      <li>YOLOv3-tiny: 10/10. Min IoU 0.99991; max confidence difference 0.000007.</li>
+      <li>YOLOv4-tiny: 10/10. Min IoU 0.99993; max confidence difference 0.000008.</li>
+      <li>YOLOv4: 2/10. Class counts match on all images. Min IoU 0.892; max confidence difference 0.055.</li>
+    </ul>
+    <p>I haven't worked out why YOLOv4 drifts yet. One suspect is the Mish activation, which upstream implements differently on the CPU and GPU, but I haven't confirmed that's it.</p>
+    <p>Bear in mind this only compares final detections on ten images, so it says the port agrees with the CPU build, not how accurate either of them is, and it doesn't touch training.</p>
+  </section>
+
+  <section class="prose" id="speed">
+    <h2>Throughput</h2>
+    <p><code>vtest.avi</code>, 768×576, 795 frames. Three runs per model. Wall time includes container start, model load, detection, drawing, and writing video and JSON. Medians:</p>
+    <ul>
+      <li>YOLOv3-tiny, 416×416: 106 FPS</li>
+      <li>YOLOv4-tiny, 416×416: 91 FPS</li>
+      <li>YOLOv4, 608×608: 9.4 FPS</li>
+    </ul>
+    <figure class="terminal-capture">
+      <a href="darknet-hip-yolov4-tiny.jpg"><img src="darknet-hip-yolov4-tiny.jpg" width="768" height="576" loading="lazy" alt="Darknet's sample photo of a dog sitting in front of a red road bicycle on a porch, with a white pickup truck behind. YOLOv4-tiny on the HIP build has boxed the dog (84%), bicycle (60%) and truck (79%)."></a>
+      <figcaption>YOLOv4-tiny on Darknet's <code>dog.jpg</code>, HIP build.</figcaption>
+    </figure>
+  </section>
+
+  <section class="prose" id="result">
+    <h2>Result</h2>
+    <p>Both tiny models ported and agreed with the CPU build on all ten checks, and full YOLOv4 runs and finds the same objects as the CPU build, although its box positions and confidences drift outside the tolerance I set.</p>
+    <p>Given the hardware, I expected more than 9.4 FPS from full YOLOv4. I think this comes down to the level of abstraction the port works at. If you were writing this for the GPU from scratch, you would reach straight for pre-optimised library kernels for the heavy layers. A skill-assisted port translates at a finer grain instead - here's what this CUDA kernel does, here's the equivalent HIP kernel - which keeps the code faithful to the original but never swaps in the pre-optimised kernels that would break through the hardware-level bottlenecks. Consistent with that, this build has cuDNN, and therefore its MIOpen equivalent, switched off, so every convolution goes through Darknet's generic im2col-plus-GEMM path rather than tuned convolution kernels.</p>
+    <p>HIP is portable by design, so I don't think the translation itself is the problem so much as the route the port took, which makes this possibly an area the skill could improve on - reaching for the optimised libraries where they exist rather than translating kernel by kernel. Or it could just be my run; agents are non-deterministic, and a second attempt might well have gone a different way. Maybe I should have used Opus 5.5.</p>
+    <p>Next: an optimisation pass on the port, finding the YOLOv4 discrepancy, and running it on a live feed from my <a href="untearing-retearing-the-frame.html">KV260 webcam</a>.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main></body>
+</html>
