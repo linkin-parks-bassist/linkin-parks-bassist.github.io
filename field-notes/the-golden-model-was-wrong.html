@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Golden Model Was Wrong · David Farrell</title>
+  <meta name="description" content="Why YOLOv4 disagreed with the CPU reference in my Darknet HIP port, and what happened when I then tried to make it faster.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .prose > p:not(.tombstone) { text-align: justify; hyphens: auto; text-indent: 1.5em; }
+  </style>
+</head>
+<body class="field-note"><main>
+  <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+  <section class="page">
+    <div class="eyebrow">Field note · 9 November 2026</div>
+    <h1 class="page-title">The Golden Model Was Wrong.</h1>
+    <p class="section-note">A YOLOv4 mismatch in the Darknet HIP port, and then a go at making it faster.</p>
+  </section>
+
+  <section class="prose" id="wait">
+    <h2>Wait, what</h2>
+    <p>In <a href="trialling-skill-assisted-agentic-porting.html">Trialling Skill-Assisted Agentic Porting</a>, the HIP port of Darknet agreed with the original CPU build on every check for the two tiny models, and full YOLOv4 passed 2 of 10: the same objects every time, with boxes overlapping their CPU twins by as little as 89% and confidences off by up to 5.5 points. I put it in the note as "I haven't worked out why yet", and it sat there among the FPS figures looking like a footnote. Then I reread it and went "wait, what do you mean YOLOv4 doesn't match the golden model?" - because that's the whole job of a port, and none of the agents involved had thought to make it stand out from the benchmark numbers and shake me by the shoulders.</p>
+    <p>So I told an agent to figure out what happened.</p>
+  </section>
+
+  <section class="prose" id="hunt">
+    <h2>The hunt</h2>
+    <p>The first suspect was Mish, the activation function that YOLOv4 has and the tiny models don't (72 Mish layers in <code>yolov4.cfg</code>, none in the other two), and which upstream writes differently for CPU and GPU. The agent swapped the HIP Mish kernel for an exact <code>x·tanh(softplus(x))</code> and rebuilt. Nothing changed: the dog was still 98% on the GPU and 96% on the CPU.</p>
+    <p>So it dumped every layer's output from both builds and compared them. Straight away that turned up a smaller oddity, which is that the two builds don't even resize the input image identically (pixels differ by up to 3e-5, from float arithmetic in the resize code), so to compare like with like it fed the HIP build the CPU build's exact input tensor. With identical inputs the two agreed to within about 5e-5 for the first 107 layers, then split apart at layers 108 and 110 by values of 2 to 3 on activations that top out around 6.5. Those are the stride-1 max-pool layers, 5×5 and 9×9, in YOLOv4's spatial pyramid pooling block, while the 13×13 one after them matched again.</p>
+    <figure class="terminal-capture">
+      <a href="yolov4-layer-divergence.svg"><img src="yolov4-layer-divergence.svg" width="900" height="430" loading="lazy" alt="Line chart of the largest difference between the HIP and CPU outputs at each of YOLOv4's 162 layers, on a log scale. Both lines sit around 1e-5 to 1e-4 until layer 108. After that the line for the CPU built with AVX on jumps to values between 1 and 10 and stays there, while the line for the CPU built with AVX off stays at about 1e-5 to 1e-4 all the way to the end."></a>
+      <figcaption>Layer-by-layer difference from the HIP build, same input image. The AVX-on line jumps at the 5×5 max-pool and never comes back.</figcaption>
+    </figure>
+    <p>Checked against a plain numpy max-pool, the HIP output was right to 1e-5 and the CPU output was not. The culprit is upstream's AVX max-pool: it processes eight outputs per vector, and when the first element of a window falls off the left edge of the row it skips the whole vector rather than just that element, so every left-hand output loses its valid values. The 13×13 pool is too wide to use the vector path, which is why it escaped. I'd built the CPU reference with AVX on, so the reference was the broken one and the port was fine.</p>
+    <p>Rebuilt with AVX off, the CPU reference gives the same detections as the port. All three models now pass all ten checks: YOLOv4 at a minimum box overlap (IoU, intersection over union) of 0.99999 and a largest confidence difference of 0.000005, the tiny models at 0.9999 and 0.000008.</p>
+  </section>
+
+  <section class="prose" id="faster">
+    <h2>Faster</h2>
+    <p>With a correct baseline in hand, the other thing I'd said in the last note was that I expected more than 9.4 FPS from the full model, and that I'd have a go at optimising it. Per-layer timing put about 90% of the forward pass in convolution layers, and a kernel trace on the GPU put roughly 70% of the GPU's time in the matrix multiply behind them, with another 10% in im2col, which lays each convolution's input out as a matrix first. Darknet does all of this through hipBLAS, so the first thing to try was the cheapest one: setting <code>ROCBLAS_USE_HIPBLASLT=1</code>, which sends the matrix multiplies through hipBLASLt without touching the code.</p>
+    <p>That alone took the YOLOv4 forward pass from 70.5 ms to 48.7 ms. The next change was removing a pass that zeroes each convolution's output buffer before the multiply adds into it, by telling the multiply to overwrite instead (44.5 ms). The last was switching the multiplies to half-precision inputs with 32-bit accumulation and output, which meant a half-precision im2col kernel, converting the weights once per layer, and calling <code>hipblasGemmEx</code> (33.8 ms). All three are in a patch of about a hundred lines to one file, switched by environment variables, and none of it is in the public fork yet.</p>
+    <p>Forward pass only, median of 24 runs on one image, GPU otherwise idle:</p>
+    <ul>
+      <li>YOLOv4 (608×608): 70.5 ms, then 48.7, 44.5 and 33.8 ms.</li>
+      <li>YOLOv4-tiny: 5.3 ms, then 4.3, 4.0 and 3.2 ms.</li>
+      <li>YOLOv3-tiny: 4.7 ms, then 3.4, 3.4 and 2.6 ms.</li>
+    </ul>
+    <p>Whole video runs, as before (<code>vtest.avi</code>, 795 frames, container start-up and drawing included), baseline then the lossless two changes, then with half precision:</p>
+    <ul>
+      <li>YOLOv4: 13.6, 21.3 and 26.9 FPS.</li>
+      <li>YOLOv4-tiny: 153, 202 and 253 FPS.</li>
+      <li>YOLOv3-tiny: 174, 232 and 264 FPS.</li>
+    </ul>
+    <p>The first two changes give identical results: all three models still pass all ten checks at the same tolerances. Half precision doesn't, quite. It finds the same objects in every image, with a worst box overlap of 0.998 and confidences within 0.003, which is outside the 0.001 I set for the pass mark (4 of 10 checks for YOLOv3-tiny, 7 of 10 for the other two), so it's a speed-for-precision trade and not a free lunch.</p>
+    <p>One more thing from re-running everything: the baseline numbers came out higher than the ones I published. The same binary that gave 9.4 FPS on YOLOv4 and 106 and 91 on the tiny models gave 13.6, 174 and 153 today, so the figures in the last note were about a third low. I don't know why, and I haven't been able to reproduce the lower ones.</p>
+  </section>
+
+  <section class="prose" id="next">
+    <h2>Where that leaves it</h2>
+    <p>A one-line environment variable getting more than half of the speed-up fits the idea from last time, that a kernel-by-kernel translation leaves optimised libraries on the table, since the better backend was already sitting there. The matrix multiplies appear to be choosing small tiles on this GPU, and bias and activation could be fused into one kernel, so there's more to find. After that there's MIOpen for the convolutions, and live video from the KV260 webcam.</p>
+    <p>I haven't done the live part yet, but I did point the port at a real frame from that camera: the one from the <a href="untearing-retearing-the-frame.html">four-way screenshot</a>, a still saved earlier and not a live feed. Full YOLOv4 on the HIP build finds a person at 98%.</p>
+    <figure class="terminal-capture">
+      <a href="darknet-hip-kv260-frame.jpg"><img src="darknet-hip-kv260-frame.jpg" width="960" height="540" loading="lazy" alt="A dim 960 by 540 frame from the KV260 camera showing me from below, in glasses with a blue screen reflected in them, with a ceiling fan behind. YOLOv4 has drawn a single box labelled person 0.98 around most of the frame."></a>
+      <figcaption>YOLOv4 on a still from the KV260 camera, HIP build.</figcaption>
+    </figure>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main></body>
+</html>
