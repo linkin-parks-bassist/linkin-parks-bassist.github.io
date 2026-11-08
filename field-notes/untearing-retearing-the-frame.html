@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Untearing, Retearing The Frame · David Farrell</title>
+  <meta name="description" content="Fixing the KV260 HDMI frame tearing, then splitting the screen four ways between the camera and three test-pattern generators.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .prose > p:not(.tombstone) { text-align: justify; hyphens: auto; text-indent: 1.5em; }
+  </style>
+</head>
+<body class="field-note"><main>
+  <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+  <section class="page">
+    <div class="eyebrow">Field note · 9 November 2026</div>
+    <h1 class="page-title">Untearing, Retearing The Frame.</h1>
+    <p class="section-note">Getting rid of the HDMI frame tearing on the KV260, then deliberately cutting the frame into four.</p>
+  </section>
+
+  <section class="prose" id="untearing">
+    <h2>Untearing</h2>
+    <p>At the end of <a href="making-the-photons-loop.html">Making the photons loop</a> I said I'd come back for the HDMI frame tearing another day, so here we are. The camera picture was arriving on the monitor with a visible horizontal seam - the top part from one frame and the bottom from the next - which is exactly what my quintuple-buffered design was supposed to prevent, so the first question to gpt was where all those buffers had gone.</p>
+    <p>The answer was that the capture side did have its five buffers, but the display side wasn't playing along. The launcher was running GStreamer's <code>kmssink</code> with <code>skip-vsync=true</code>, meaning it would put a new buffer on the display plane without waiting for the monitor's refresh, and it could also hand the previous buffer back to the pool straight away. Hand a buffer back while HDMI is still scanning it out, and the capture side cheerfully writes the next frame into it mid-scan - hence half of one frame and half of another.</p>
+    <p>Just turning vsync on in the ordinary launcher wasn't enough; it still tore. What fixed it was a small C program, <code>buffered-display</code>, that changed three things at once:</p>
+    <ul>
+      <li><code>skip-vsync=false</code>, so a new frame only goes on screen at the refresh;</li>
+      <li><code>hold-extra-sample=true</code>, so the display hangs onto the previous buffer until its replacement is actually showing;</li>
+      <li>a probe that forwards the display's buffer-allocation request back up through the pipeline to the capture side, asking for a minimum of five - so the quintuple buffering is finally sized by the thing that actually needs it.</li>
+    </ul>
+    <p>With all three in place the camera ran raw 1080p straight into the display at about 20 FPS, and the seam was gone. I'll admit we never established which of the three was doing the heavy lifting, since only the combination was tested - it was buffers, it's always buffers, and I left it alone once it worked.</p>
+  </section>
+
+  <section class="prose" id="retearing">
+    <h2>Retearing</h2>
+    <p>The design has four capture lanes. Only one has a camera on it so far; the other three have had test-pattern generators sitting in for cameras since <a href="four-cameras-first-contact.html">First Contact</a>. With the display behaving, the obvious next thing was to put all four on screen at once, i.e. tear the frame again, but on purpose and along straight lines.</p>
+    <p>Each lane's capture graph was reconfigured down from 1920×1080 to 960×540, so four of them tile a 1080p screen exactly. A Python GStreamer script, <code>quad-display.py</code>, opens all four video nodes, sets the three TPGs to colour bars, crosshatch and checkerboard, and feeds them into a compositor: camera top-left, bars top-right, crosshatch bottom-left, checkerboard bottom-right. The output goes to the same <code>kmssink</code> settings that fixed the tearing, plus a side branch that saves one PNG per second so I could pull a screenshot off the board.</p>
+    <p>The frame rate dropped to 10 FPS, deliberately. The compositor is GStreamer's software one, so the board's Arm cores are doing the mixing, and asking them to blend four streams into a 1080p frame thirty times a second seemed optimistic. Rather than let each lane drop frames whenever it fell behind, the script keeps exactly every third buffer from each source (3, 6, 9, ...) and throws away the other two before they reach the compositor, so all four inputs are thinned the same way and the output runs at a steady ten. The camera was delivering about 26-28 FPS, so it lands at around 9.</p>
+    <p>The TPGs, meanwhile, turned out to be producing frames at something like 200 per second rather than the 30 they were meant to. They're little hardware blocks that spit out the same picture over and over, and evidently nobody told them to pace themselves - I'd guess they should have been configured for 30 when they were instantiated in the design, and weren't. An attempt at fixing it by adjusting their blanking didn't get there. Since every third of 200 is still more than ten, the compositor simply takes whatever is newest, so it doesn't matter for this view, but it's on the list.</p>
+    <p>Then I sat in front of it and took a screenshot.</p>
+    <figure class="terminal-capture">
+      <a href="quad-glint.png"><img src="quad-glint.png" width="1920" height="1080" loading="lazy" alt="A 1920 by 1080 composite in four quadrants: the camera's view of me looking up at the monitor top-left, with the screen reflected in my glasses; colour bars top-right; a white crosshatch grid on black bottom-left; a black and white checkerboard bottom-right."></a>
+      <figcaption>The colour bars are in my glasses.</figcaption>
+    </figure>
+    <p>That's the camera looking at me looking at the screen, with the test patterns reflected in my glasses. Next up is putting actual cameras on the other three lanes.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main></body>
+</html>
