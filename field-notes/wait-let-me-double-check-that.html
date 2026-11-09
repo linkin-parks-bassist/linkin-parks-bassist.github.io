@@ -873,9 +873,27 @@ Therefore,
   </section>
 
   <section class="prose" id="holds">
-    <h2>Does it hold up</h2>
-    <p>Unlike forcibly inserting <code>&lt;/think&gt;</code>, the half-strength steer cuts the rumination without decreasing accuracy: on the forty-problem MATH set it went from 38 of 40 unsteered to 39 of 40 with thinking cut by 44%, and on a fresh pool of twenty MATH problems that weren't touched when fitting the vector it stayed at 19 of 20 with thinking down 48% (while six hard AIME problems went from 1 of 6 to 2 of 6, thinking down 14% - when the model is genuinely stuck rather than ruminating over a finished answer, a close vector doesn't magically give it the solution). On ten general prompts, median thinking dropped from 775 tokens to 476, with visible answers about half as long and noticeably more decisive - asked about tabs versus spaces, it went from "spaces are usually better" to "whatever your team agrees", and on a story prompt, where the unsteered run burned the entire 4,000-token cap deliberating without ever writing a story, the steered run actually wrote one.</p>
-    <p>The caveat at the end of the log is that a vector fitted on maths traces didn't carry over cleanly when we tried dropping it straight into my local agent setup, where turns have very different prompts and structure - so if we push this further there, it'll need to be fitted on recorded agent turns rather than competition maths.</p>
+    <h2>Results</h2>
+    <p>Unlike forcibly inserting <code>&lt;/think&gt;</code>, the half-strength steer cuts the rumination nearly in half without costing accuracy. On ten general prompts the visible answers also came out about half as long and noticeably more decisive - asked about tabs versus spaces, it went from "spaces are usually better" to "whatever your team agrees", and on a story prompt, where the unsteered run burned the entire 4,000-token cap deliberating without ever writing a story, the steered run actually wrote one.</p>
+    <div class="table-wrap" style="margin: 1.4rem 0 1.4rem;">
+      <table>
+        <thead>
+          <tr><th>Set</th><th>Setting</th><th>Accuracy</th><th>Thinking tokens</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>MATH L4–5 (40, low)</td><td>Unsteered (no cap)</td><td>40 / 40</td><td>732 median (one 13k runaway)</td></tr>
+          <tr><td>MATH L4–5 (40, low)</td><td>Forced <code>&lt;/think&gt;</code> at 1,024</td><td>37 / 40</td><td>≤ 1,024</td></tr>
+          <tr><td>MATH L4–5 (40, low)</td><td>Forced <code>&lt;/think&gt;</code> at 256</td><td>33 / 40</td><td>≤ 256</td></tr>
+          <tr><td>AIME 2025 II-3</td><td>Unsteered / \(\alpha = 1\) / \(\alpha = 0.5\)</td><td>82 ✓ / 54 ✗ / 82 ✓</td><td>11,029 → 1,469 → 3,120 (−72%)</td></tr>
+          <tr><td>MATH L4–5 (40, xhigh)</td><td>Unsteered → \(\alpha = 0.5\)</td><td>38 / 40 → 39 / 40</td><td>126,115 → 70,413 (−44%, median 887 → 549)</td></tr>
+          <tr><td>Fresh MATH L4–5 (20, xhigh)</td><td>Unsteered → \(\alpha = 0.5\)</td><td>19 / 20 → 19 / 20</td><td>32,508 → 17,009 (−48%, median 779 → 504)</td></tr>
+          <tr><td>AIME 2025 (6 solved/mixed)</td><td>Unsteered → \(\alpha = 0.5\)</td><td>5 / 6 → 5 / 6</td><td>−61% on the five solved (6th stuck at cap)</td></tr>
+          <tr><td>Fresh hard AIME (6, xhigh)</td><td>Unsteered → \(\alpha = 0.5\)</td><td>1 / 6 → 2 / 6</td><td>−14% (5 → 4 hit the 14k cap)</td></tr>
+          <tr><td>General prompts (10)</td><td>Unsteered → \(\alpha = 0.5\)</td><td>—</td><td>775 → 476 median (−53% total, 1 → 0 caps)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Where the model is genuinely stuck on a hard problem rather than ruminating over an answer it already has, a close vector doesn't magically hand it the solution - it still runs to the cap. Everywhere else, half a nudge across layers 28 to 36 is enough to get it to check its work once and hand the answer over, which is a much nicer way to get my GPU time back than a guillotine.</p>
     <p class="tombstone" aria-label="End of note">□</p>
   </section>
   <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
