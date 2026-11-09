@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wait, Let Me Double-Check That · David Farrell</title>
+  <meta name="description" content="What a thinking model does after it already has the answer, and what happens when you nudge its activations to stop.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .prose > p:not(.tombstone) { text-align: justify; hyphens: auto; text-indent: 1.5em; }
+    .transcript { margin: 1.4rem 0 1.2rem; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); box-shadow: 0 2px 0 var(--shadow); overflow: hidden; }
+    .tx-head { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; align-items: baseline; padding: .6rem .9rem; background: var(--accent-wash); border-bottom: 1px solid var(--line); font-size: .9rem; }
+    .tx-head strong { color: var(--accent); }
+    .tx-head span { color: var(--ink-soft); }
+    .tx-head .tx-legend { margin-left: auto; }
+    .tx-wrap { position: relative; }
+    .tx-body { height: 26rem; overflow-y: scroll; padding: .9rem 1.6rem .9rem .9rem; white-space: pre-wrap; overflow-wrap: anywhere; font: .82rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); }
+    .tx-body:focus { outline: 2px solid var(--accent-bright); outline-offset: -2px; }
+    .tx-body mark { background: #ffd86b; color: #28262b; padding: 0 .15em; border-radius: 3px; font-weight: 700; }
+    .tx-divider { display: block; margin: .2rem 0; padding: .35rem .7rem; text-align: center; background: var(--dark); color: var(--dark-text); border-radius: 4px; font-weight: 700; letter-spacing: .02em; }
+    .tx-ticks { position: absolute; top: 0; right: 0; bottom: 0; width: 12px; background: var(--accent-wash); border-left: 1px solid var(--line); pointer-events: none; }
+    .tx-ticks i { position: absolute; right: 2px; width: 8px; height: 3px; background: #e0a100; border-radius: 1px; }
+    .tx-ticks i.a { background: var(--accent); }
+    .tx-prompt { margin: 1.2rem 0; padding: .8rem 1rem; border-left: 4px solid var(--accent-bright); background: var(--accent-wash); font-size: .95rem; }
+    .tx-note { font-size: .9rem; color: var(--ink-soft); margin: -.4rem 0 1rem; text-indent: 0 !important; }
+  </style>
+</head>
+<body class="field-note"><main>
+  <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+  <section class="page">
+    <div class="eyebrow">Field note · 4 November 2026</div>
+    <h1 class="page-title">Wait, Let Me Double-Check That.</h1>
+    <p class="section-note">What a thinking model does after it already has the answer, and what happens when you nudge its activations to stop.</p>
+  </section>
+
+  <section class="prose" id="trace">
+    <p>Here is what a typical Qwen3.8-27B thinking trace looks like.</p>
+    <p>The problem is a small one from AIME 2025, and the answer is 82. What follows is the model's complete, unedited thinking, with every appearance of the right answer highlighted, and it starts at the top. Scroll as far as you can stand.</p>
+    <div class="tx-prompt"><strong>Problem.</strong> Four unit squares form a 2 × 2 grid. Each of the 12 unit line segments forming the sides of the squares is colored either red or blue in such a way that each unit square has 2 red sides and 2 blue sides. Find the number of such colorings.</div>
+    <div class="transcript" id="tx-base">
+      <div class="tx-head"><strong>No steering</strong><span>11,029 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><mark>82</mark> = the correct answer</span></div>
+      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="No steering: full transcript, scrollable">We need solve combinatorics problem. Need reason carefully. Problem: 2x2 grid of unit squares. 12 unit line segments forming sides of squares colored red/blue so each unit square has 2 red sides and 2 blue sides. Count colorings.
+
+We need provide step-by-step, final boxed.
+
+Let&#x27;s model. 2x2 grid: 4 small squares. Edges: 12 unit segments: outer boundary 8? Let&#x27;s list. Grid has 3 horizontal lines of length 2: top, middle, bottom = 6 horizontal unit segments. 3 vertical lines of length 2: left, middle, right = 6 vertical unit segments. Total 12. Four squares: top-left (TL), top-right (TR), bottom-left (BL), bottom-right (BR). Each square has four edges; internal edges shared by two squares: middle vertical and middle horizontal, each one unit? Actually middle vertical segment between TL/TR? Wait in 2x2 grid, internal vertical line at x=1 from y=0 to2 consists of two unit segments: upper internal vertical (between TL and TR) and lower internal vertical (between BL and BR). Internal horizontal line at y=1 from x=0 to2 consists of two unit segments: left internal horizontal (between TL and BL) and right internal horizontal (between TR and BR). Total internal unit segments: 4. Boundary segments: 8. Each square condition: number of red edges among its 4 equals 2.
+
+We need count assignments of 12 binary variables satisfying 4 parity/exact constraints: sum on each square =2.
+
+Could do brute force mentally or combinatorial. Need ensure count. Let&#x27;s assign variables.
+
+Let&#x27;s name edges.
+
+Squares:
+TL: top boundary left (a), left boundary upper (b), right internal vertical upper (c), bottom internal horizontal left (d). So TL edges: a,b,c,d.
+TR: top boundary right (e), right boundary upper (f), left internal vertical upper (c), bottom internal horizontal right (g). TR: e,f,c,g.
+BL: left boundary lower (h), bottom boundary left (i), top internal horizontal left (d), right internal vertical lower (j). BL: h,i,d,j.
+BR: right boundary lower (k), bottom boundary right (l), top internal horizontal right (g), left internal vertical lower (j). BR: k,l,g,j.
+
+Variables: a,b,c,d,e,f,g,h,i,j,k,l all in {0,1}, where 1 red maybe. Constraints:
+TL: a+b+c+d =2
+TR: e+f+c+g=2
+BL: h+i+d+j=2
+BR: k+l+g+j=2.
+
+Variables grouped: c,d,g,j internal. Boundary variables pairs: for each square, two boundary variables with internal variables.
+
+We can sum over internal variables (16 possibilities) and count boundary choices independently? Yes constraints separate: For TL, given c,d, need a+b = 2 - c - d. a,b independent boundary variables. Number choices for (a,b) is C(2, 2-c-d) if value 0,1,2 else 0. Similarly TR given c,g: e+f = 2-c-g count C(2, 2-c-g). BL: h+i = 2-d-j count C(2,2-d-j). BR: k+l = 2-g-j count C(2,2-g-j). Total count = sum_{c,d,g,j in {0,1}} product of these binomial counts.
+
+Since c,d,g,j each binary. Let w(x,y)=C(2,2-x-y). For x,y in {0,1}. Compute:
+x+y=0: C(2,2)=1
+x+y=1: C(2,1)=2
+x+y=2: C(2,0)=1.
+So w = 1 if both 0 or both 1, 2 if different. Product over four pairs (c,d),(c,g),(d,j),(g,j). Need sum over 16 of product. This is like partition function of Ising? w = 2 if different, 1 if same. Let t(x,y) = 1 + delta(x xor y) maybe since 2 for diff, 1 for same. Sum over c,d,g,j ∏_{edges of K4?} w on pairs (c,d),(c,g),(d,j),(g,j). The four variables are vertices of a cycle? Pairs: c-d, c-g, d-j, g-j. That&#x27;s a 4-cycle: c-d-j-g-c. Actually edges: c-d, d-j, j-g, g-c. Yes cycle C4. Count = sum over states on C4 of 2^{number of edges with different endpoints} * 1^{same}. Since each edge weight 2 if cut, 1 if not cut.
+
+Compute: Sum over binary assignments to cycle length 4 of 2^{number of edges changed}. This depends on number of edges where adjacent differ. For cycle of length 4, number of changes can be 0,2,4 (not odd). Count assignments with m changes: m=0: 2 assignments (all 0 or all 1); m=2: ? In C4, number of edges with transitions is 2k for k runs of 1s? Let&#x27;s count. Total 16. Number with m=4: alternating assignments: 2 (0101,1010). m=0: 2. m=2: remaining 12. Then sum = 2*1 + 12*2^2? Wait weight 2^m: m=0 weight1: 2; m=2 weight4: 12*4=48; m=4 weight16: 2*16=32. Total <mark>82</mark>. Is that count? Let&#x27;s verify maybe <mark>82</mark>. Need ensure no additional constraints? Each square has exactly 2 red sides. We used boundary choices independently. Seems count <mark>82</mark>. But need be careful: Unit line segments forming sides of squares: each of 12 unit segments colored. Are internal segments counted as sides for two squares? Yes each square condition includes it. We accounted.
+
+But let&#x27;s double-check by alternate methods to avoid mistake. Could brute force mental via transfer or inclusion. Let&#x27;s enumerate by internal variables maybe table. Let&#x27;s compute sum explicitly to verify <mark>82</mark>.
+
+Let internal variables c,d,g,j. Product = f(c,d) f(c,g) f(d,j) f(g,j) with f=1 if same? Actually f=1 same,2 diff. Let&#x27;s enumerate by c,d.
+
+For c,d fixed, sum over g,j of f(c,g) f(d,j) f(g,j) times f(c,d). Need maybe.
+
+Case c=d: f(c,d)=1. Subcase c=d=0. Need sum g,j: f(0,g)=1 if g=0 else2; f(0,j)=1 if j=0 else2; f(g,j)=1 if same else2.
+Values:
+g0 j0:1*1*1=1
+g0 j1:1*2*2=4
+g1 j0:2*1*2=4
+g1 j1:2*2*1=4 total13.
+Same for c=d=1: 13. So c=d contributes 26.
+
+Case c!=d: f(c,d)=2. Subcase c=0,d=1. Sum g,j: f(0,g): g0=1,g1=2. f(1,j): j1=1,j0=2. f(g,j).
+g0 j0:1*2*2=4
+g0 j1:1*1*1=1
+g1 j0:2*2*1=4
+g1 j1:2*1*2=4 total13. times 2=26. c=1,d=0 similarly 26. Total <mark>82</mark>. Yes.
+
+But wait: Could there be symmetry/global color swap? Colorings red/blue labeled, so count <mark>82</mark>. If they ask number such colorings, labels matter. <mark>82</mark> is even? global swap pairs, so even yes.
+
+Need craft solution step by step. But before final, let&#x27;s think if any hidden nuance: &quot;Four unit squares form a 2x2 grid. Each of the 12 unit line segments forming the sides of the squares is colored either red or blue in such a way that each unit square has 2 red sides and 2 blue sides.&quot; Could &quot;unit line segments forming the sides of the squares&quot; include the 4 internal full-length? No, says 12 unit line segments, so exactly unit edges. Good.
+
+Need maybe present an accessible counting method. We can define 4 internal edges and 8 boundary edges. For each internal pair? Let&#x27;s create clear notation.
+
+Maybe use variables. Let internal edges be A,B,C,D? We need avoid confusion.
+
+Let&#x27;s set up a diagram maybe in text.
+
+Let four small squares be top-left, top-right, bottom-left, bottom-right. The four interior unit segments are:
+- V_u: vertical internal top (shared by top squares)
+- V_l: vertical internal bottom (shared by bottom squares)
+- H_l: horizontal internal left (shared by left squares)
+- H_r: horizontal internal right (shared by right squares).
+
+Each square has two boundary unit segments (outer) and two internal unit segments. For a given square, if its two internal sides have colors r,b (as bits), then number of reds needed among its two outer sides is 2 - (red count among internals). Since each outer side independent. Number of ways to color its two outer sides is:
+- 1 if both internal sides same color? Let&#x27;s check: If both internal red (sum 2), need 0 red outer: one way (both blue). If both internal blue (sum 0), need 2 red outer: one way (both red). If internal one red one blue (sum 1), need 1 red outer: two ways. Yes.
+
+So each square contributes a factor 1 if its two internal edges have same color, 2 if different.
+
+The four internal edges interact through the four squares: top-left has V_u and H_l; top-right V_u and H_r; bottom-left V_l and H_l; bottom-right V_l and H_r. We need sum over all 16 colorings of internal edges of product of factors for four squares. This is a cycle of four internal edges: V_u - H_l - V_l - H_r - V_u. We need evaluate sum of 2^{# of adjacent pairs of different colors} (since factor 2 if different, 1 if same) on a 4-cycle.
+
+Counting binary colorings of a 4-cycle by number of adjacent color changes. Since changes around a cycle occur in even numbers. Let m = number of adjacent pairs (among the 4 internal edges in cyclic order) with different colors.
+- m=0: all four internal edges same: 2 colorings (all red or all blue), contribution 2*1 =2.
+- m=4: colors alternate: 2 colorings, contribution 2*16=32.
+- m=2: remaining 16-2-2=12 colorings, contribution 12*4=48.
+Total 2+32+48=<mark>82</mark>.
+
+Need maybe justify m can&#x27;t be 1 or 3 for a closed cycle. In any cycle, number of color changes even because to return to start color must change even times. Or count directly: For 4-cycle, transitions count 0,2,4.
+
+This is elegant. Need ensure final answer boxed <mark>82</mark>.
+
+Let&#x27;s also consider alternative inclusion-exclusion maybe not needed.
+
+Potential issue: If a square has two internal edges same color, factor 1. But if both internal red, boundary must both blue; if both blue, boundary both red; yes one way. If different, boundary one red one blue: two ways. Correct.
+
+Let&#x27;s test by explicit small enumeration? We already did. Let&#x27;s maybe verify using matrix/transfer. Sum over c,d,g,j product. Could be <mark>82</mark>. Let&#x27;s maybe cross-check via dynamic programming: For each c,d,g,j, product. Could also use transfer: choose c,d (4), sum over g,j. We got 26 for each c,d? Actually c=d contributed 13 each, c!=d 26 each; total 4*? Wait c=d two cases 13 each =26, c!=d two cases 26 each =52 total <mark>82</mark>. Nice.
+
+Let&#x27;s think if there is a more direct count by cases on internal edge colors: maybe table. But cycle method good.
+
+Need produce final with reasoning. The user asks &quot;Please reason step by step, and put your long answer maybe. Need final answer with boxed. We can be detailed.
+
+Need consider if the 12 segments include the four internal unit segments and 8 boundary. Yes.
+
+Let&#x27;s craft final:
+1. Label the four interior unit edges: x (upper vertical), y (lower vertical), u (left horizontal), v (right horizontal). Actually cyclic order: x (top vertical), u (left horizontal), y (bottom vertical), v (right horizontal) maybe.
+2. For any square, its two interior sides are adjacent in cycle; its two outer sides independent.
+3. Lemma: Given two interior sides of a square, number of ways to color the two outer sides to make exactly two reds:
+   - same color: 1 way
+   - different: 2 ways.
+   Show table.
+4. Therefore total colorings = sum over 16 interior colorings of product over 4 squares: 2 if the square&#x27;s two interior sides differ, 1 if same. In cycle notation, product = 2^{m}, where m is number of edges of the 4-cycle of interior edges whose endpoints have different colors.
+5. Count interior colorings by m.
+   - m=0: all same: 2.
+   - m=2: choose? Need maybe count not just remaining. Could count: On a 4-cycle, number with exactly 2 changes. Let&#x27;s count maybe: The 2 changes can be adjacent edges or opposite edges? Let&#x27;s see: If exactly 2 transitions, there are two runs of same color. For 4 vertices cycle, patterns with exactly two changes: e.g. 0011 (changes at two adjacent boundaries? Actually sequence 0 0 1 1 around cycle: changes between 0-1 at one boundary and 1-0 at another boundary opposite? Let&#x27;s count 12. Could present simply: total 16; exclude 0 and 4 =&gt; 12. But to be rigorous maybe: there are 2^4=16 total; m is even. m=0 has 2, m=4 has 2; so m=2 has 12. Or count explicitly.
+   - m=4: alternating: 2.
+6. Contributions: m=0: 2*1=2; m=2: 12*4=48; m=4: 2*16=32. Total <mark>82</mark>.
+
+Need maybe ensure product for m=2 is 2^2=4. yes.
+
+Let&#x27;s also maybe include an alternative check table if desired. But final can be concise but detailed enough.
+
+Let&#x27;s think of potential ambiguity: &quot;each unit square has 2 red sides and 2 blue sides&quot; Does a side mean the full side of the unit square (unit segment). For internal shared segment, it is a side for both adjacent squares, same color. We used that.
+
+Could there be colorings where a square&#x27;s two interior edges are the same but outer edges both opposite color, and adjacent squares impose consistency? Outer edges are not shared, so no consistency. Good.
+
+Let&#x27;s maybe explore if any colorings counted multiple? For each internal coloring and choices for boundary edges independent. Unique. Good.
+
+Let&#x27;s prepare final answer.
+
+But before final, let&#x27;s consider if there is an alternative interpretation: The grid has 12 unit line segments forming sides of squares. Could there be 4 central squares? No.
+
+Let&#x27;s maybe think about parity/inclusion: Each square has even red count. If we sum constraints over all squares: boundary edges counted once, internal edges counted twice. Total red edges over squares = 8 (since 4 squares * 2). Let B = total red boundary (8 boundary edges), I = total red internal (4 internal edges). Sum = B + 2I =8. This gives B even? B=8-2I, so B even and I can 0..4, B=8,6,4,2,0. But not all possible. Could count via constraints maybe. But our count good. Maybe we can use this as check. For m? The internal coloring distribution? Let&#x27;s see internal edge red count r. Does our cycle count by m independent of total? Total count <mark>82</mark>. Could perhaps classify by I: maybe not needed.
+
+Let&#x27;s maybe test with a quick manual enumeration to be absolutely certain: For each internal coloring (16) product:
+List c,d,g,j (c top vert, d left horiz, g right horiz, j bottom vert) cycle c-d-j-g-c? Need product edges: c-d (TL), c-g (TR), d-j (BL), g-j (BR). Let&#x27;s list by red count? We&#x27;ll compute maybe to ensure total <mark>82</mark>.
+0000: all same m0 product1.
+1111:1.
+0001? variables c=0,d=0,g=0,j=1. Cycle c-d same (1), d-j diff(2), j-g diff(2), g-c same(1): product4 (m=2).
+There are many. Sum by m counts: m0 two =2; m4 two alternating: 0101? c=0,d=1,g=0,j=1? Check cycle: c-d diff, d-j same? d=1 j=1 same, j-g diff, g-c same -&gt; m=2 not 4. Wait need be careful: cycle order maybe c,d,j,g. Alternating around cycle: c=0,d=1,j=0,g=1? Let&#x27;s see. Variables positions on cycle: c (top internal vertical) adjacent to d (left horizontal) and g (right horizontal). d adjacent to c and j (bottom vertical). j adjacent to d and g. g adjacent to j and c. Cycle c-d-j-g-c. Alternating assignments: c=0,d=1,j=0,g=1 =&gt; c-d diff, d-j diff, j-g diff, g-c diff: m4. This corresponds c=0,d=1,g=1,j=0? Wait order c,d,j,g: values 0,1,0,1 =&gt; c=0,d=1,j=0,g=1. In variable order c,d,g,j = 0,1,1,0. And opposite c=1,d=0,g=0,j=1. Our previous &quot;0101&quot; in c,d,g,j order was c=0,d=1,g=0,j=1 which cycle c-d diff, d-j same? d=1,j=1 same; j-g diff, g-c same =&gt; m2. So total m4 =2 yes.
+Let&#x27;s count m2 by total 12. Fine.
+
+Maybe there is a subtle issue: The factor for each square depends on colors of its two internal edges. If internal edges are same color, one way; if different, two ways. This is correct if we only require exactly 2 red sides total. But what if a square&#x27;s two internal edges are same red, then outer both blue. But those outer edges may belong to only that square, so no conflict. Good.
+
+Let&#x27;s think if there is a more combinatorial direct count maybe using graph cuts. Could present as: internal edges form a cycle; each square gives weight 2 for a cut between adjacent internal edges. Counting weighted cuts in C4. Nice.
+
+Need final in box. Ensure final only answer? User requested reason step by step and put final within boxed. We can provide full reasoning.
+
+Let&#x27;s produce final with maybe a diagram in text:
+
+```
+      +---+---+
+      | I | II|
+  +---+---+---+
+  |III| IV|
+      +---+---+
+```
+Interior edges: a (upper vertical between I,II), b (lower vertical between III,IV), c (left horizontal between I,III), d (right horizontal between II,IV). Cycle: a-c-b-d-a? Need consistent. Let&#x27;s choose:
+- x = vertical internal segment in top half.
+- y = horizontal internal segment in left half.
+- z = vertical internal segment in bottom half.
+- w = horizontal internal segment in right half.
+Then squares use pairs (x,y), (x,w), (y,z), (z,w). Cycle x-y-z-w-x. Good.
+
+Let&#x27;s make table for lemma:
+Interior colors of a square | # ways for its two outer sides
+RR: 1 (BB)
+BB: 1 (RR)
+RB or BR: 2 (RB or BR)
+Actually if internal one red one blue, outer must one red one blue: two choices. Good.
+
+Then sum.
+
+Potential improvement: Count interior colorings by m without relying on total-exclusion? Could show:
+- m=0: 2.
+- m=4: 2.
+- m=2: For exactly two adjacent differences, choose the two edges of the 4-cycle that are different. They can be opposite (2 choices) or adjacent (4 choices? Let&#x27;s count: number of 2-edge subsets in C4: 6. For a given set of cut edges, number of assignments? If cut set is a cutset of cycle: For connected components of graph after removing? Actually assignments with exactly those edges cut and others not: If cut set is a set of edges with even degree? For a cycle, specifying cut edges that form even-degree subset (all subsets of even size) yields 2 assignments? Let&#x27;s check. For C4, number of binary assignments with exactly a specified cut set S of even size is 2? Because choose color at one vertex, propagate; consistency around cycle iff S even. For any even S, exactly 2 assignments. There are C(4,2)=6 even S of size2, so 6*2=12. Good. Could present simpler: total 16 minus 4 =12. But if m must be even, total even? Need justify m even. Could just state around a cycle the number of color changes is even, and total 16, leaving 12. That&#x27;s fine.
+
+Let&#x27;s ensure no issue with m=2 count if total 16 and m=0/4 each 2, m even, so 12. Yes.
+
+Let&#x27;s maybe include a note: The product factor is 2^m because each differing internal pair contributes a factor of 2, each same contributes 1.
+
+Let&#x27;s now consider if there might be an alternative count due to color swapping: If colors unlabeled, answer 41. But problem says red or blue, labeled. Usually count labeled colorings. If they expected maybe <mark>82</mark>. Let&#x27;s verify with known AoPS? This problem maybe from contest? Four unit squares 2x2, each square 2 red 2 blue. Count maybe <mark>82</mark>? Let&#x27;s search memory: There is an AMC/AIME problem? &quot;Four unit squares form a 2 by 2 grid. Each of the 12 unit line segments ... colored red or blue ... each unit square has 2 red sides and 2 blue sides. Find number&quot; Could answer maybe <mark>82</mark>? AIME answer integer <mark>082</mark>? It might be AIME? <mark>82</mark> plausible. Let&#x27;s think if AIME answer <mark>082</mark>. Yes likely.
+
+Let&#x27;s see if any hidden constraints: &quot;Each of the 12 unit line segments forming the sides of the squares&quot; In a 2x2 grid, there are 12 unit line segments if we count all edges of small squares. However, the central cross? Wait a 2x2 grid of four unit squares has outer perimeter 8 unit segments and internal segments: one vertical line of length 2 (two unit segments) and one horizontal line of length 2 (two unit segments). Total 12. Yes.
+
+Maybe &quot;sides of the squares&quot; could mean the four sides of each unit square, but internal line segment is side of two squares, still one colored segment. Yes.
+
+Let&#x27;s maybe explore a direct generating function to be safe: Let internal edges variables. Each square constraint can be expressed. Our count <mark>82</mark>. Let&#x27;s maybe do a quick full brute force by hand for confidence:
+Use internal edge variables as bits. The boundary choices count product. We computed sum <mark>82</mark>.
+Let&#x27;s explicitly list all 16 in c,d,g,j order with product:
+c,d,g,j:
+0000: f(0,0)=1 f(0,0)=1 f(0,0)=1 f(0,0)=1 =&gt;1
+0001: c0d0g0j1: TL 1, TR f(0,0)=1? Wait TR c,g=0,0 =&gt;1, BL d,j=0,1 =&gt;2, BR g,j=0,1=&gt;2 =&gt;4
+0010: c0d0g1j0: TL 1, TR f(0,1)=2, BL f(0,0)=1, BR f(1,0)=2 =&gt;4
+0011: c0d0g1j1: TL1, TR2, BL f(0,1)=2, BR f(1,1)=1 =&gt;4
+0100: c0d1g0j0: TL2, TR1, BL f(1,0)=2, BR f(0,0)=1 =&gt;4
+0101: c0d1g0j1: TL2, TR1, BL f(1,1)=1, BR f(0,1)=2 =&gt;4? 2*1*1*2=4
+0110: c0d1g1j0: TL2, TR2, BL f(1,0)=2, BR f(1,0)=2 =&gt;16? Wait c=0,d=1,g=1,j=0. Cycle c-d diff (2), c-g diff (2), d-j diff? d=1,j=0 diff (2), g-j diff? 1,0 diff (2): product16. This is one alternating? Cycle order c,d,j,g: 0,1,0,1 yes m4. Good.
+0111: c0d1g1j1: TL2, TR2, BL f(1,1)=1, BR f(1,1)=1 =&gt;4
+1000: c1d0g0j0: TL2, TR f(1,0)=2, BL f(0,0)=1, BR f(0,0)=1 =&gt;4
+1001: c1d0g0j1: TL2, TR2, BL f(0,1)=2, BR f(0,1)=2 =&gt;16? c=1,d=0,g=0,j=1 cycle 1,0,1,0? c-d diff, d-j diff, j-g diff, g-c diff? g=0,c=1 diff yes m4. product16.
+1010: c1d0g1j0: TL2, TR f(1,1)=1, BL f(0,0)=1, BR f(1,0)=2 =&gt;4
+1011: c1d0g1j1: TL2, TR1, BL f(0,1)=2, BR f(1,1)=1 =&gt;4
+1100: c1d1g0j0: TL1, TR f(1,0)=2, BL f(1,0)=2, BR f(0,0)=1 =&gt;4
+1101: c1d1g0j1: TL1, TR2, BL f(1,1)=1, BR f(0,1)=2 =&gt;4
+1110: c1d1g1j0: TL1, TR1, BL f(1,0)=2, BR f(1,0)=2 =&gt;4
+1111:1
+Sum: 1+4+4+4+4+4+16+4+4+16+4+4+4+4+4+1 =? 1+1=2, 16*2=32, remaining 12*4=48 total<mark>82</mark>. Yes.
+
+Everything consistent.
+
+Need perhaps include note: We don&#x27;t need to track exact positions of red among outer sides beyond count because each square&#x27;s two outer sides are distinct but only number of reds matters. The binomial coefficient handles distinctness. Good.
+
+Let&#x27;s think of possible edge cases: If the two internal sides have both red, outer sides both blue. What if one of those outer sides is shared? In a 2x2 grid, each square&#x27;s outer sides are boundary not shared. Correct. If grid bigger, not independent, but here okay.
+
+Let&#x27;s maybe craft final with a clear diagram using ASCII:
+
+```
+  a---b---c
+  |   |   |
+  d---e---f
+  |   |   |
+  g---h---i
+```
+But unit segments: top row a,b; middle d,e,f? Wait 2x2 grid with vertices 3x3. Edges: horizontal: top: a,b; middle: d,e? Actually middle horizontal line has two unit segments: left d, right e? bottom: g,h. Vertical: left: c? Let&#x27;s define carefully. But maybe not necessary.
+
+Could label internal edges: top vertical p, left horizontal q, bottom vertical r, right horizontal s. Cycle p-q-r-s-p. Let&#x27;s use letters to make product easy.
+
+Let&#x27;s define:
+- p: vertical internal segment between the two upper squares.
+- q: horizontal internal segment between the two left squares.
+- r: vertical internal segment between the two lower squares.
+- s: horizontal internal segment between the two right squares.
+
+Then the four squares involve internal pairs:
+Top-left: p,q.
+Top-right: p,s.
+Bottom-left: q,r.
+Bottom-right: r,s.
+This is cycle p-q-r-s-p. Good.
+
+Maybe in table:
+Square | internal edges | factor
+Top-left | p,q | 2 if p≠q else 1
+Top-right | p,s | 2 if p≠s else 1
+Bottom-left | q,r | 2 if q≠r else 1
+Bottom-right | r,s | 2 if r≠s else 1
+
+Then total = sum_{p,q,r,s∈{R,B}} ∏ factors.
+
+Let m = number of inequalities among p≠q, q≠r, r≠s, s≠p. Then product = 2^m. Count by m.
+
+We should be careful: In the cycle p-q-r-s-p, the pairs are p-q, q-r, r-s, s-p. Top-right p-s corresponds s-p. Good.
+
+Counting m:
+- m=0: all p,q,r,s same: 2.
+- m=2: exactly two of the four cyclic adjacencies are inequalities. There are 12 such colorings. Maybe explain: In a closed cycle, m is even. There are 16 total internal colorings. The only other even possibilities are m=0 and m=4; m=0 has 2, m=4 has 2, so m=2 has 12. Or count: choose the two unequal adjacencies? Let&#x27;s present maybe both: because a coloring with exactly two changes consists of two adjacent pairs of same color; there are 12. Simpler total exclusion.
+- m=4: alternating: 2.
+
+Contribution: 2*1 +12*4+2*16 =<mark>82</mark>.
+
+Need maybe mention m=1 or3 impossible because as you go around the cycle and return to starting edge color, the number of changes must be even.
+
+Let&#x27;s ensure final answer with \boxed{<mark>82</mark>}.
+
+Given desired oververbosity 9, maybe provide a thorough solution with a small verification table. But not too long. We can include an optional &quot;check by direct summation&quot; maybe. But final answer should be clear.
+
+Let&#x27;s think if there is a more subtle combinatorial identity: Weighted count of cuts in C4 = (1+2)^? Not exactly. Could also compute using transfer matrix:
+Sum = trace(M^4) where M = [[1,2],[2,1]]? Wait weights same/diff: matrix W with W_{00}=1,W_{11}=1,W_{01}=2,W_{10}=2. Sum over cycle length 4 = trace(W^4). Eigenvalues 3 and -1. trace =3^4+(-1)^4=81+1=<mark>82</mark>. Oh! That&#x27;s a neat check. Actually product over edges of W_{x_i x_{i+1}} sum over cycle = trace(W^4) = <mark>82</mark>. Could mention as alternative? Maybe not needed, but could be elegant. But step-by-step counting by m is more accessible.
+
+Let&#x27;s see if maybe the problem expects an answer like <mark>82</mark>. Could present the matrix method as a concise verification? Maybe overkill. But with oververbosity 9, maybe include a short &quot;Equivalent check&quot; not necessary. But final should not be too bloated.
+
+Let&#x27;s ensure no arithmetic error: 12*4=48, 2*16=32, 2*1=2 total <mark>82</mark>. Yes.
+
+Let&#x27;s consider if there are colorings where an internal segment color influences two squares but our factor product double counts? No, each internal segment colored once; product factors are conditional counts for outer segments only. For a fixed internal coloring, the choices for boundary segments for each square are independent because no boundary segment is shared by two squares. Is that true? In 2x2, boundary unit segments are each side of exactly one unit square. Yes. So product of counts is exact. Good to emphasize.
+
+Let&#x27;s maybe produce a formal solution:
+
+Let red=1, blue=0. For each square, condition sum=2. We can condition on the four internal segments. The four internal segments are not boundary; call them x1,...,x4 in cyclic order. For square i, if its two internal segments have sum s_i (0,1,2), its two boundary segments must have sum 2-s_i. Number of ways to choose colors of two distinct boundary segments with that sum is C(2,2-s_i). This equals 1,2,1 for s_i=0,1,2 respectively, i.e., 1 if the two internal colors are equal, 2 if different.
+
+Then total = ∑_{x_1...x_4} ∏ C(2,2-(x_i+x_{i+1})).
+
+Since C(2,2-(x+y)) = 1 + [x≠y]? Actually 1 if equal,2 if not. So product = 2^{number of i with x_i≠x_{i+1}}.
+
+Then count.
+
+Could include a note: The boundary choices are distinct segments, so C(2,1)=2 not 1. Good.
+
+Let&#x27;s maybe include an ASCII diagram to help:
+
+```
+  ┌───┬───┐
+  │   │   │
+  ├───┼───┤
+  │   │   │
+  └───┴───┘
+```
+Internal segments: top vertical, left horizontal, bottom vertical, right horizontal.
+
+Let&#x27;s decide notation. Use R/B maybe.
+
+Detailed final draft:
+
+&quot;Color the 4 interior unit segments first. There are 16 possibilities. Let the interior segments be a (upper vertical), b (left horizontal), c (lower vertical), d (right horizontal). They form a cycle a-b-c-d-a, where a-b are internal sides of the top-left square, b-c of bottom-left, c-d of bottom-right, d-a of top-right.
+
+For one square, suppose its two internal sides have colors. If they are equal, then to have two red sides total, the two external sides must both have the opposite color: exactly 1 choice. If they are different, the two external sides must be one red and one blue: exactly 2 choices. Thus, for a fixed coloring of the interior segments, the number of ways to color the boundary segments is ∏ 2^{[internal pair differs]} over the four squares.
+
+Now count this product over the 16 interior colorings. Let m be number of times adjacent interior segments in the cycle a-b-c-d-a differ. The product is 2^m.
+
+As we go around a cycle, the number m of color changes is even. Possibilities: m=0,2,4.
+- m=0: all four interior segments same color: 2 colorings. Contribution 2*1.
+- m=4: colors alternate: 2 colorings. Contribution 2*16.
+- m=2: the remaining 16-2-2=12 colorings. Contribution 12*4.
+
+Total 2+48+32=<mark>82</mark>.&quot;
+
+Maybe in m=2 explanation, &quot;remaining&quot; depends on no m=1/3. We state even. Good.
+
+Let&#x27;s check if &quot;remaining&quot; could be challenged: Are there exactly 12 with m=2? Yes. Could maybe count explicitly to avoid relying on total. Let&#x27;s add a parenthetical: &quot;Equivalently, choosing which two adjacent pairs differ (six choices for a pair of cycle edges) and then choosing the color of the first segment (2 choices) gives 12, since the set of changed edges must be even; for a 4-cycle any pair of edges gives a consistent assignment.&quot; But that&#x27;s more complex. The total exclusion is simple.
+
+Need ensure &quot;m=4: colors alternate: 2 colorings&quot; around cycle length 4. Yes.
+
+Let&#x27;s think if a coloring with m=2 could be all not same and not alternating. Yes.
+
+Maybe we can include the matrix trace as an &quot;optional compact check&quot; but maybe not necessary. If oververbose, could include after main solution: &quot;As a check, this sum is trace of [[1,2],[2,1]]^4 = <mark>82</mark>.&quot; But maybe unnecessary and could distract. Since desired oververbosity 9, maybe a short check is okay. But final answer should be clear.
+
+Let&#x27;s also consider if there is any issue with &quot;each unit square has 2 red sides and 2 blue sides&quot; means exactly two sides of each square are red, not at least. We use exactly.
+
+Let&#x27;s maybe think about possible alternative direct count using inclusion-exclusion over four square constraints. Could be messy. Our solution is elegant.
+
+Let&#x27;s see if there are any colorings where two boundary segments of a square are not independent because they might be collinear? They are distinct unit segments; coloring each independently. If both need red, one choice; if one red, two choices (which one red). Good.
+
+Let&#x27;s maybe define &quot;external sides&quot; vs &quot;boundary sides&quot;. For a corner square in 2x2, it has two boundary sides that meet at a corner; no sharing. Yes.
+
+Let&#x27;s prepare final with \boxed{<mark>82</mark>}. Use LaTeX.
+
+Double-check final no missing \boxed{} exactly. The user: &quot;put your final answer within \boxed{}.&quot; We&#x27;ll end with \boxed{<mark>82</mark>}.
+
+Let&#x27;s maybe include all steps in final.
+
+One more thought: The four interior segments form a cycle, but the pair for top-right is p and s; in cycle p-q-r-s-p, yes. Let&#x27;s ensure the cycle order matches actual geometry:
+- p upper vertical: between TL and TR.
+- q left horizontal: between TL and BL.
+- r lower vertical: between BL and BR.
+- s right horizontal: between TR and BR.
+Cycle: p adjacent to q (TL) and s (TR). q adjacent p and r (BL). r adjacent q and s (BR). s adjacent r and p (TR). Yes.
+
+Now if p and q differ, factor 2 for TL. If q and r differ, factor 2 for BL, etc.
+
+Counting m: Let&#x27;s maybe explicitly state m is number of inequalities among p≠q, q≠r, r≠s, s≠p. Good.
+
+Let&#x27;s maybe use &quot;red&quot; and &quot;blue&quot; not bits. For m even proof: Starting at segment p and moving around the cycle to q,r,s,p, each time adjacent segments differ we switch color; to end back at p&#x27;s original color after full cycle, the number of switches must be even. Good.
+
+Let&#x27;s consider if m=0 contribution: product=1. For all internal same red: each square&#x27;s two internal sides red, so each square&#x27;s two outer sides blue. Unique full coloring. All internal blue: all outer red. Good.
+m=4: alternating internal colors. Each square&#x27;s internal sides differ, so each square&#x27;s two outer sides must be one red one blue, 2 choices each, total 16 for each of 2 alternating internal colorings. Good.
+m=2: two squares have differing internal sides (2 choices each) and two squares have same (1 each), total 4 boundary choices per internal coloring. 12*4=48.
+
+This interpretation maybe easier: Instead of 2^m, say each &quot;bad&quot; square? Actually square with differing internal sides has 2 choices. Good.
+
+Let&#x27;s maybe count m=2 by square types: Exactly two of the four squares have differing internal edges. But is every internal coloring with m=2 exactly two squares differing? Yes. Could count internal colorings by number of squares with differing internal edges. That&#x27;s m. Maybe count directly: There are 4 squares; choose which 2 squares differ? Not independent. But total 12.
+
+Let&#x27;s see if there is a direct count of m=2 internal colorings: Could be two adjacent squares differing or two opposite squares differing. If opposite squares differ? Let&#x27;s explore: For m=2, changed edges in cycle can be opposite or adjacent. If opposite edges differ and other two same? Example cycle values 0,1,0,0? Edges: 0-1 diff,1-0 diff,0-0 same,0-0 same? That&#x27;s adjacent? The changed edges are adjacent? Actually values around: 0,1,0,0. Edges: e1 diff, e2 diff, e3 same, e4 same: changed edges adjacent (e1,e2). Opposite changed edges example values 0,1,1,0? Edges: diff,same,diff,diff? That&#x27;s 3? Need even. For C4, a pair of opposite edges changed: e1 and e3. Values: x,1-x,1-x,x? Example 0,1,1,0: e1 diff, e2 same, e3 diff, e4 same -&gt; m=2. So changed edges opposite. There are 2 opposite pairs, 4 adjacent pairs. For each pair, 2 assignments =12. Could present but not needed.
+
+Let&#x27;s ensure final is self-contained.
+
+Potential issue: The internal edges count 4 but boundary edges 8. When conditioning on internal colors, for each square we choose its two boundary edges. Are the boundary edges for adjacent squares ever the same? No, because boundary of 2x2 has 8 unit segments each belongs to exactly one of the four squares. Let&#x27;s maybe state &quot;Since the outer unit segments are not shared by two squares, these choices for different squares are independent.&quot; Good.
+
+Let&#x27;s think about if a square has two internal sides same color, the boundary sides must both be opposite color. But if both internal sides are blue, boundary both red; if both red, boundary both blue. If the square has two internal sides different, boundary one red one blue. Correct.
+
+Let&#x27;s maybe include the binomial coefficient formula for rigor:
+For a square, if its internal red count is i ∈ {0,1,2}, its boundary red count must be 2-i. Number of ways to choose which of its two boundary sides are red is \binom{2}{2-i}. This is 1,2,1. This equals 1 if i=0 or2 (internal colors same) and 2 if i=1 (internal colors different). Nice.
+
+Then total formula:
+N = ∑_{a,b,c,d∈{R,B}} ∏_{squares} \binom{2}{2 - (# red internal sides of square)}.
+Simplify.
+
+Let&#x27;s maybe use variables x_1,...,x_4 in cyclic order and formula:
+N = ∑_{x_1,...,x_4} ∏_{i=1}^4 w(x_i,x_{i+1}) with w=1 same,2 different, indices mod 4.
+Then evaluate.
+
+Could include the eigenvalue check in a footnote? Maybe not. But if final oververbose, maybe add &quot;Sanity check: The same sum is trace of ... =<mark>82</mark>.&quot; But might be unnecessary. The problem likely expects contest solution; keep clean.
+
+Let&#x27;s now formulate final answer in polished form.
+
+Need no commentary in final. Use LaTeX.
+
+Final:
+
+```
+Let the four interior unit segments be ...
+...
+Thus total = ... = \boxed{<mark>82</mark>}.
+```
+
+Let&#x27;s ensure final has \boxed{<mark>82</mark>} not just at end maybe. Good.
+
+Double-check if there is any possibility of overcounting due to global color swap? No, colors labeled. If they wanted up to symmetry, not asked. Good.
+
+Let&#x27;s think if there is a direct generating function maybe: The weight matrix method yields <mark>82</mark>. If I include it, ensure not confusing. Maybe final can have a short &quot;Another way to see the final sum&quot; but no need.
+
+Let&#x27;s perhaps include a small table for the number of ways:
+
+| colors of a square&#x27;s two internal sides | required outer red count | number of ways |
+| RR or BB | 0 or 2 | 1 |
+| RB or BR | 1 | 2 |
+
+Actually if RR required outer red count 0 (both blue) 1; BB required outer red count 2 (both red) 1. Good.
+
+Let&#x27;s include.
+
+Potential hidden trap: In a square, if internal sides are different, the outer sides must have one red and one blue. But are there exactly two choices? The two outer sides are distinct (e.g., top and left for top-left). Yes.
+
+Let&#x27;s think about possible symmetries: The 2x2 grid has 8 symmetries; count <mark>82</mark> not divisible by 8, so many asymmetry. Fine.
+
+Let&#x27;s maybe verify using parity constraints: If internal coloring has m changes, what is total red internal? Not directly. But total red boundary =? For each square with internal red count i, boundary red count 2-i. Total boundary red = 8 - 2I where I total red internal. This must be between 0 and8. Our count includes all. For m=4 alternating, I can be 2 only (alternating has two red two blue), boundary total =4, each square boundary one red. 2 internal *16 =32. For m=0 all I=0 or4, boundary total 8 or0. For m=2, internal red count can be 1,2,3? Let&#x27;s see contributions 48. Fine.
+
+Let&#x27;s maybe do another independent count by total internal red count to see if <mark>82</mark>: Internal colorings 16, for each product. Could sum by I:
+I=0: 0000 product1.
+I=4: 1111 product1.
+I=1: choose 1 red among 4 =4. What products? If one red, cycle has? e.g. 1000: m? c=1,d=0,g=0,j=0: edges c-d diff, d-j same, j-g same, g-c diff =&gt; m=2 product4. All four product4 =&gt;16.
+I=3: similarly 4*4=16.
+I=2: 6 colorings. Products: two red adjacent in cycle? There are 4 adjacent pairs: e.g. 1100 product4; opposite pairs: 2 colorings? e.g. 1010? In cycle order, opposite red? Let&#x27;s map. Total I=2 products sum should <mark>82</mark>-2-32=48? Wait I=0+4=2, I=1+3=32, remaining I=2 sum48. There are 6 internal colorings; some product16? The two alternating have I=2 and m=4 product16 each (32). The other four adjacent I=2 product4 each (16). Total 48. Yes. Good.
+
+No issue.
+
+Let&#x27;s think if final answer should include &quot;unit line segments&quot; maybe &quot;segments&quot; not &quot;edges&quot;. Use both.
+
+Let&#x27;s now write final.
+
+But before final, maybe consider if there is a simpler way: Treat each square as choosing which two sides red. There are C(4,2)=6 choices per square, total 6^4=1296, impose consistency on internal edges. Could use inclusion? Not needed.
+
+Let&#x27;s ensure final not too terse. We can write:
+
+&quot;First color the four interior segments. ... This reduces the problem to counting weighted colorings of a 4-cycle.&quot;
+
+Then detailed counting.
+
+Let&#x27;s produce final now.
+
+<span class="tx-divider">&lt;/think&gt; after 11,029 tokens</span>
+
+Let the four unit segments inside the \(2\times 2\) grid be the ones shared by two small squares. Label them cyclically as \(a,b,c,d\):
+
+- \(a\): vertical internal segment between the two top squares,
+- \(b\): horizontal internal segment between the two left squares,
+- \(c\): vertical internal segment between the two bottom squares,
+- \(d\): horizontal internal segment between the two right squares.
+
+These four internal segments form a cycle
+
+\[
+a-b-c-d-a.
+\]
+
+Each of the four unit squares uses two of these internal segments:
+
+\[
+(a,b),\quad (b,c),\quad (c,d),\quad (d,a).
+\]
+
+Now fix the colors of these four internal segments. For a given square, suppose its two internal sides are known.
+
+- If those two internal sides have the same color, then the square’s two outer sides must both have the opposite color. This gives \(1\) choice.
+- If those two internal sides have different colors, then the square’s two outer sides must be one red and one blue. This gives \(2\) choices.
+
+Since the outer unit segments are not shared by two squares, the choices for different squares are independent once the internal segments are fixed.
+
+So for a fixed coloring of \(a,b,c,d\), the number of ways to color the outer segments is
+
+\[
+2^m,
+\]
+
+where \(m\) is the number of adjacent pairs in the cycle \(a,b,c,d,a\) whose colors differ.
+
+There are \(2^4=16\) possible colorings of the internal segments. As we go around a cycle, the number \(m\) of color changes must be even, so \(m=0,2,4\).
+
+- \(m=0\): all four internal segments have the same color.  
+  Number of internal colorings: \(2\).  
+  Contribution: \(2\cdot 1=2\).
+
+- \(m=4\): the four internal segments alternate colors.  
+  Number of internal colorings: \(2\).  
+  Contribution: \(2\cdot 2^4=32\).
+
+- \(m=2\): the remaining internal colorings.  
+  Number of internal colorings: \(16-2-2=12\).  
+  Contribution: \(12\cdot 2^2=48\).
+
+Thus the total number of valid colorings is
+
+\[
+2+48+32=<mark>82</mark>.
+\]
+
+\[
+\boxed{<mark>82</mark>}
+\]</div><div class="tx-ticks" aria-hidden="true"><i style="top:10.59%"></i><i style="top:10.69%"></i><i style="top:11.03%"></i><i style="top:12.11%"></i><i style="top:13.80%"></i><i style="top:14.06%"></i><i style="top:14.20%"></i><i style="top:21.14%"></i><i style="top:21.84%"></i><i style="top:22.98%"></i><i style="top:23.70%"></i><i style="top:28.87%"></i><i style="top:33.04%"></i><i style="top:34.01%"></i><i style="top:45.04%"></i><i style="top:45.37%"></i><i style="top:45.99%"></i><i style="top:46.05%"></i><i style="top:46.11%"></i><i style="top:46.22%"></i><i style="top:48.17%"></i><i style="top:48.58%"></i><i style="top:52.05%"></i><i style="top:58.56%"></i><i style="top:59.05%"></i><i style="top:60.53%"></i><i style="top:60.80%"></i><i style="top:61.26%"></i><i style="top:61.94%"></i><i style="top:69.24%"></i><i style="top:71.68%"></i><i style="top:74.08%"></i><i style="top:74.43%"></i><i style="top:86.02%"></i><i style="top:86.71%"></i><i style="top:86.81%"></i><i style="top:87.53%"></i><i style="top:89.45%"></i><i style="top:91.29%"></i><i style="top:92.64%"></i><i class="a" style="top:99.94%"></i><i class="a" style="top:99.98%"></i></div></div>
+    </div>
+
+    <p class="tx-note">The ticks down the right-hand edge are the highlights, to scale: the whole trace, top to bottom.</p>
+    <p>That's 11,029 tokens of thinking. The model writes 82 for the first time about a tenth of the way in, and then writes it 39 more times - confirming it again, confirming it with a matrix trace, wondering whether AIME answers are meant to have three digits, making sure the boxed format is right - before it finally stops and hands over the answer it already had.</p>
+  </section>
+
+  <section class="prose" id="itch">
+    <h2>The itch</h2>
+    <p>This has bothered me for ages: the model gets there, and then keeps going, with the same sort of "wait, let me verify" for page after page of tokens that I'm waiting on at about eleven a second on my own GPU. I'd wondered for a long time whether I could fix it by reaching inside the model and turning a knob, which is to say with activation steering, where instead of asking the model in words to hurry up you add a direction to its internal state while it runs.</p>
+  </section>
+
+  <section class="prose" id="discovery">
+    <h2>What's actually going on</h2>
+    <p>First I needed to know how the model stops thinking at all. It closes its thinking with a newline followed by a <code>&lt;/think&gt;</code> token, and if the paragraph break before that is a double newline the chance of closing there is exactly zero, which gave me a first theory: that it keeps going because it keeps landing on the wrong kind of paragraph break. I built a sampler trick that swaps a double newline for a single one whenever a readiness gate fires, and on forty MATH problems it looked brilliant, 37 of 40 right at a median of 631 tokens, until I noticed it was exiting after a median of 94 thinking tokens, before the model had solved anything. The gate had learned a formatting signal and not readiness, and a more direct edit to the output weights for those two tokens changed nothing at all.</p>
+    <p>So I switched method. Instead of running long evaluations I saved the model's whole state at moments where it was spiralling after its answer and resampled the next tokens sixteen times from each. From a paragraph end like "Need final with \boxed{10080}." - which reads like a model that has quite literally finished - it closed its thinking in none of 352 resamples, while at clean stopping points in short traces it closed about half the time. Plotting the closing probability along 1,064 paragraph ends from whole traces said the same: it sits near zero almost everywhere until the real end, in short traces and runaways alike. It isn't missing the exit. It decides to carry on, and the readiness to close only builds up late.</p>
+    <p>I tried blaming the prompt next, both the default instruction to validate assumptions and the model's own earlier re-checks priming it to do more. From the same six runaway snapshots, eight resamples each, 9 of 48 closed within 384 tokens as things were, 13 of 48 with the instruction swapped out and 7 of 48 with the earlier re-check paragraphs deleted, so neither is the driver.</p>
+  </section>
+
+  <section class="prose" id="direction">
+    <h2>Finding the direction</h2>
+    <p>That left steering. I took the model's internal state at moments where it really did close its thinking, subtracted its average state at moments just after the final answer where it carried on anyway (leaving out the traces I meant to test on), and added a fraction of that difference back in across layers 28 to 36. On the same snapshots, new tokens only, the full-strength version closed 40 of 48 within 384 tokens against 9 of 48 untouched, and 9 of 48 for a random vector of the same size, so the direction is doing something specific; 20 of the 21 it closed and I graded were right. Doubling it closed all 48 but only 39 of 45 graded answers were right, which is where the cost started to show.</p>
+  </section>
+
+  <section class="prose" id="half">
+    <h2>Turning it down by half</h2>
+    <p>Then the real test: the problem from the top of the page, the same seed, with the steering on from the first token to the last. At full strength it was done in 1,469 tokens, and it answered 54, because it skipped the one check that mattered. Here is that run in full.</p>
+    <div class="transcript" id="tx-full">
+      <div class="tx-head"><strong>Steering at full strength</strong><span>1,469 thinking tokens · answer 54 (wrong)</span><span class="tx-legend">no 82 anywhere</span></div>
+      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at full strength: full transcript, scrollable">We need answer combinatorics. Need solve. Let&#x27;s analyze problem carefully.
+
+We have 2x2 grid: four unit squares. There are 12 unit line segments forming sides of squares. Need count colorings each of 12 segments red/blue such that each unit square has exactly 2 red sides and 2 blue sides.
+
+We need be careful: 2x2 grid has external boundary and internal segments. There are 12 unit line segments? Let&#x27;s visualize: 3x3 grid lines? Unit squares: horizontal segments: 3 rows *2 =6; vertical: 3 cols*2=6 total 12. Need count colorings.
+
+We can solve by casework, maybe inclusion-exclusion or transfer. Let&#x27;s define coordinates. Squares A top-left, B top-right, C bottom-left, D bottom-right. Edges:
+Horizontal:
+y=2 (top): hA top (between x0-1), hB top (x1-2)
+y=1 middle: hA bottom / hC top? Actually segment from (0,1)-(1,1) is bottom of top-left and top of bottom-left; hB bottom / D top (1,1)-(2,1)
+y=0 bottom: hC bottom, hD bottom
+Vertical:
+x=0: vA left (0,1)-(0,2)? wait coordinates: top-left square from (0,1) to (1,2), top-right (1,1)-(2,2), bottom-left (0,0)-(1,1), bottom-right (1,0)-(2,1). vertical x=0: top-left left segment (0,1)-(0,2), bottom-left left (0,0)-(0,1). x=1: top-left bottom? vertical x=1 from (1,1)-(1,2) right of TL/left of TR; (1,0)-(1,1) right BL/left BR. x=2: top-right right (2,1)-(2,2), bottom-right right (2,0)-(2,1).
+
+Constraint each of 4 squares has sum red=2 (let red=1 blue=0). Count assignments to 12 variables satisfying 4 equations mod? Not mod, exact counts. Could brute force mentally? Need reasoning.
+
+Let variables:
+Top row:
+a = top edge TL
+b = top edge TR
+c = middle horizontal left (bottom TL/top BL)
+d = middle horizontal right (bottom TR/top BR)
+e = bottom edge BL
+f = bottom edge BR
+Vertical left top g (left TL)
+h vertical left bottom i? Let&#x27;s name:
+Left outer top: l1 = TL left
+l2 = BL left
+Middle vertical top: m1 = TL right/TR left
+m2 = BL right/BR left
+Right outer top: r1 = TR right
+r2 = BR right
+
+Squares:
+TL: a + g + c + m1 =2
+TR: b + m1 + r1 + d =2
+BL: c + l2 + e + m2 =2? Wait BL edges: left l2, bottom e, right m2, top c. Yes.
+BR: d + m2 + r2 + f =2.
+
+All variables 0/1. Count.
+
+We can derive. Since constraints linear. Number of solutions to 4 equations over integers? Could count via cases. There are 2^12=4096, maybe use transfer. Need ensure no hidden interpretation: each unit square has 2 red sides and 2 blue sides. Count all colorings of 12 unit line segments. No further restrictions.
+
+Let&#x27;s compute systematically. We can maybe use inclusion or dynamic.
+
+Approach: choose top two edges a,b,m1? Then constraints. Let&#x27;s do enumeration maybe via algebra.
+
+Let red=1.
+Eq1: a+g+c+m1=2
+Eq2: b+m1+r1+d=2
+Eq3: c+l2+e+m2=2
+Eq4: d+m2+r2+f=2.
+
+Variables independent except through shared edges: m1 affects top, m2 affects bottom. We can count by summing over middle verticals maybe.
+
+Let x=m1, y=m2 (0/1). For each x, need count assignments a,g,c with a+g+c = 2-x. For each y, count assignments d,l2,e,r2,f? Wait eq2: b+r1+d =2-x; eq4: r2+f+d =2-y? Actually eq4 d+y+r2+f=2 =&gt; d+r2+f=2-y. d shared between eq2 and eq4? d is middle horizontal right. Eq2 variables b,d,r1. Eq4 variables d,f,r2. Need count over d,b,r1,f,r2. Could sum over d. For given x,y: number of (a,g,c) with sum 2-x times number for right part. Right: for d=0/1, count (b,r1) sum=2-x-d, count (f,r2) sum=2-y-d. Each binary pair sum s: C(2,s) if 0&lt;=s&lt;=2. product.
+
+Compute total = sum_x sum_y Nleft(x) * [sum_d C(2, 2-x-d) C(2,2-y-d)] but only valid.
+
+Nleft for 3 variables sum s = C(3,s).
+Let&#x27;s compute. x=0: s=2 =&gt;3. x=1:s=1=&gt;3.
+Right function F(x,y)=sum_{d=0,1} C(2,2-x-d)*C(2,2-y-d) where invalid if sum&lt;0 or &gt;2? Since x,y,d binary; 2-x-d ranges 0..2. Good.
+Compute table:
+x0,y0: d0 C2,2=1 *1=1; d1 C2,1=2*2=4 total5.
+x0,y1: d0 C2,2=1 * C2,1=2 =2; d1 C2,1=2 * C2,0=1=2 total4.
+x1,y0: similarly 4.
+x1,y1: d0 2*2=4; d1 1*1=1 total5.
+Total = x0: Nleft3*(F00+F01=9)=27; x1:3*(4+5=9)=27 total 54.
+Check if any subtlety? Could there be different orientation? 12 line segments include internal? yes.
+
+Need final with reasoning step by step. Ensure no overcount. Could present alternate maybe.
+
+<span class="tx-divider">&lt;/think&gt; after 1,469 tokens</span>
+
+Let red = 1 and blue = 0. Label the middle vertical segments \(x\) (top) and \(y\) (bottom). For a fixed \(x,y\):
+
+- Top-left square: remaining 3 edges must sum to \(2-x\), giving \(\binom{3}{2-x}\) choices.
+- Top-right and bottom-right: choose the shared middle-right edge \(d\in\{0,1\}\), then choose edges to make sums \(2-x-d\) and \(2-y-d\).
+
+\[
+\sum_{x=0}^1\sum_{y=0}^1 \binom{3}{2-x}
+\sum_{d=0}^1 \binom{2}{2-x-d}\binom{2}{2-y-d}
+\]
+
+Compute:
+
+\[
+3(1+2+2+? )
+\]
+
+More explicitly:
+
+- \(x=0,y=0: 3(1\cdot1+2\cdot2)=3(1+4)=15\)
+- \(x=0,y=1: 3(1\cdot2+2\cdot1)=3(2+2)=12\)
+- \(x=1,y=0: 3(2\cdot1+1\cdot2)=12\)
+- \(x=1,y=1: 3(2\cdot2+1\cdot1)=15\)
+
+Total:
+
+\[
+\boxed{54}
+\]</div><div class="tx-ticks" aria-hidden="true"></div></div>
+    </div>
+
+    <p>So I turned it down by half.</p>
+    <div class="transcript" id="tx-half">
+      <div class="tx-head"><strong>Steering at half strength</strong><span>3,120 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><mark>82</mark> = the correct answer</span></div>
+      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at half strength: full transcript, scrollable">We need answer combinatorics. Need solve carefully. Problem: 2x2 grid of unit squares, 12 unit line segments (edges) colored red/blue such that each of 4 unit squares has 2 red, 2 blue. Count colorings.
+
+We need reason step by step. Let&#x27;s model. 2x2 grid has 12 edges: 3 vertical lines each length 2 -&gt; 6 vertical unit segments; 3 horizontal lines length 2 -&gt; 6 horizontal. Need each of four cells have exactly 2 red among its 4 edges.
+
+We can count via variables. Let&#x27;s denote squares A top-left, B top-right, C bottom-left, D bottom-right. Edges:
+Top row: horizontal top of A: a, top of B: b.
+Middle horizontal: left segment between A/C: c, right segment between B/D: d.
+Bottom horizontal: left C: e, right D: f.
+Vertical left: top A: g, bottom C: h.
+Middle vertical: top A/B: i, bottom C/D: j.
+Vertical right: top B: k, bottom D: l.
+Variables binary maybe 1 red, 0 blue. Conditions:
+A: a+g+i+c =2
+B: b+k+i+d=2
+C: e+h+j+c=2
+D: f+l+j+d=2.
+Each variable 0/1. Need number assignments.
+
+Could brute force mentally or derive. There are 2^12=4096. Need exact count.
+
+Let&#x27;s analyze. Could use transfer / inclusion-exclusion / linear constraints over integers not mod2. Exactly two ones per row of cell equations.
+
+Variables arranged edges. Maybe use symmetry. Let&#x27;s count systematically.
+
+Approaches:
+1) Enumerate interior edges (i,j,c,d) maybe then count outer edges satisfying equations.
+Interior shared edges: i top middle vertical, j bottom middle vertical, c middle horizontal left, d middle horizontal right. For each assignment of these 4, count outer edge assignments satisfying each square sum 2.
+For a square with two outer edges and two interior edges known: if interior sum s, need outer sum = 2-s. There are 2 outer edges binary, number choices C(2, 2-s) if 2-s in {0,1,2}. For all squares independent? Outer edges distinct for each square: top a,b, left g,h, right k,l, bottom e,f. Each square uses two outer edges. Need count product? For fixed interiors, conditions:
+A: a+g = 2 - (i+c)
+B: b+k = 2 - (i+d)
+C: e+h = 2 - (j+c)
+D: f+l = 2 - (j+d)
+All RHS must be 0,1,2. Each equation independent over disjoint pairs (a,g), (b,k), (e,h), (f,l) (note g/h on left vertical separate; yes disjoint). Number choices per square = binom(2, RHS). Product. Sum over 16 interior assignments with RHS valid. Since i,j,c,d binary, 2-(i+c) is 0 if sum 2, 1 if sum1, 2 if sum0. Always valid. So total sum_{i,j,c,d} C(2, 2-i-c)*C(2,2-i-d)*C(2,2-j-c)*C(2,2-j-d).
+Can compute. Let weight for variable pair? Let&#x27;s denote w(x,y)=C(2,2-x-y). Values: if x+y=0 -&gt;4, 1-&gt;2, 2-&gt;1.
+Sum over i,j,c,d w(i,c) w(i,d) w(j,c) w(j,d). This is like (for c,d) sum_i sum_j. We can factor: sum_i [w(i,c)w(i,d)] * sum_j [w(j,c)w(j,d)]. Since i,j independent. For given c,d compute S(c,d)=sum_{i in {0,1}} w(i,c)w(i,d). Then total = sum_{c,d} S(c,d)^2.
+
+Compute w:
+c,d values.
+If c=d=0: i=0 w(0,0)^2=4*4=16; i=1 w(1,0)=2, squared 4; S=20.
+c=0,d=1: i=0: w(0,0)=4 * w(0,1)=2 =&gt;8; i=1: w(1,0)=2 * w(1,1)=1 =&gt;2; S=10.
+c=1,d=0 similarly 10.
+c=1,d=1: i=0:2*2=4; i=1:1*1=1; S=5.
+Sum squares: 400 +100+100+25 =625. Is that answer? Need verify. But wait each unit square exactly 2 red sides. This count seems plausible. Need ensure no overcount? Edges all unit segments. Yes.
+
+But let&#x27;s think if there are constraints like line segments forming sides of squares (12) colored; no condition on vertices. So 625.
+
+But we need produce reasoning step-by-step. Could maybe provide alternative check. Let&#x27;s double-check with another method to ensure no mistake. Maybe the product counts choices for outer edge pairs: For A: top and left outer edges; B top and right; C bottom and left; D bottom and right. For fixed middle edges (vertical middle top/bottom? horizontal middle left/right) all outer pairs independent indeed. Let&#x27;s test small examples. Interior all 0: each square needs 2 outer red among 2 -&gt; all outer red. Product 1? Wait w(0,0)=C(2,2)=1? I earlier defined C(2,2-i-c). If i+c=0 -&gt; C(2,2)=1 not 4! Oops I made error: number of assignments for two binary edges with sum r is C(2,r), not C(2, 2-s) yes if s=0 -&gt; r=2 -&gt;1, not 4. I mistakenly set w(0,0)=4? Let&#x27;s correct.
+
+w(x,y) = binom(2,2-x-y). Values: x+y=0 -&gt; binom(2,2)=1; sum1 -&gt; binom(2,1)=2; sum2 -&gt; binom(2,0)=1. So w: (0,0)=1; (0,1)=2; (1,0)=2; (1,1)=1.
+Then S(0,0)= i=0:1*1=1; i=1:2*2=4 =&gt;5. S(0,1)=i=0:1*2=2; i=1:2*1=2=&gt;4. S(1,0)=4. S(1,1)=i=0:2*2=4; i=1:1*1=1=&gt;5. Total sum squares =25+16+16+25=<mark>82</mark>. Is that correct? Let&#x27;s verify. Total <mark>82</mark> maybe.
+
+Let&#x27;s brute force mentally maybe. Could also derive by inclusion. Need ensure. Let&#x27;s test with another counting. Let variables. For fixed middle horizontal c,d and middle vertical i,j. Outer pair counts as above. Sum =? Let&#x27;s recompute all 16:
+c,d 0,0: S=5 square25.
+0,1: S=4 square16.
+1,0:16.
+1,1:25 total<mark>82</mark>.
+Seems plausible. But need be careful: Outer edge variables: A: top a and left top g; B: top b and right top k; C: bottom e and left bottom h; D: bottom f and right bottom l. Are left top and left bottom distinct? Yes. Right top and right bottom distinct. Good.
+
+Let&#x27;s maybe find alternative formula or sanity check. Could be <mark>82</mark>. Let&#x27;s do a direct independent check with generating functions or small enumeration logically.
+
+We can also count by middle edges maybe. Let&#x27;s label interior edges: top middle vertical m (i), bottom middle vertical n (j), middle horizontal left p (c), right q (d). For each cell, outer edges must compensate. For each interior pair sum s, number of outer assignments = C(2,2-s): if interior 0 red -&gt; both outer red:1; if 1 red -&gt; one red:2; if 2 red -&gt; both blue:1. So indeed.
+
+Let&#x27;s test maybe another approach: Let a,b top outer, g,h left, k,l right, e,f bottom. Conditions:
+A: a+g+ i + c=2
+B: b+k + i + d=2
+C: e+h + j + c=2
+D: f+l + j + d=2.
+For fixed i,c, A gives a+g = 2-i-c. Number N(i,c). For all 4 independent. Sum. We can also sum over i,j first. Let&#x27;s calculate via table. For fixed i,c? We can compute sum over i,j maybe. Let&#x27;s do full sum manually to ensure <mark>82</mark>.
+Define f_i,c = binom(2,2-i-c). Table:
+i,c:
+0,0:1
+0,1:2
+1,0:2
+1,1:1.
+Then total = sum_i,j,c,d f(i,c)f(i,d)f(j,c)f(j,d).
+Group c,d:
+c=0,d=0: sum_i f(i,0)^2 =1+4=5; sum_j same=5; product 25.
+0,1: sum_i f(i,0)f(i,1)=1*2 +2*1=4; sum_j same=4; product16.
+1,0:4*4=16.
+1,1: sum_i 2*2+1*1=5; 5*5=25 total<mark>82</mark>.
+
+Let&#x27;s consider if there are colorings where each unit square has 2 red sides and 2 blue sides; no other constraints. Yes.
+
+Need final with boxed. Provide step-by-step. Could include a diagram description. Let&#x27;s ensure no hidden pitfalls: &quot;Four unit squares form a 2 x 2 grid. Each of the 12 unit line segments forming the sides of the squares is colored either red or blue in such a way that each unit square has 2 red sides and 2 blue sides. Find the number of such colorings.&quot; There are 12 unit line segments: in a 2x2 grid there are 12 edges (3x3? Actually 2x2 grid has 4 squares, unit segments: vertical: 3 columns *2=6, horizontal: 3 rows*2=6). Yes.
+
+Potential alternate solution: Could use transfer matrix. But final should be detailed.
+
+Let&#x27;s think if there is any chance they count colorings up to symmetry? Usually &quot;number of such colorings&quot; means distinct assignments to labeled positions, not up to symmetry. <mark>82</mark>. If up to dihedral would different. No indication. We&#x27;ll assume labeled grid.
+
+Need maybe include reasoning that choices for outer segments independent given interior shared segments. Need be careful with names.
+
+Let&#x27;s draft:
+Let the four interior (shared) unit segments be:
+v1 = vertical segment between top two squares (middle vertical top half), v2 = vertical between bottom two squares, h1 = horizontal segment between left two squares (middle horizontal left half), h2 = horizontal between right two squares. Let colors be 0/1 red. For each square, if the two shared edges incident to it have r red, the two outer edges incident must have 2-r red. Number of ways to choose those two outer edges: binom(2,2-r), i.e. 1 if r=0, 2 if r=1, 1 if r=2.
+Then sum over four shared edges.
+Maybe denote variables a,b for top vertical? Let&#x27;s choose clear:
+x = top middle vertical (between top-left and top-right)
+y = bottom middle vertical (between bottom-left and bottom-right)
+u = middle horizontal left (between top-left and bottom-left)
+v = middle horizontal right (between top-right and bottom-right)
+For a fixed x,u for top-left, number for its two outer edges = C(2,2-x-u). Similarly. Since outer edges are disjoint across squares, multiply.
+Total:
+∑_{x,y,u,v∈{0,1}} C(2,2-x-u) C(2,2-x-v) C(2,2-y-u) C(2,2-y-v).
+Then evaluate by fixing u,v.
+For u=v:
+If u=v=0: (C(2,2-x)?) Let&#x27;s do table maybe.
+Let N_{s} = number ways for two outer edges given sum s? But final.
+Compute:
+For fixed u,v, S = ∑_{x} C(2,2-x-u)C(2,2-x-v).
+- u=v=0: x=0:1*1=1, x=1:2*2=4 =&gt;5.
+- u=0,v=1: x=0:1*2=2, x=1:2*1=2 =&gt;4.
+- u=1,v=0:4.
+- u=v=1: x=0:2*2=4, x=1:1*1=1 =&gt;5.
+Then total S(u,v)^2: 25+16+16+25=<mark>82</mark>.
+
+Check if maybe outer edge pairs not independent because top edge of A and top edge of B distinct yes, left top and left bottom distinct etc. Good.
+
+Could also include a sanity check: If all four shared edges red? x=y=u=v=1: each square has 2 shared red, so its two outer must be blue: 1 coloring. Included.
+
+Need final with \boxed{<mark>82</mark>}. Ensure final only. But user asked reason step by step. Good.
+
+<span class="tx-divider">&lt;/think&gt; after 3,120 tokens</span>
+
+Let the four shared (interior) unit segments be variables that are \(1\) if red and \(0\) if blue:
+
+- \(x\): middle vertical segment in the top row
+- \(y\): middle vertical segment in the bottom row
+- \(u\): middle horizontal segment in the left column
+- \(v\): middle horizontal segment in the right column
+
+For any unit square, suppose its two shared edges have red-sum \(s\). Since the square must have exactly 2 red sides, its two outer edges must have red-sum \(2-s\). The number of ways to choose those two outer edges is
+
+\[
+\binom{2}{2-s}.
+\]
+
+Thus, for fixed \(x,y,u,v\), the number of colorings of the outer edges is
+
+\[
+\binom{2}{2-x-u}\binom{2}{2-x-v}\binom{2}{2-y-u}\binom{2}{2-y-v}.
+\]
+
+Now sum over all \(x,y,u,v\in\{0,1\}\). For fixed \(u,v\), compute
+
+\[
+S(u,v)=\sum_{x\in\{0,1\}} \binom{2}{2-x-u}\binom{2}{2-x-v}.
+\]
+
+Then the total is
+
+\[
+\sum_{u,v\in\{0,1\}} S(u,v)^2.
+\]
+
+Evaluate:
+
+- If \(u=v=0\):
+  \[
+  S= \binom22\binom22+\binom21\binom21=1+4=5.
+  \]
+
+- If \(u=0,v=1\):
+  \[
+  S= \binom22\binom21+\binom21\binom20=2+2=4.
+  \]
+
+- If \(u=1,v=0\):
+  \[
+  S=4.
+  \]
+
+- If \(u=v=1\):
+  \[
+  S= \binom21\binom21+\binom20\binom20=4+1=5.
+  \]
+
+Therefore,
+
+\[
+5^2+4^2+4^2+5^2=25+16+16+25=<mark>82</mark>.
+\]
+
+\[
+\boxed{<mark>82</mark>}
+\]</div><div class="tx-ticks" aria-hidden="true"><i style="top:41.84%"></i><i style="top:42.23%"></i><i style="top:45.23%"></i><i style="top:48.34%"></i><i style="top:56.60%"></i><i style="top:59.43%"></i><i style="top:68.19%"></i><i style="top:84.02%"></i><i style="top:87.20%"></i><i class="a" style="top:99.77%"></i><i class="a" style="top:99.94%"></i></div></div>
+    </div>
+
+    <p>It writes the answer, double-checks it once, properly, and then closes: 3,120 tokens instead of 11,029, and the right answer. Too much and it stops thinking before it has done the work, too little and it never stops, and half was the goldilocks setting, the one I kept.</p>
+  </section>
+
+  <section class="prose" id="holds">
+    <h2>Does it hold up</h2>
+    <p>On ten ordinary prompts (code, debugging, an explanation, a story, logic, a fact, a plan, an opinion, counting letters, lock-picking) the median thinking length dropped from 775 to 476 tokens, the visible answers came out about half as long, and the model got more decisive: asked about tabs against spaces, it went from "spaces are usually better" to "whatever your team agrees". The story prompt hit the 4,000-token cap unsteered without ever writing a story, and the steered one wrote one. On a fresh pool of problems that had nothing to do with fitting the direction, 20 MATH problems and six AIME, the MATH answers stayed at 19 correct out of 20 with thinking down 48%, while the hard AIME set went from one correct to two with thinking down only 14%, because where the model is genuinely stuck, steering doesn't help.</p>
+    <p>It's one seed, one quantisation of one model, and the direction was fitted on maths. When I first switched it on in the agent setup I run these models in, the benefit didn't carry over - looping from the start, and I'm still working out whether that's the steer or how it was deployed - so if I do this again I'll fit it on recorded agent turns and not on maths.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
+</main></body>
+</html>
