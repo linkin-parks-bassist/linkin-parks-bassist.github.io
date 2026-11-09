@@ -6,23 +6,42 @@
   <title>Qwensteering 2: Rooting Out Rumination · David Farrell</title>
   <meta name="description" content="What a thinking model does after it already has the answer, and what happens when you nudge its activations to stop.">
   <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
   <style>
     .prose > p:not(.tombstone) { text-align: justify; hyphens: auto; text-indent: 1.5em; }
     .transcript { margin: 1.4rem 0 1.2rem; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); box-shadow: 0 2px 0 var(--shadow); overflow: hidden; }
     .tx-head { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; align-items: baseline; padding: .6rem .9rem; background: var(--accent-wash); border-bottom: 1px solid var(--line); font-size: .9rem; }
     .tx-head strong { color: var(--accent); }
     .tx-head span { color: var(--ink-soft); }
-    .tx-head .tx-legend { margin-left: auto; }
+    .tx-head .tx-legend { margin-left: auto; display: inline-flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+    .tx-swatch { display: inline-flex; align-items: center; gap: .3rem; font-size: .82rem; }
+    .tx-swatch::before { content: ""; width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--line); display: inline-block; }
+    .tx-swatch.think::before { background: #f3eae4; }
+    .tx-swatch.ans::before { background: #fffdfb; }
     .tx-wrap { position: relative; }
-    .tx-body { height: 26rem; overflow-y: scroll; padding: .9rem 1.6rem .9rem .9rem; white-space: pre-wrap; overflow-wrap: anywhere; font: .82rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); }
+    .tx-body { height: 28rem; overflow-y: scroll; margin-right: 16px; color: var(--ink); scrollbar-width: auto; scrollbar-color: var(--accent) #ede0dc; }
+    .tx-body::-webkit-scrollbar { width: 12px; }
+    .tx-body::-webkit-scrollbar-track { background: #ede0dc; border-left: 1px solid var(--line); }
+    .tx-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 6px; border: 2px solid #ede0dc; }
     .tx-body:focus { outline: 2px solid var(--accent-bright); outline-offset: -2px; }
-    .tx-body mark { background: #ffd86b; color: #28262b; padding: 0 .15em; border-radius: 3px; font-weight: 700; }
-    .tx-divider { display: block; margin: .2rem 0; padding: .35rem .7rem; text-align: center; background: var(--dark); color: var(--dark-text); border-radius: 4px; font-weight: 700; letter-spacing: .02em; }
-    .tx-ticks { position: absolute; top: 0; right: 0; bottom: 0; width: 12px; background: var(--accent-wash); border-left: 1px solid var(--line); pointer-events: none; }
-    .tx-ticks i { position: absolute; right: 2px; width: 8px; height: 3px; background: #e0a100; border-radius: 1px; }
-    .tx-ticks i.a { background: var(--accent); }
+    .tx-think { padding: .95rem 1.1rem; background: #f4ebe6; color: #544b4f; white-space: pre-wrap; overflow-wrap: anywhere; font: .82rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-bottom: 1px solid var(--line); }
+    .tx-phase { display: inline-block; margin-bottom: .55rem; padding: .12rem .48rem; border-radius: 3px; font: 800 .68rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+    .tx-think .tx-phase { background: #e3d2ca; color: #4a3f44; }
+    .tx-answer .tx-phase { background: var(--accent-wash); color: var(--accent); border: 1px solid #e2c5cb; }
+    .tx-divider { padding: .4rem .9rem; text-align: center; background: var(--dark); color: var(--dark-text); font: 700 .78rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .03em; }
+    .tx-answer { padding: 1.05rem 1.2rem 1.2rem; background: var(--paper); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; font: .95rem/1.65 ui-sans-serif, system-ui, sans-serif; }
+    .tx-body mark, .tx-head mark, .katex .mord.mark-hit { background: #ffd86b; color: #28262b; padding: 0 .18em; border-radius: 3px; font-weight: 700; }
+    .tx-ticks { position: absolute; top: 0; right: 0; bottom: 0; width: 16px; background: #faf2ee; border-left: 1px solid var(--line); cursor: pointer; user-select: none; }
+    .tx-ticks .tx-zone-think { position: absolute; top: 0; left: 0; right: 0; background: #efe1da; border-bottom: 1px solid var(--dark); }
+    .tx-ticks .tx-zone-ans { position: absolute; left: 0; right: 0; bottom: 0; background: #fffdfb; }
+    .tx-ticks i { position: absolute; left: 2px; right: 2px; height: 3px; background: #d99000; border-radius: 1px; z-index: 1; }
+    .tx-ticks i.a { background: var(--accent); height: 4px; }
+    .tx-thumb { position: absolute; left: 1px; right: 1px; top: 0; height: 28px; background: rgba(159, 59, 82, 0.24); border: 1.5px solid var(--accent); border-radius: 3px; z-index: 2; pointer-events: none; }
     .tx-prompt { margin: 1.2rem 0; padding: .8rem 1rem; border-left: 4px solid var(--accent-bright); background: var(--accent-wash); font-size: .95rem; }
     .tx-note { font-size: .9rem; color: var(--ink-soft); margin: -.4rem 0 1rem; text-indent: 0 !important; }
+    .tx-answer .katex-display { margin: .55em 0; overflow-x: auto; overflow-y: hidden; }
   </style>
 </head>
 <body class="field-note"><main>
@@ -36,11 +55,12 @@
 
   <section class="prose" id="trace">
     <p>Here is what a typical Qwen3.8-27B thinking trace looks like.</p>
-    <p>The problem is a small one from AIME 2025, and the answer is 82. What follows is the model's complete, unedited thinking, with every appearance of the right answer highlighted, and it starts at the top. Scroll as far as you can stand.</p>
-    <div class="tx-prompt"><strong>Problem.</strong> Four unit squares form a 2 × 2 grid. Each of the 12 unit line segments forming the sides of the squares is colored either red or blue in such a way that each unit square has 2 red sides and 2 blue sides. Find the number of such colorings.</div>
+    <p>The problem is a small one from AIME 2025, and the answer is 82. What follows is the model's complete, unedited thinking (shaded warm) followed by the final reply it eventually emits (on white), with every appearance of the right answer highlighted, starting at the top. Scroll as far as you can stand.</p>
+    <div class="tx-prompt"><strong>Problem.</strong> Four unit squares form a \(2 \times 2\) grid. Each of the 12 unit line segments forming the sides of the squares is colored either red or blue in such a way that each unit square has 2 red sides and 2 blue sides. Find the number of such colorings.</div>
     <div class="transcript" id="tx-base">
-      <div class="tx-head"><strong>No steering</strong><span>11,029 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><mark>82</mark> = the correct answer</span></div>
-      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="No steering: full transcript, scrollable">We need solve combinatorics problem. Need reason carefully. Problem: 2x2 grid of unit squares. 12 unit line segments forming sides of squares colored red/blue so each unit square has 2 red sides and 2 blue sides. Count colorings.
+      <div class="tx-head"><strong>No steering</strong><span>11,029 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><span class="tx-swatch think">thinking</span><span class="tx-swatch ans">answer</span><span><mark>82</mark> = right answer</span></span></div>
+      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="No steering: full transcript, scrollable"><div class="tx-think"><div class="tx-phase">Thinking · 11,029 tokens</div>
+We need solve combinatorics problem. Need reason carefully. Problem: 2x2 grid of unit squares. 12 unit line segments forming sides of squares colored red/blue so each unit square has 2 red sides and 2 blue sides. Count colorings.
 
 We need provide step-by-step, final boxed.
 
@@ -475,10 +495,7 @@ Let&#x27;s ensure final not too terse. We can write:
 
 Then detailed counting.
 
-Let&#x27;s produce final now.
-
-<span class="tx-divider">&lt;/think&gt; after 11,029 tokens</span>
-
+Let&#x27;s produce final now.</div><div class="tx-divider">&lt;/think&gt; after 11,029 tokens</div><div class="tx-answer"><div class="tx-phase">Final answer</div>
 Let the four unit segments inside the \(2\times 2\) grid be the ones shared by two small squares. Label them cyclically as \(a,b,c,d\):
 
 - \(a\): vertical internal segment between the two top squares,
@@ -530,41 +547,42 @@ There are \(2^4=16\) possible colorings of the internal segments. As we go aroun
 Thus the total number of valid colorings is
 
 \[
-2+48+32=<mark>82</mark>.
+2+48+32=82.
 \]
 
 \[
-\boxed{<mark>82</mark>}
-\]</div><div class="tx-ticks" aria-hidden="true"><i style="top:10.59%"></i><i style="top:10.69%"></i><i style="top:11.03%"></i><i style="top:12.11%"></i><i style="top:13.80%"></i><i style="top:14.06%"></i><i style="top:14.20%"></i><i style="top:21.14%"></i><i style="top:21.84%"></i><i style="top:22.98%"></i><i style="top:23.70%"></i><i style="top:28.87%"></i><i style="top:33.04%"></i><i style="top:34.01%"></i><i style="top:45.04%"></i><i style="top:45.37%"></i><i style="top:45.99%"></i><i style="top:46.05%"></i><i style="top:46.11%"></i><i style="top:46.22%"></i><i style="top:48.17%"></i><i style="top:48.58%"></i><i style="top:52.05%"></i><i style="top:58.56%"></i><i style="top:59.05%"></i><i style="top:60.53%"></i><i style="top:60.80%"></i><i style="top:61.26%"></i><i style="top:61.94%"></i><i style="top:69.24%"></i><i style="top:71.68%"></i><i style="top:74.08%"></i><i style="top:74.43%"></i><i style="top:86.02%"></i><i style="top:86.71%"></i><i style="top:86.81%"></i><i style="top:87.53%"></i><i style="top:89.45%"></i><i style="top:91.29%"></i><i style="top:92.64%"></i><i class="a" style="top:99.94%"></i><i class="a" style="top:99.98%"></i></div></div>
+\boxed{82}
+\]</div></div><div class="tx-ticks" aria-hidden="true" title="Click or drag to scroll"><span class="tx-zone-think"></span><span class="tx-zone-ans"></span><i style="top:10.59%"></i><i style="top:10.69%"></i><i style="top:11.03%"></i><i style="top:12.11%"></i><i style="top:13.80%"></i><i style="top:14.06%"></i><i style="top:14.20%"></i><i style="top:21.14%"></i><i style="top:21.84%"></i><i style="top:22.98%"></i><i style="top:23.70%"></i><i style="top:28.87%"></i><i style="top:33.04%"></i><i style="top:34.01%"></i><i style="top:45.04%"></i><i style="top:45.37%"></i><i style="top:45.99%"></i><i style="top:46.05%"></i><i style="top:46.11%"></i><i style="top:46.22%"></i><i style="top:48.17%"></i><i style="top:48.58%"></i><i style="top:52.05%"></i><i style="top:58.56%"></i><i style="top:59.05%"></i><i style="top:60.53%"></i><i style="top:60.80%"></i><i style="top:61.26%"></i><i style="top:61.94%"></i><i style="top:69.24%"></i><i style="top:71.68%"></i><i style="top:74.08%"></i><i style="top:74.43%"></i><i style="top:86.02%"></i><i style="top:86.71%"></i><i style="top:86.81%"></i><i style="top:87.53%"></i><i style="top:89.45%"></i><i style="top:91.29%"></i><i style="top:92.64%"></i><i class="a" style="top:99.94%"></i><i class="a" style="top:99.98%"></i><span class="tx-thumb"></span></div></div>
     </div>
 
-    <p class="tx-note">The ticks down the right-hand edge are the highlights, to scale: the whole trace, top to bottom.</p>
+    <p class="tx-note">The strip down the right-hand edge maps the whole run from top to bottom (click or drag it to jump): warm is thinking, white at the very bottom is the visible answer, the little window is where you are, and every amber tick is another <mark>82</mark>.</p>
     <p>That's 11,029 tokens of thinking. The model writes 82 for the first time about a tenth of the way in, and then writes it 39 more times - confirming it again, confirming it with a matrix trace, wondering whether AIME answers are meant to have three digits, making sure the boxed format is right - before it finally stops and hands over the answer it already had.</p>
   </section>
 
   <section class="prose" id="itch">
     <h2>The itch</h2>
-    <p>This has bothered me for ages: the model gets there, and then keeps going, with the same sort of "wait, let me verify" for page after page of tokens that I'm waiting on at about eleven a second on my own GPU. I'd wondered for a long time whether I could fix it by reaching inside the model and turning a knob, which is to say with activation steering, where instead of asking the model in words to hurry up you add a direction to its internal state while it runs.</p>
+    <p>This has bothered me for ages: the model gets there, and then keeps going, with the same sort of "wait, let me verify" for page after page of tokens that I'm waiting on at about eleven a second on my own GPU. I'd wondered for a long time whether it was possible to fix with some activation steering - instead of asking the model in words to hurry up, reaching inside and adding a direction to its internal state while it runs - so I set my gpt on it. I was fairly hands-off for this one; really all the legwork was done by my gpt while I hovered in the background telling it what to do.</p>
   </section>
 
   <section class="prose" id="discovery">
-    <h2>What's actually going on</h2>
-    <p>First I needed to know how the model stops thinking at all. It closes its thinking with a newline followed by a <code>&lt;/think&gt;</code> token, and if the paragraph break before that is a double newline the chance of closing there is exactly zero, which gave me a first theory: that it keeps going because it keeps landing on the wrong kind of paragraph break. I built a sampler trick that swaps a double newline for a single one whenever a readiness gate fires, and on forty MATH problems it looked brilliant, 37 of 40 right at a median of 631 tokens, until I noticed it was exiting after a median of 94 thinking tokens, before the model had solved anything. The gate had learned a formatting signal and not readiness, and a more direct edit to the output weights for those two tokens changed nothing at all.</p>
-    <p>So I switched method. Instead of running long evaluations I saved the model's whole state at moments where it was spiralling after its answer and resampled the next tokens sixteen times from each. From a paragraph end like "Need final with \boxed{10080}." - which reads like a model that has quite literally finished - it closed its thinking in none of 352 resamples, while at clean stopping points in short traces it closed about half the time. Plotting the closing probability along 1,064 paragraph ends from whole traces said the same: it sits near zero almost everywhere until the real end, in short traces and runaways alike. It isn't missing the exit. It decides to carry on, and the readiness to close only builds up late.</p>
-    <p>I tried blaming the prompt next, both the default instruction to validate assumptions and the model's own earlier re-checks priming it to do more. From the same six runaway snapshots, eight resamples each, 9 of 48 closed within 384 tokens as things were, 13 of 48 with the instruction swapped out and 7 of 48 with the earlier re-check paragraphs deleted, so neither is the driver.</p>
+    <h2>A false start</h2>
+    <p>First it went looking for how the model stops thinking at all. Qwen closes its thinking block with a single newline followed by a <code>&lt;/think&gt;</code> token, whereas after a double newline the probability of <code>&lt;/think&gt;</code> is zero, and at lots of post-answer paragraph breaks the conditional probability of closing given a single newline was nearly 1 while the probability of emitting that single newline was near zero. My gpt came back from this all excited: actually, no need to steer at all, the rumination is caused by this silly newline trap! It built a sampler exit ramp that swapped a double newline for a single one whenever a readiness gate fired, ran it across forty MATH problems, and presented 37 out of 40 right at a median of 631 tokens. I was like, wow, really?</p>
+    <p>No. A couple of experiments later (and one <code>amdgpu</code> compute-ring reset after it tried running four GPU jobs at once) that turned out to be completely wrong: the "exit ramp" was bailing out at a median of 94 thinking tokens, before the model had solved anything, because its gate had just latched onto a formatting signal rather than readiness, and a direct rank-1 edit to the output weights for the two newline tokens did nothing either. By this point it had burned through a fair bit of my GPU time on busted methodology, which is where I stepped in and told it to get real, stop running huge blind evals, and make no mistakes: save the model's state at the exact moments where it was spiralling, and test from those snapshots directly.</p>
+    <p>Once it did that, the newline-trap story died immediately. Resampling sixteen times from spiral snapshots - even right after a line like <code>Need final with \boxed{10080}.</code> - closed in 0 of 352 tries, whereas clean stopping points in short traces closed about half the time. Checking 1,064 paragraph ends across whole traces showed the same thing: the probability of closing sits near zero almost everywhere until the actual end, in short traces and runaways alike. It isn't missing the exit; it's choosing to keep going, and the readiness to close only builds up late. Swapping out the system prompt's instruction to validate assumptions (13 of 48 closed within 384 tokens against 9 of 48 untouched) or deleting the earlier re-check paragraphs from the context (7 of 48, with re-check openers actually doubling) didn't budge it either.</p>
   </section>
 
   <section class="prose" id="direction">
     <h2>Finding the direction</h2>
-    <p>That left steering. I took the model's internal state at moments where it really did close its thinking, subtracted its average state at moments just after the final answer where it carried on anyway (leaving out the traces I meant to test on), and added a fraction of that difference back in across layers 28 to 36. On the same snapshots, new tokens only, the full-strength version closed 40 of 48 within 384 tokens against 9 of 48 untouched, and 9 of 48 for a random vector of the same size, so the direction is doing something specific; 20 of the 21 it closed and I graded were right. Doubling it closed all 48 but only 39 of 45 graded answers were right, which is where the cost started to show.</p>
+    <p>So we went back to steering - and by "we" I mean my gpt did, while I was there, ish, pointing from the armchair. It took the model's average residual state at real closes, subtracted the average state at post-answer paragraph ends where the model carried on anyway (holding out the test traces), and added that vector across layers 28 to 36. On those held-out runaway snapshots, applying the vector to new tokens closed 40 of 48 within 384 tokens compared with 9 of 48 unsteered - and 9 of 48 for a random vector of the same norm, so the direction wasn't just noise - with 20 of 21 graded answers right. Doubling the dose closed all 48, at the cost of dropping accuracy to 39 of 45.</p>
   </section>
 
   <section class="prose" id="half">
     <h2>Turning it down by half</h2>
-    <p>Then the real test: the problem from the top of the page, the same seed, with the steering on from the first token to the last. At full strength it was done in 1,469 tokens, and it answered 54, because it skipped the one check that mattered. Here is that run in full.</p>
+    <p>Then came the full-run test on the AIME problem from the top of the page, same seed, with the steer applied from the very first token. At full strength (\(\alpha = 1\)) it finished in 1,469 thinking tokens and confidently answered 54, because in its hurry to wrap up it set \(\binom{2}{2} = 4\), skipped the one check that would have caught it, and closed immediately. Here is that run.</p>
     <div class="transcript" id="tx-full">
-      <div class="tx-head"><strong>Steering at full strength</strong><span>1,469 thinking tokens · answer 54 (wrong)</span><span class="tx-legend">no 82 anywhere</span></div>
-      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at full strength: full transcript, scrollable">We need answer combinatorics. Need solve. Let&#x27;s analyze problem carefully.
+      <div class="tx-head"><strong>Steering at full strength</strong><span>1,469 thinking tokens · answer 54 (wrong)</span><span class="tx-legend"><span class="tx-swatch think">thinking</span><span class="tx-swatch ans">answer</span><span>no 82 anywhere</span></span></div>
+      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at full strength: full transcript, scrollable"><div class="tx-think"><div class="tx-phase">Thinking · 1,469 tokens</div>
+We need answer combinatorics. Need solve. Let&#x27;s analyze problem carefully.
 
 We have 2x2 grid: four unit squares. There are 12 unit line segments forming sides of squares. Need count colorings each of 12 segments red/blue such that each unit square has exactly 2 red sides and 2 blue sides.
 
@@ -634,10 +652,7 @@ x1,y1: d0 2*2=4; d1 1*1=1 total5.
 Total = x0: Nleft3*(F00+F01=9)=27; x1:3*(4+5=9)=27 total 54.
 Check if any subtlety? Could there be different orientation? 12 line segments include internal? yes.
 
-Need final with reasoning step by step. Ensure no overcount. Could present alternate maybe.
-
-<span class="tx-divider">&lt;/think&gt; after 1,469 tokens</span>
-
+Need final with reasoning step by step. Ensure no overcount. Could present alternate maybe.</div><div class="tx-divider">&lt;/think&gt; after 1,469 tokens</div><div class="tx-answer"><div class="tx-phase">Final answer</div>
 Let red = 1 and blue = 0. Label the middle vertical segments \(x\) (top) and \(y\) (bottom). For a fixed \(x,y\):
 
 - Top-left square: remaining 3 edges must sum to \(2-x\), giving \(\binom{3}{2-x}\) choices.
@@ -665,13 +680,14 @@ Total:
 
 \[
 \boxed{54}
-\]</div><div class="tx-ticks" aria-hidden="true"></div></div>
+\]</div></div><div class="tx-ticks" aria-hidden="true" title="Click or drag to scroll"><span class="tx-zone-think"></span><span class="tx-zone-ans"></span><span class="tx-thumb"></span></div></div>
     </div>
 
-    <p>So I turned it down by half.</p>
+    <p>So we turned it down by half (\(\alpha = 0.5\)).</p>
     <div class="transcript" id="tx-half">
-      <div class="tx-head"><strong>Steering at half strength</strong><span>3,120 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><mark>82</mark> = the correct answer</span></div>
-      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at half strength: full transcript, scrollable">We need answer combinatorics. Need solve carefully. Problem: 2x2 grid of unit squares, 12 unit line segments (edges) colored red/blue such that each of 4 unit squares has 2 red, 2 blue. Count colorings.
+      <div class="tx-head"><strong>Steering at half strength</strong><span>3,120 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><span class="tx-swatch think">thinking</span><span class="tx-swatch ans">answer</span><span><mark>82</mark> = right answer</span></span></div>
+      <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at half strength: full transcript, scrollable"><div class="tx-think"><div class="tx-phase">Thinking · 3,120 tokens</div>
+We need answer combinatorics. Need solve carefully. Problem: 2x2 grid of unit squares, 12 unit line segments (edges) colored red/blue such that each of 4 unit squares has 2 red, 2 blue. Count colorings.
 
 We need reason step by step. Let&#x27;s model. 2x2 grid has 12 edges: 3 vertical lines each length 2 -&gt; 6 vertical unit segments; 3 horizontal lines length 2 -&gt; 6 horizontal. Need each of four cells have exactly 2 red among its 4 edges.
 
@@ -790,10 +806,7 @@ Check if maybe outer edge pairs not independent because top edge of A and top ed
 
 Could also include a sanity check: If all four shared edges red? x=y=u=v=1: each square has 2 shared red, so its two outer must be blue: 1 coloring. Included.
 
-Need final with \boxed{<mark>82</mark>}. Ensure final only. But user asked reason step by step. Good.
-
-<span class="tx-divider">&lt;/think&gt; after 3,120 tokens</span>
-
+Need final with \boxed{<mark>82</mark>}. Ensure final only. But user asked reason step by step. Good.</div><div class="tx-divider">&lt;/think&gt; after 3,120 tokens</div><div class="tx-answer"><div class="tx-phase">Final answer</div>
 Let the four shared (interior) unit segments be variables that are \(1\) if red and \(0\) if blue:
 
 - \(x\): middle vertical segment in the top row
@@ -850,23 +863,82 @@ Evaluate:
 Therefore,
 
 \[
-5^2+4^2+4^2+5^2=25+16+16+25=<mark>82</mark>.
+5^2+4^2+4^2+5^2=25+16+16+25=82.
 \]
 
 \[
-\boxed{<mark>82</mark>}
-\]</div><div class="tx-ticks" aria-hidden="true"><i style="top:41.84%"></i><i style="top:42.23%"></i><i style="top:45.23%"></i><i style="top:48.34%"></i><i style="top:56.60%"></i><i style="top:59.43%"></i><i style="top:68.19%"></i><i style="top:84.02%"></i><i style="top:87.20%"></i><i class="a" style="top:99.77%"></i><i class="a" style="top:99.94%"></i></div></div>
+\boxed{82}
+\]</div></div><div class="tx-ticks" aria-hidden="true" title="Click or drag to scroll"><span class="tx-zone-think"></span><span class="tx-zone-ans"></span><i style="top:41.84%"></i><i style="top:42.23%"></i><i style="top:45.23%"></i><i style="top:48.34%"></i><i style="top:56.60%"></i><i style="top:59.43%"></i><i style="top:68.19%"></i><i style="top:84.02%"></i><i style="top:87.20%"></i><i class="a" style="top:99.77%"></i><i class="a" style="top:99.94%"></i><span class="tx-thumb"></span></div></div>
     </div>
 
-    <p>It writes the answer, double-checks it once, properly, and then closes: 3,120 tokens instead of 11,029, and the right answer. Too much and it stops thinking before it has done the work, too little and it never stops, and half was the goldilocks setting, the one I kept.</p>
+    <p>It makes the exact same \(\binom{2}{2} = 4\) slip on its first pass (getting 625), pauses to verify once, catches the mistake, lands on 82, checks it cleanly, and closes after 3,120 thinking tokens instead of 11,029. Too strong and it skips the check it actually needed; unsteered and it checks thirty-nine times; half strength was the goldilocks setting.</p>
   </section>
 
   <section class="prose" id="holds">
     <h2>Does it hold up</h2>
-    <p>On ten ordinary prompts (code, debugging, an explanation, a story, logic, a fact, a plan, an opinion, counting letters, lock-picking) the median thinking length dropped from 775 to 476 tokens, the visible answers came out about half as long, and the model got more decisive: asked about tabs against spaces, it went from "spaces are usually better" to "whatever your team agrees". The story prompt hit the 4,000-token cap unsteered without ever writing a story, and the steered one wrote one. On a fresh pool of problems that had nothing to do with fitting the direction, 20 MATH problems and six AIME, the MATH answers stayed at 19 correct out of 20 with thinking down 48%, while the hard AIME set went from one correct to two with thinking down only 14%, because where the model is genuinely stuck, steering doesn't help.</p>
-    <p>It's one seed, one quantisation of one model, and the direction was fitted on maths. When I first switched it on in the agent setup I run these models in, the benefit didn't carry over - looping from the start, and I'm still working out whether that's the steer or how it was deployed - so if I do this again I'll fit it on recorded agent turns and not on maths.</p>
+    <p>Across a broader sweep at \(\alpha = 0.5\), ten general prompts dropped from a median of 775 thinking tokens to 476, with visible answers about half as long and noticeably more decisive - asked about tabs versus spaces, it went from "spaces are usually better" to "whatever your team agrees", and on a story prompt, where the unsteered run burned the entire 4,000-token cap deliberating without ever writing a story, the steered run actually wrote one. On a fresh out-of-sample pool that wasn't touched when fitting the vector (20 MATH Level 4–5 problems and six hard AIME problems, running with speculative decoding at ~27 tokens/s), MATH stayed at 19 of 20 correct with thinking cut by 48%, and the hard AIME set went from 1 of 6 to 2 of 6 with thinking down 14% - because when the model is genuinely stuck rather than ruminating over a finished answer, a close vector doesn't magically give it the solution.</p>
+    <p>The caveat at the end of the log is that a vector fitted on maths traces didn't carry over cleanly when we tried dropping it straight into CointOS, where agent turns have very different prompts and structure - so if we push this further for agent work, it'll need to be fitted on recorded agent turns rather than competition maths.</p>
     <p class="tombstone" aria-label="End of note">□</p>
   </section>
   <footer>© 2026 David Farrell · <a href="index.html">back to field notes</a></footer>
-</main></body>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.renderMathInElement) {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false },
+        { left: '$$', right: '$$', display: true }
+      ],
+      throwOnError: false,
+      ignoredTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    });
+    document.querySelectorAll('.tx-body .katex-html .mord').forEach(el => {
+      if (el.textContent === '82') {
+        const parent = el.parentElement;
+        if (parent && parent.textContent === '82') parent.classList.add('mark-hit');
+        else el.classList.add('mark-hit');
+      }
+    });
+  }
+  document.querySelectorAll('.transcript').forEach(tx => {
+    const body = tx.querySelector('.tx-body');
+    const think = tx.querySelector('.tx-think');
+    const ticks = tx.querySelector('.tx-ticks');
+    const zoneThink = tx.querySelector('.tx-zone-think');
+    const zoneAns = tx.querySelector('.tx-zone-ans');
+    const thumb = tx.querySelector('.tx-thumb');
+    const sync = () => {
+      const sh = body.scrollHeight || 1;
+      const ch = body.clientHeight || 1;
+      const th = think ? think.offsetHeight : sh;
+      const splitPct = Math.min(100, Math.max(0, (th / sh) * 100));
+      if (zoneThink) zoneThink.style.height = splitPct.toFixed(2) + '%';
+      if (zoneAns) zoneAns.style.top = splitPct.toFixed(2) + '%';
+      if (thumb) {
+        const hPct = Math.max(4, Math.min(100, (ch / sh) * 100));
+        const maxTop = 100 - hPct;
+        const scrollRatio = sh > ch ? body.scrollTop / (sh - ch) : 0;
+        thumb.style.height = hPct.toFixed(2) + '%';
+        thumb.style.top = (scrollRatio * maxTop).toFixed(2) + '%';
+      }
+    };
+    body.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    let dragging = false;
+    const jump = e => {
+      const r = ticks.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (e.clientY - r.top) / (r.height || 1)));
+      body.scrollTop = ratio * (body.scrollHeight - body.clientHeight);
+    };
+    ticks.addEventListener('pointerdown', e => { dragging = true; ticks.setPointerCapture(e.pointerId); jump(e); });
+    ticks.addEventListener('pointermove', e => { if (dragging) jump(e); });
+    ticks.addEventListener('pointerup', () => { dragging = false; });
+    sync();
+    setTimeout(sync, 150);
+  });
+});
+</script>
+</body>
 </html>
