@@ -28,6 +28,10 @@
   <section class="prose" id="hunt">
     <h2>The hunt</h2>
     <p>The first suspect was Mish, the activation function that YOLOv4 has and the tiny models don't (72 Mish layers in <code>yolov4.cfg</code>, none in the other two), and which upstream writes differently for CPU and GPU. The agent swapped the HIP Mish kernel for an exact <code>x·tanh(softplus(x))</code> and rebuilt. Nothing changed: the dog was still 98% on the GPU and 96% on the CPU.</p>
+    <figure class="terminal-capture">
+      <a href="darknet-hip-yolov4-dog.jpg"><img src="darknet-hip-yolov4-dog.jpg" width="768" height="576" loading="lazy" alt="Darknet's sample photo of a dog sitting on a porch in front of a red road bicycle, with a white pickup truck behind. YOLOv4 on the HIP build has boxed the dog (0.98), the bicycle (0.92) and the truck (0.92)."></a>
+      <figcaption>YOLOv4 on Darknet's <code>dog.jpg</code>, HIP build: the test image.</figcaption>
+    </figure>
     <p>So it dumped every layer's output from both builds and compared them. Straight away that turned up a smaller oddity, which is that the two builds don't even resize the input image identically (pixels differ by up to 3e-5, from float arithmetic in the resize code), so to compare like with like it fed the HIP build the CPU build's exact input tensor. With identical inputs the two agreed to within about 5e-5 for the first 107 layers, then split apart at layers 108 and 110 by values of 2 to 3 on activations that top out around 6.5. Those are the stride-1 max-pool layers, 5×5 and 9×9, in YOLOv4's spatial pyramid pooling block, while the 13×13 one after them matched again.</p>
     <figure class="terminal-capture">
       <a href="yolov4-layer-divergence.svg"><img src="yolov4-layer-divergence.svg" width="900" height="430" loading="lazy" alt="Line chart of the largest difference between the HIP and CPU outputs at each of YOLOv4's 162 layers, on a log scale. Both lines sit around 1e-5 to 1e-4 until layer 108. After that the line for the CPU built with AVX on jumps to values between 1 and 10 and stays there, while the line for the CPU built with AVX off stays at about 1e-5 to 1e-4 all the way to the end."></a>
@@ -66,7 +70,7 @@
       <a href="darknet-hip-kv260-desk.jpg"><img src="darknet-hip-kv260-desk.jpg" width="1920" height="1080" loading="lazy" alt="A blurry, blue-tinted 1920 by 1080 frame from the live KV260 stream looking down at a desk. YOLOv4 has boxed a laptop showing the Avnet logo (88%), the laptop's own keyboard (51%), a full-size black keyboard on the right (99%), a black travel cup (88%) and a dark computer mouse (57%)."></a>
       <figcaption>YOLOv4 on the live KV260 stream, pointed at my desk.</figcaption>
     </figure>
-    <p>And now a silly one, from the blooper reel, feat. a $17 Alibaba former-bitcoin-miner Zynq board.</p>
+    <p>and now a silly one, from the blooper reel, feat. a $17 Alibaba former-bitcoin-miner Zynq board.</p>
     <figure class="terminal-capture">
       <a href="darknet-hip-kv260-blooper.jpg"><img src="darknet-hip-kv260-blooper.jpg" width="1920" height="1080" loading="lazy" alt="A 1920 by 1080 frame from the live KV260 stream: a green circuit board with a Zynq chip and a white label, held in a hand in front of a kitchen ceiling. YOLOv4 has boxed the whole board as a wine glass (78%), and boxed a strip down the right edge, where part of my face and hair are visible, as a person (38%)."></a>
       <figcaption>"Wine glass", 78%.</figcaption>
