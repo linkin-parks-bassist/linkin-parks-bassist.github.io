@@ -18,27 +18,25 @@
     .tx-head .tx-legend { margin-left: auto; display: inline-flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
     .tx-swatch { display: inline-flex; align-items: center; gap: .3rem; font-size: .82rem; }
     .tx-swatch::before { content: ""; width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--line); display: inline-block; }
-    .tx-swatch.think::before { background: #f3eae4; }
-    .tx-swatch.ans::before { background: #fffdfb; }
+    .tx-swatch.think::before { background: var(--paper); border-style: dashed; }
+    .tx-swatch.ans::before { background: var(--paper); border: 1.5px solid var(--accent); }
     .tx-wrap { position: relative; }
-    .tx-body { height: 28rem; overflow-y: scroll; margin-right: 16px; color: var(--ink); scrollbar-width: auto; scrollbar-color: var(--accent) #ede0dc; }
-    .tx-body::-webkit-scrollbar { width: 12px; }
-    .tx-body::-webkit-scrollbar-track { background: #ede0dc; border-left: 1px solid var(--line); }
-    .tx-body::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 6px; border: 2px solid #ede0dc; }
+    .tx-body { height: 28rem; overflow-y: scroll; padding-right: 16px; color: var(--ink); scrollbar-width: none; -ms-overflow-style: none; }
+    .tx-body::-webkit-scrollbar { display: none; }
     .tx-body:focus { outline: 2px solid var(--accent-bright); outline-offset: -2px; }
-    .tx-think { padding: .95rem 1.1rem; background: #f4ebe6; color: #544b4f; white-space: pre-wrap; overflow-wrap: anywhere; font: .82rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-bottom: 1px solid var(--line); }
+    .tx-think { padding: .95rem 1.1rem; background: var(--paper); color: var(--ink-soft); white-space: pre-wrap; overflow-wrap: anywhere; font: .82rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; border-bottom: 1px solid var(--line); }
     .tx-phase { display: inline-block; margin-bottom: .55rem; padding: .12rem .48rem; border-radius: 3px; font: 800 .68rem/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
-    .tx-think .tx-phase { background: #e3d2ca; color: #4a3f44; }
+    .tx-think .tx-phase { background: #f3eae6; color: var(--ink-soft); border: 1px solid #e5d9d7; }
     .tx-answer .tx-phase { background: var(--accent-wash); color: var(--accent); border: 1px solid #e2c5cb; }
     .tx-divider { padding: .4rem .9rem; text-align: center; background: var(--dark); color: var(--dark-text); font: 700 .78rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .03em; }
-    .tx-answer { padding: 1.05rem 1.2rem 1.2rem; background: var(--paper); color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; font: .95rem/1.65 ui-sans-serif, system-ui, sans-serif; }
+    .tx-answer { padding: 1.05rem 1.2rem 1.2rem; background: var(--paper); color: var(--ink); border-left: 4px solid var(--accent-bright); white-space: pre-wrap; overflow-wrap: anywhere; font: .95rem/1.65 ui-sans-serif, system-ui, sans-serif; }
     .tx-body mark, .tx-head mark, .katex .mord.mark-hit { background: #ffd86b; color: #28262b; padding: 0 .18em; border-radius: 3px; font-weight: 700; }
-    .tx-ticks { position: absolute; top: 0; right: 0; bottom: 0; width: 16px; background: #faf2ee; border-left: 1px solid var(--line); cursor: pointer; user-select: none; }
-    .tx-ticks .tx-zone-think { position: absolute; top: 0; left: 0; right: 0; background: #efe1da; border-bottom: 1px solid var(--dark); }
-    .tx-ticks .tx-zone-ans { position: absolute; left: 0; right: 0; bottom: 0; background: #fffdfb; }
+    .tx-ticks { position: absolute; top: 0; right: 0; bottom: 0; width: 14px; background: var(--accent-wash); border-left: 1px solid var(--line); cursor: pointer; user-select: none; }
+    .tx-ticks .tx-zone-think { position: absolute; top: 0; left: 0; right: 0; background: var(--accent-wash); border-bottom: 1px solid var(--dark); }
+    .tx-ticks .tx-zone-ans { position: absolute; left: 0; right: 0; bottom: 0; background: var(--paper); }
     .tx-ticks i { position: absolute; left: 2px; right: 2px; height: 3px; background: #d99000; border-radius: 1px; z-index: 1; }
     .tx-ticks i.a { background: var(--accent); height: 4px; }
-    .tx-thumb { position: absolute; left: 1px; right: 1px; top: 0; height: 28px; background: rgba(159, 59, 82, 0.24); border: 1.5px solid var(--accent); border-radius: 3px; z-index: 2; pointer-events: none; }
+    .tx-thumb { position: absolute; left: 1px; right: 1px; top: 0; height: 28px; background: rgba(40, 38, 43, 0.16); border: 1.5px solid var(--dark); border-radius: 3px; z-index: 2; pointer-events: none; }
     .tx-prompt { margin: 1.2rem 0; padding: .8rem 1rem; border-left: 4px solid var(--accent-bright); background: var(--accent-wash); font-size: .95rem; }
     .tx-note { font-size: .9rem; color: var(--ink-soft); margin: -.4rem 0 1rem; text-indent: 0 !important; }
     .tx-answer .katex-display { margin: .55em 0; overflow-x: auto; overflow-y: hidden; }
@@ -55,10 +53,10 @@
 
   <section class="prose" id="trace">
     <p>Here is what a typical Qwen3.8-27B thinking trace looks like.</p>
-    <p>The problem is a small one from AIME 2025, and the answer is 82. What follows is the model's complete, unedited thinking (shaded warm) followed by the final reply it eventually emits (on white), with every appearance of the right answer highlighted, starting at the top. Scroll as far as you can stand.</p>
+    <p>The problem is a small one from AIME 2025, and the answer is 82. What follows is the model's complete, unedited thinking followed by the final reply it eventually emits, with every appearance of the right answer highlighted, starting at the top. Scroll as far as you can stand.</p>
     <div class="tx-prompt"><strong>Problem.</strong> Four unit squares form a \(2 \times 2\) grid. Each of the 12 unit line segments forming the sides of the squares is colored either red or blue in such a way that each unit square has 2 red sides and 2 blue sides. Find the number of such colorings.</div>
     <div class="transcript" id="tx-base">
-      <div class="tx-head"><strong>No steering</strong><span>11,029 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><span class="tx-swatch think">thinking</span><span class="tx-swatch ans">answer</span><span><mark>82</mark> = right answer</span></span></div>
+      <div class="tx-head"><strong>No steering</strong><span>11,029 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><mark>82</mark> = the right answer</span></div>
       <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="No steering: full transcript, scrollable"><div class="tx-think"><div class="tx-phase">Thinking · 11,029 tokens</div>
 We need solve combinatorics problem. Need reason carefully. Problem: 2x2 grid of unit squares. 12 unit line segments forming sides of squares colored red/blue so each unit square has 2 red sides and 2 blue sides. Count colorings.
 
@@ -555,7 +553,7 @@ Thus the total number of valid colorings is
 \]</div></div><div class="tx-ticks" aria-hidden="true" title="Click or drag to scroll"><span class="tx-zone-think"></span><span class="tx-zone-ans"></span><i style="top:10.59%"></i><i style="top:10.69%"></i><i style="top:11.03%"></i><i style="top:12.11%"></i><i style="top:13.80%"></i><i style="top:14.06%"></i><i style="top:14.20%"></i><i style="top:21.14%"></i><i style="top:21.84%"></i><i style="top:22.98%"></i><i style="top:23.70%"></i><i style="top:28.87%"></i><i style="top:33.04%"></i><i style="top:34.01%"></i><i style="top:45.04%"></i><i style="top:45.37%"></i><i style="top:45.99%"></i><i style="top:46.05%"></i><i style="top:46.11%"></i><i style="top:46.22%"></i><i style="top:48.17%"></i><i style="top:48.58%"></i><i style="top:52.05%"></i><i style="top:58.56%"></i><i style="top:59.05%"></i><i style="top:60.53%"></i><i style="top:60.80%"></i><i style="top:61.26%"></i><i style="top:61.94%"></i><i style="top:69.24%"></i><i style="top:71.68%"></i><i style="top:74.08%"></i><i style="top:74.43%"></i><i style="top:86.02%"></i><i style="top:86.71%"></i><i style="top:86.81%"></i><i style="top:87.53%"></i><i style="top:89.45%"></i><i style="top:91.29%"></i><i style="top:92.64%"></i><i class="a" style="top:99.94%"></i><i class="a" style="top:99.98%"></i><span class="tx-thumb"></span></div></div>
     </div>
 
-    <p class="tx-note">The strip down the right-hand edge maps the whole run from top to bottom (click or drag it to jump): warm is thinking, white at the very bottom is the visible answer, the little window is where you are, and every amber tick is another <mark>82</mark>.</p>
+    <p class="tx-note">The scrollbar on the right maps the whole run from top to bottom (click or drag it to jump): every amber tick is another <mark>82</mark> in the thinking, and the white sliver at the very bottom is the visible answer.</p>
     <p>That's 11,029 tokens of thinking. The model writes 82 for the first time about a tenth of the way in, and then writes it 39 more times - confirming it again, confirming it with a matrix trace, wondering whether AIME answers are meant to have three digits, making sure the boxed format is right - before it finally stops and hands over the answer it already had.</p>
   </section>
 
@@ -580,7 +578,7 @@ Thus the total number of valid colorings is
     <h2>Turning it down by half</h2>
     <p>Then came the full-run test on the AIME problem from the top of the page, same seed, with the steer applied from the very first token. At full strength (\(\alpha = 1\)) it finished in 1,469 thinking tokens and confidently answered 54, because in its hurry to wrap up it set \(\binom{2}{2} = 4\), skipped the one check that would have caught it, and closed immediately. Here is that run.</p>
     <div class="transcript" id="tx-full">
-      <div class="tx-head"><strong>Steering at full strength</strong><span>1,469 thinking tokens · answer 54 (wrong)</span><span class="tx-legend"><span class="tx-swatch think">thinking</span><span class="tx-swatch ans">answer</span><span>no 82 anywhere</span></span></div>
+      <div class="tx-head"><strong>Steering at full strength</strong><span>1,469 thinking tokens · answer 54 (wrong)</span><span class="tx-legend">no 82 anywhere</span></div>
       <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at full strength: full transcript, scrollable"><div class="tx-think"><div class="tx-phase">Thinking · 1,469 tokens</div>
 We need answer combinatorics. Need solve. Let&#x27;s analyze problem carefully.
 
@@ -685,7 +683,7 @@ Total:
 
     <p>So we turned it down by half (\(\alpha = 0.5\)).</p>
     <div class="transcript" id="tx-half">
-      <div class="tx-head"><strong>Steering at half strength</strong><span>3,120 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><span class="tx-swatch think">thinking</span><span class="tx-swatch ans">answer</span><span><mark>82</mark> = right answer</span></span></div>
+      <div class="tx-head"><strong>Steering at half strength</strong><span>3,120 thinking tokens · answer 82 (correct)</span><span class="tx-legend"><mark>82</mark> = the right answer</span></div>
       <div class="tx-wrap"><div class="tx-body" tabindex="0" role="region" aria-label="Steering at half strength: full transcript, scrollable"><div class="tx-think"><div class="tx-phase">Thinking · 3,120 tokens</div>
 We need answer combinatorics. Need solve carefully. Problem: 2x2 grid of unit squares, 12 unit line segments (edges) colored red/blue such that each of 4 unit squares has 2 red, 2 blue. Count colorings.
 
