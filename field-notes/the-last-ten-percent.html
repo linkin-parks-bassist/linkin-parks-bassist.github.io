@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Last Ten Percent · David Farrell</title>
+  <meta name="description" content="Is porting CUDA to AMD frustrating, why do people do it and do they regret it? Ten years of what people have said, from HIPIFY's 90/10 claim to coding agents, against my own Darknet port.">
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .prose > p:not(.tombstone) { text-align: justify; hyphens: auto; text-indent: 1.5em; }
+    .prose blockquote { margin: 1em 2em; font-style: italic; }
+    .prose .table-wrap { margin: 0.5em 0 1.2em; }
+  </style>
+</head>
+<body class="field-note"><main>
+  <div class="topline"><a href="../index.html">David Farrell</a><nav><a href="../about/index.html">About</a><a href="../projects/index.html">Projects</a><a href="index.html" aria-current="page">Field Notes</a><a href="../contact/index.html">Contact</a></nav></div>
+  <p class="crumb"><a href="index.html">← Field Notes</a></p>
+  <section class="page">
+    <div class="eyebrow">Field note · 17 November 2026</div>
+    <h1 class="page-title">The Last Ten Percent.</h1>
+    <p class="section-note">What ten years of people have said about porting CUDA to HIP.</p>
+  </section>
+
+  <section class="prose" id="short">
+    <h2>The short answer</h2>
+    <p>Is porting CUDA to AMD actually a frustrating process, or is it generally fine? I asked Claude (Opus 5.5) to find out, and the numbers in this section are its estimates from about five hundred dated quotes that it and its subagents gathered (<a href="the-last-ten-percent-sources.html">all of them are listed with links here</a>), so they're a model's read of a pile that leans towards people with something to complain about rather than a survey, or something I've personally weighed source by source. Its answer is that the porting itself is fine and the project around it is moderately frustrating. Something like eighty percent of the people who talk about converting the code call it easy, often an afternoon's work, but that conversion is maybe five to fifteen percent of the job, and the rest - getting it to build, making it give the right answers, making it fast and living with the ROCm stack underneath it - is where nearly all the frustration lives, with how much of it you get depending mostly on whether you ported before or after 2025 and whether you'd written your own CUDA kernels or were just running PyTorch.</p>
+    <p>It also depends a great deal on who you are, so here's roughly how each crowd has ended up:</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Who</th><th>How it went</th><th>Regret</th></tr></thead>
+      <tbody>
+        <tr><td>Supercomputer centres (Frontier, LUMI, Setonix…)</td><td>About 80% good outcome, with codes 2–7× faster than on the NVIDIA machines they replaced</td><td>Almost none, though procurement made the call for them</td></tr>
+        <tr><td>Datacentre AI on Instinct, through PyTorch or vLLM</td><td>About 70% satisfied, nearer 40% once custom CUDA kernels are involved</td><td>Low among the big buyers</td></tr>
+        <tr><td>Hobbyists on consumer cards, before 2024</td><td>About 30% happy</td><td>High, with perhaps a third to a half giving up and buying NVIDIA</td></tr>
+        <tr><td>Hobbyists, 2025–26</td><td>50–60% happy</td><td>Lower, though many settle on Vulkan instead of ROCm</td></tr>
+        <tr><td>Embedded teams leaving Jetson</td><td>No public data yet</td><td>–</td></tr>
+      </tbody>
+    </table></div>
+    <p>Most people port because they don't have much choice, and Claude puts about forty percent down to a supercomputer or cloud that simply runs AMD, another thirty percent or so to cost, supply or memory capacity, around fifteen percent to getting away from lock-in or wanting an open stack, and the last fifteen to the hardware already sitting on their desk. Regret is rare among ports that actually got finished, under ten percent by its reckoning, with nearly all of it coming from people who gave up partway, most of them on consumer cards.</p>
+  </section>
+
+  <section class="prose" id="why">
+    <h2>Why look</h2>
+    <p>My own experience of moving CUDA code to AMD so far is one <a href="trialling-skill-assisted-agentic-porting.html">eleven-minute agent pass over Darknet</a> with AMD's CUDA-to-HIP skill, followed by chasing a YOLOv4 discrepancy that turned out to be <a href="pyrite.html">upstream's own CPU max-pool</a> rather than the port, and a GEMM change that took full YOLOv4 from 13.6 to 21.3 FPS. That's a fairly charmed introduction, and since part of my job is showing other people how to do this I wanted to know what everyone who did it the hard way actually thought of it, so I had a handful of agents go through about a decade of Hacker News and Reddit threads, HPC lab papers, HIPIFY's issue tracker, NVIDIA's Jetson forums and the research on LLM translation, and bring back dated, sourced quotes - roughly five hundred of them, which between them tell a surprisingly consistent story, and which I've read through Claude's summaries rather than one by one.</p>
+  </section>
+
+  <section class="prose" id="ninety">
+    <h2>Where the ninety percent came from</h2>
+    <p>The figure everyone repeats is AMD's own, from the Boltzmann Initiative launch at SC15 in November 2015, where AMD said that <a href="https://ir.amd.com/news-events/press-releases/detail/652/amd-launches-boltzmann-initiative-to-dramatically-reduce-barriers-to-gpu-computing-on-amd-fireprotm-graphics">"in many cases 90 percent or more of CUDA code can be automatically converted"</a> by HIPIFY with the last ten percent done by hand, and it has stayed at roughly that number in AMD material ever since - 80 to 95 percent for the CORAL-2 proxy apps in 2019, "95% compatibility" in a migration infographic this June. Independent measurements wander a lot more than that, from under five to about forty-five percent of lines changed across ORNL's SHOC benchmarks in 2019, to nearly 44 percent of scraped GitHub files failing conversion outright in the CASS dataset last year.</p>
+    <p>What's interesting is that hardly anyone who actually used HIPIFY complains about the renaming itself. Philip Roth at ORNL found <a href="https://www.olcf.ornl.gov/wp-content/uploads/2019/10/Roth-HIP-on-Summit-20191009.pdf">"Hipify-perl worked better than expected"</a>, and someone porting Leela Chess Zero to a consumer card in 2022 wrote that if they could <a href="https://news.ycombinator.com/item?id=32932152">"port it in an afternoon"</a> the situation wasn't completely terrible. The complaint is about what happens after that afternoon, which Uri Maayan, porting Mamba2 kernels in February, summed up in two short sentences: <a href="https://maayan.dev/posts/mamba2-rocm">"The output compiles. It does not produce correct results."</a></p>
+  </section>
+
+  <section class="prose" id="hurt">
+    <h2>Where it actually hurt</h2>
+    <p>The single most common source of misery is AMD's 64-wide wavefront meeting code that assumes a 32-thread warp, whether that's a literal <code>32</code>, a 32-bit lane mask or a shuffle with a hard-coded width, none of which mention a CUDA API and so all of which sail through translation and compilation and then quietly return the wrong numbers. ORNL's Frontier readiness paper notes that <a href="https://osti.gov/servlets/purl/1975345">"Many NAMD kernels had hard-coded the warp size"</a>, and an AMD developer community post from a fortnight ago describes <a href="https://devcommunity.amd.com/t/what-the-wavefront-width-actually-costs-you-porting-a-reduction-kernel-from-cuda-to-hip-on-cdna/1287">"a category of CUDA to HIP port that compiles cleanly, passes hipify-perl, runs without error, and still returns wrong numbers"</a> - which is also, more or less, why the skill I used rewrites <code>% 32</code> to <code>warpSize</code> before it does anything else, with a comment about preventing 27× numerical errors.</p>
+    <p>After that it's the stack around the code - compiler bugs on large kernels (LLNL's Monte Carlo team found <a href="https://osti.gov/servlets/purl/2563318">"the compiler itself was generating incorrect code"</a> as recently as last year), ROCm releases coupled tightly to drivers, and for anyone outside a national lab, a support matrix that left consumer cards out for years and generated a whole folklore around <code>HSA_OVERRIDE_GFX_VERSION</code>. Most of the angriest posts the agents found come from that period and that crowd, people who bought a Radeon for machine learning around 2020 and ended up with something like <a href="https://news.ycombinator.com/item?id=29345077">"I bought NVidia. It just worked."</a></p>
+    <p>The third thing, and the one that lines up most closely with what I saw on Darknet, is that a faithful port runs but isn't fast, because it has translated the NVIDIA-tuned kernels one by one instead of reaching for the libraries that would have done the heavy lifting on AMD. The US Naval Research Lab summed it up in 2020 as <a href="https://news.ycombinator.com/item?id=24812088">"Manual porting required for optimal performance in several critical sections"</a>, and the reviewer of an <a href="https://github.com/LeelaChessZero/lc0/pull/2375">agent-written ROCm backend for lc0</a> this year expected most of its kernels to need tuning specifically for AMD, which is the same lesson my hipBLASLt change taught me, at much smaller scale.</p>
+  </section>
+
+  <section class="prose" id="crowds">
+    <h2>Three crowds, three verdicts</h2>
+    <p>The sentiment only makes sense once you notice that three quite different groups of people have been doing the porting. The supercomputing centres were put on AMD by procurement - Frontier, El Capitan, LUMI, Pawsey's Setonix here in Australia - and they got embedded AMD and HPE engineers, rough early toolchains and in the end machines that ran their codes several times faster than the NVIDIA systems they replaced, so their papers read as pragmatic and broadly positive with some very specific scars, such as LLNL's description of an early-access system as <a href="https://www.llnl.gov/article/48121/early-access-systems-llnl-mark-progress-toward-el-capitan">"a house that has the outside walls and a roof, but it doesn't have the carpeting or drywall"</a>. The machine-learning crowd mostly never writes CUDA at all and goes through PyTorch or Triton, so for them "porting" means whether vLLM's ROCm backend has the attention kernel they need, and their mood has gone from SemiAnalysis's December 2024 verdict that <a href="https://newsletter.semianalysis.com/p/mi300x-vs-h100-vs-h200-benchmark-part-1-training">"out of the box training with AMD is impossible"</a> to vLLM declaring in February that <a href="https://vllm.ai/blog/2026-02-27-rocm-attention-backend">"the era of 'just porting' is over"</a>. The hobbyists are the third crowd, and they judge everything by whether their particular card is supported this year, which on Strix Halo is still a mixed story where Vulkan often beats ROCm in llama.cpp.</p>
+    <p>A fourth crowd is only just turning up, which is embedded teams on Jetson, and what's striking about their complaints is how little they have to do with CUDA - they talk about JetPack upgrades that require reflashing and rebuilding everything, kernels pinned years behind, sixteen-gigabyte OS images that are hard to update over the air, and this July a price rise of up to 101 percent. When they do talk about what would be hard to leave, it's TensorRT engines, DeepStream pipelines, the Argus camera stack and NVENC, none of which any CUDA-to-HIP tool touches.</p>
+  </section>
+
+  <section class="prose" id="agents">
+    <h2>What the agents change</h2>
+    <p>Coding agents with a porting skill take out most of what people used to complain about in the first fortnight - the renaming, the CMake, the link flags, the well-known wave64 traps and the days of reading documentation - and AMD's own VP of AI software put it bluntly in April, saying <a href="https://www.eetimes.com/taking-on-cuda-with-rocm-one-step-after-another/">"Claude is better than HIPify because it has web search built in."</a> AMD's skill is also fairly candid about its limits: it expects about 90 percent success on simple single-file samples, lists inline PTX, tensor-core WMMA code, cuDNN and graphics interop as things it cannot automate, and the newer companion skill states that <a href="https://github.com/amd/skills/blob/main/skills/moat-cuda-to-rocm/SKILL.md">"A real-GPU test run is the only evidence that counts."</a></p>
+    <p>The sceptics, meanwhile, have moved on to the parts agents don't touch. One Hacker News commenter argued in September that <a href="https://news.ycombinator.com/item?id=49686522">"the source language has never been the moat"</a> and that NVIDIA's real advantage is the entire stack, and on Anthropic's claim last week of a three-day bring-up on MI355X, another wrote that <a href="https://news.ycombinator.com/item?id=50470244">"Those 3 days are typically followed by an almost infinite number of bug cycles"</a>. The research mostly backs a more moderate version of that - frontier models usually get to correct HIP within a few turns but rarely to fast HIP, and agents writing kernels from scratch tend to bake in the shapes they were tested on - so the honest summary is that the translation, which was already the easy part, is now very nearly free, and the validation and tuning that people always found hard are still there to be done.</p>
+  </section>
+
+  <section class="prose" id="result">
+    <h2>Result</h2>
+    <p>Read against all this, the eleven minutes on my own port are mostly a way of getting to the interesting part sooner. The checks against a CPU reference and the library routing afterwards are the bits people have actually been asking for these last ten years, and they're also where the skill could most usefully grow, by reaching for hipBLASLt or MIOpen where they exist instead of translating every kernel faithfully. The thing nobody seems to have written up yet is a full production move off Jetson to an AMD X100-series APU.</p>
+    <p class="tombstone" aria-label="End of note">□</p>
+  </section>
+  <footer>© 2026 David Farrell · <a href="the-last-ten-percent-sources.html">sources</a> · <a href="index.html">back to field notes</a></footer>
+</main></body>
+</html>
